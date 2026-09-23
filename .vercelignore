@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.data
+scripts
+vite.config.js.timestamp-*.mjs
+
+# added by the Upstash integration (agent reference docs)
+.agents
+.claude
+skills-lock.json

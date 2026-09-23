@@ -1,0 +1,41 @@
+/* Settings — plain and compact. */
+.set .section { margin-top: 30px; }
+.set-help { margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); max-width: 640px; }
+.set-help.muted { color: var(--ink-faded); }
+.set-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.set-status { font-family: var(--serif); font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.set-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+.set-status.ok::before { background: var(--sage); }
+.set-status.local::before { background: var(--gold); }
+.set-status.warn::before { background: var(--accent); }
+.set-signed { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.set-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.set-result { margin: 12px 0 0; }
+.set-toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; }
+.set-toggle input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.set-pledge, .set-pledge-edit { margin-top: 12px; }
+.set-pledge-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+.set-pledge-time { margin-top: 10px; font-size: 14px; color: var(--ink-soft); }
+.set-axes { display: grid; gap: 6px; }
+.set-axis { display: grid; grid-template-columns: 230px auto; align-items: center; gap: 10px; }
+.set-axis-name { font-size: 14px; }
+.set-seg { justify-self: start; display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--panel); flex-wrap: nowrap; }
+.set-seg button { border: none; background: none; padding: 4px 10px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; min-height: 28px; white-space: nowrap; }
+.set-seg button + button { border-left: 1px solid var(--rule); }
+.set-seg button.on { background: var(--ink); color: var(--bg); }
+.set-dur { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rule-soft); }
+.set-dur-end { font-size: 13px; }
+.set-danger .section-head h2 { color: var(--accent); }
+.set-confirm { width: 180px; font-family: var(--mono); }
+.set-delete:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.set-delete:not(:disabled):hover { background: var(--accent); color: #fbf6ee !important; }
+@media (max-width: 760px) {
+  .set-axis { grid-template-columns: 1fr; gap: 3px; margin-bottom: 6px; }
+  .set-seg button { padding: 6px 9px; min-height: 36px; }
+  .set-confirm { width: 100%; }
+}
+
+.set-people { list-style: none; margin: 8px 0 0; padding: 0; }
+.set-people li { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 7px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14px; }
+.set-people li .serif { font-size: 16px; flex: 0 1 auto; }
+.set-code { font-family: var(--mono); font-size: 12px; background: var(--bg-deep); padding: 2px 6px; border-radius: 2px; word-break: break-all; flex: 1 1 260px; }

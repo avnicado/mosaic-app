@@ -1,0 +1,4898 @@
+{
+  "meta": {
+    "generatedAt": "2026-07-09T17:11:29.362Z",
+    "count": 210,
+    "sources": [
+      "Hacker News",
+      "Quanta Magazine",
+      "Aeon",
+      "Nautilus",
+      "Colossal",
+      "Atlas Obscura",
+      "ProPublica",
+      "Ars Technica Science",
+      "Smithsonian"
+    ],
+    "domains": [
+      "science",
+      "technology",
+      "arts & culture",
+      "philosophy & ideas",
+      "society & politics",
+      "business & economics",
+      "health & mind",
+      "history",
+      "nature & environment",
+      "sport & play",
+      "craft & making",
+      "math & abstraction"
+    ],
+    "slots": [
+      "sharpen",
+      "complicate",
+      "bridge",
+      "ground"
+    ],
+    "domainCounts": {
+      "technology": 121,
+      "society & politics": 24,
+      "history": 12,
+      "arts & culture": 15,
+      "philosophy & ideas": 6,
+      "science": 23,
+      "math & abstraction": 1,
+      "health & mind": 3,
+      "nature & environment": 3,
+      "craft & making": 1,
+      "business & economics": 1
+    },
+    "slotCounts": {
+      "sharpen": 64,
+      "ground": 42,
+      "complicate": 66,
+      "bridge": 38
+    },
+    "scoring": {
+      "bridgingFloor": 0.35,
+      "provenance": {
+        "perspective": 0,
+        "llm": 0,
+        "heuristic": 210
+      },
+      "perspectiveAttributesUsed": [],
+      "note": "Bridging scores come from Perspective when a key is present, else the LLM classifier, else a deterministic heuristic (scored_by records which per item). The LLM/heuristic fallback is the deliberate Perspective-sunset migration path, not a stopgap. Non-Hacker-News engagement counts are modeled from recency + a deterministic hash (engagementModeled=true); HN counts are real."
+    }
+  },
+  "items": [
+    {
+      "id": "hn-48849066",
+      "title": "GPT-5.6",
+      "excerpt": "",
+      "url": "https://openai.com/index/gpt-5-6/",
+      "source": "Hacker News",
+      "timestamp": 1783616654000,
+      "engagement": {
+        "votes": 64,
+        "comments": 14
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 91.79
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845049",
+      "title": "Show HN: 18 Words",
+      "excerpt": "",
+      "url": "https://18words.com/",
+      "source": "Hacker News",
+      "timestamp": 1783601332000,
+      "engagement": {
+        "votes": 520,
+        "comments": 211
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 865.87
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48843923",
+      "title": "EU Parliament greenlights Chat Control 1.0",
+      "excerpt": "",
+      "url": "https://www.patrick-breyer.de/en/eu-parliament-greenlights-chat-control-1-0-breyer-our-children-lose-out/",
+      "source": "Hacker News",
+      "timestamp": 1783595034000,
+      "engagement": {
+        "votes": 504,
+        "comments": 267
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 922.5
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847552",
+      "title": "Hy3",
+      "excerpt": "",
+      "url": "https://hy.tencent.com/research/hy3",
+      "source": "Hacker News",
+      "timestamp": 1783610868000,
+      "engagement": {
+        "votes": 100,
+        "comments": 34
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 162.5
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846281",
+      "title": "No leap second will be introduced at the end of December 2026",
+      "excerpt": "",
+      "url": "https://datacenter.iers.org/data/latestVersion/bulletinC.txt",
+      "source": "Hacker News",
+      "timestamp": 1783606594000,
+      "engagement": {
+        "votes": 138,
+        "comments": 103
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 325.22
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847511",
+      "title": "A possible future for Damn Interesting",
+      "excerpt": "",
+      "url": "https://www.damninteresting.com/a-possible-future/",
+      "source": "Hacker News",
+      "timestamp": 1783610725000,
+      "engagement": {
+        "votes": 54,
+        "comments": 3
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 57.99
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846184",
+      "title": "Muse Spark 1.1",
+      "excerpt": "https:&#x2F;&#x2F;ai.meta.com&#x2F;static-resource&#x2F;muse-spark-1-1-evaluatio... [pdf] https:&#x2F;&#x2F;developer.meta.com&#x2F;ai&#x2F;resources&#x2F;blog&#x2F;build-with-muse... https:&#x2F;&#x2F;www.bloomberg.com&#x2F;news&#x2F;articles&#x2F;2026-07-09&#x2F;meta-star... , https:&#x2F;&#x2F;archive.is&#x2F;3ccKa",
+      "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
+      "source": "Hacker News",
+      "timestamp": 1783606222000,
+      "engagement": {
+        "votes": 176,
+        "comments": 114
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 381.19
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846995",
+      "title": "TLS certificates for internal services done right",
+      "excerpt": "",
+      "url": "https://tuxnet.dev/posts/tls-for-internal-services/",
+      "source": "Hacker News",
+      "timestamp": 1783609022000,
+      "engagement": {
+        "votes": 51,
+        "comments": 32
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 110.14
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847407",
+      "title": "Opinionated and Easy Pi.dev Configuration",
+      "excerpt": "",
+      "url": "https://lazypi.org/",
+      "source": "Hacker News",
+      "timestamp": 1783610373000,
+      "engagement": {
+        "votes": 41,
+        "comments": 27
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 91.65
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847562",
+      "title": "Launch HN: Context.dev (YC S26) – API to get structured data from any website",
+      "excerpt": "Hi Hacker News, I’m Yahia. I built Context.dev ( https:&#x2F;&#x2F;www.context.dev&#x2F; ) to make it really easy to integrate web data into your products and agents. Here’s a demo video: https:&#x2F;&#x2F;www.tella.tv&#x2F;video&#x2F;build-faster-with-context-dev-api... Since it’s an API, here are the docs: https:&#x2F;&#x2F;docs.context.dev&#x2F;quickstart . You can send us a URL and get back cl",
+      "url": "https://www.context.dev",
+      "source": "Hacker News",
+      "timestamp": 1783610919000,
+      "engagement": {
+        "votes": 31,
+        "comments": 27
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 82.24
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845442",
+      "title": "The glass backbone: Why the Army's logistics will break in the next war",
+      "excerpt": "",
+      "url": "https://mwi.westpoint.edu/the-glass-backbone-why-the-armys-logistics-will-break-in-the-next-war/",
+      "source": "Hacker News",
+      "timestamp": 1783603483000,
+      "engagement": {
+        "votes": 117,
+        "comments": 126
+      },
+      "engagementModeled": false,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 343.1
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48809574",
+      "title": "Girls Just Wanna Have Fast MPMC Queues with Bounded Waiting",
+      "excerpt": "",
+      "url": "https://nahla.dev/blog/waitfree_queue/",
+      "source": "Hacker News",
+      "timestamp": 1783367190000,
+      "engagement": {
+        "votes": 19,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 4.99
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847536",
+      "title": "How to Write an Email",
+      "excerpt": "",
+      "url": "https://blog.dannycastonguay.com/how-to-write-an-email/",
+      "source": "Hacker News",
+      "timestamp": 1783610812000,
+      "engagement": {
+        "votes": 33,
+        "comments": 9
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 49.32
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846510",
+      "title": "Show HN: Analog Watch",
+      "excerpt": "",
+      "url": "https://analog.watch",
+      "source": "Hacker News",
+      "timestamp": 1783607454000,
+      "engagement": {
+        "votes": 50,
+        "comments": 47
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 136.77
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846293",
+      "title": "PostHog Open Sourced",
+      "excerpt": "",
+      "url": "https://github.com/PostHog/posthog-foss",
+      "source": "Hacker News",
+      "timestamp": 1783606660000,
+      "engagement": {
+        "votes": 83,
+        "comments": 57
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 186.31
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847940",
+      "title": "AI content is everywhere on social media, especially LinkedIn",
+      "excerpt": "",
+      "url": "https://www.pangram.com/blog/ai-in-your-feed",
+      "source": "Hacker News",
+      "timestamp": 1783612209000,
+      "engagement": {
+        "votes": 89,
+        "comments": 64
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 211.41
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48778956",
+      "title": "Meta reuses old RAM in new servers with custom bridge chip",
+      "excerpt": "",
+      "url": "https://www.networkworld.com/article/4192827/meta-reuses-old-ram-in-new-servers-with-custom-bridge-chip.html",
+      "source": "Hacker News",
+      "timestamp": 1783106825000,
+      "engagement": {
+        "votes": 228,
+        "comments": 152
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 34.73
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846332",
+      "title": "New open access book on history of computers and politics",
+      "excerpt": "",
+      "url": "https://mitpress.mit.edu/9780262053198/simpolitics/",
+      "source": "Hacker News",
+      "timestamp": 1783606814000,
+      "engagement": {
+        "votes": 26,
+        "comments": 2
+      },
+      "engagementModeled": false,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 28.4
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847405",
+      "title": "Coordination Without Consolidation: On Systems of States [pdf]",
+      "excerpt": "",
+      "url": "https://isonomiaquarterly.com/wp-content/uploads/2026/06/iq-4.2-summer-2026-macdonald-coordination-without-consolidation.pdf",
+      "source": "Hacker News",
+      "timestamp": 1783610363000,
+      "engagement": {
+        "votes": 11,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 12.54
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847834",
+      "title": "Show HN: Reverse-engineering web apps into agent tools",
+      "excerpt": "Hey HN! We built a browser-based agent that runs inside an authenticated web app, watches how the app calls its own APIs, and automatically turns those into agent tools. You can think of it as an auto-generated MCP server that self-updates as the host app changes. The result is a skilled AI assistant that actually integrates deeply with any product (not just chat and RAG) with minimal effort. Chec",
+      "url": "https://news.ycombinator.com/item?id=48847834",
+      "source": "Hacker News",
+      "timestamp": 1783611917000,
+      "engagement": {
+        "votes": 12,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 13.62
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48849059",
+      "title": "ChatGPT Work",
+      "excerpt": "",
+      "url": "https://openai.com/index/chatgpt-for-your-most-ambitious-work/",
+      "source": "Hacker News",
+      "timestamp": 1783616633000,
+      "engagement": {
+        "votes": 7,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.98
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48841446",
+      "title": "AI changes the economics of software rewrites",
+      "excerpt": "",
+      "url": "https://thetruthasiseeitnow.com/ai-slop-starts-with-the-codebase-itself/",
+      "source": "Hacker News",
+      "timestamp": 1783576010000,
+      "engagement": {
+        "votes": 47,
+        "comments": 60
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 134.06
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846757",
+      "title": "Why we're moving off Cloudflare Durable Objects",
+      "excerpt": "",
+      "url": "https://usewire.io/engineering/why-were-moving-wire-off-cloudflare-durable-objects/",
+      "source": "Hacker News",
+      "timestamp": 1783608304000,
+      "engagement": {
+        "votes": 23,
+        "comments": 4
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 29.58
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48840620",
+      "title": "What's slowing down the AI buildout",
+      "excerpt": "",
+      "url": "https://www.worksinprogress.news/p/ai-is-bottlenecked-by-the-grid",
+      "source": "Hacker News",
+      "timestamp": 1783567562000,
+      "engagement": {
+        "votes": 31,
+        "comments": 68
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 128.14
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48841259",
+      "title": "Spider venom kills varroa mites without harming honeybees",
+      "excerpt": "",
+      "url": "https://connectsci.au/news/news-parent/9703/Spider-venom-kills-varroa-mites-without-harming",
+      "source": "Hacker News",
+      "timestamp": 1783574085000,
+      "engagement": {
+        "votes": 244,
+        "comments": 106
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 362.31
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846276",
+      "title": "Maxwell's Equations Were Discovered [video]",
+      "excerpt": "",
+      "url": "https://www.youtube.com/watch?v=-hua8RWopfw",
+      "source": "Hacker News",
+      "timestamp": 1783606577000,
+      "engagement": {
+        "votes": 29,
+        "comments": 11
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 48.21
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48848111",
+      "title": "Auditory and spontaneous movement responses to music over first postnatal year",
+      "excerpt": "",
+      "url": "https://elifesciences.org/articles/107088",
+      "source": "Hacker News",
+      "timestamp": 1783612858000,
+      "engagement": {
+        "votes": 5,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.84
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845514",
+      "title": "US seeks cheaper hunter-killer drones after Iran destroys $1B worth of Reapers",
+      "excerpt": "",
+      "url": "https://arstechnica.com/gadgets/2026/07/us-seeks-cheaper-hunter-killer-drones-after-iran-destroys-1b-worth-of-reapers/",
+      "source": "Hacker News",
+      "timestamp": 1783603771000,
+      "engagement": {
+        "votes": 171,
+        "comments": 226
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 580.17
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845209",
+      "title": "A Road to Lisp: Why Lisp",
+      "excerpt": "",
+      "url": "https://scotto.me/blog/2026-07-09-why-lisp/",
+      "source": "Hacker News",
+      "timestamp": 1783602364000,
+      "engagement": {
+        "votes": 34,
+        "comments": 21
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 70.24
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845422",
+      "title": "Show HN: FableCut – A browser video editor AI agents can drive (zero deps)",
+      "excerpt": "",
+      "url": "https://github.com/ronak-create/FableCut",
+      "source": "Hacker News",
+      "timestamp": 1783603390000,
+      "engagement": {
+        "votes": 76,
+        "comments": 46
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 156.13
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847181",
+      "title": "Ways to think about token pricing",
+      "excerpt": "",
+      "url": "https://www.ben-evans.com/benedictevans/2026/7/9/ways-to-think-about-token-pricing",
+      "source": "Hacker News",
+      "timestamp": 1783609612000,
+      "engagement": {
+        "votes": 12,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 13.45
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48838876",
+      "title": "John Deere owners will get the right to repair equipment under FTC settlement",
+      "excerpt": "",
+      "url": "https://apnews.com/article/john-deere-right-to-repair-agriculture-equipment-cb7514ffedb95c130a976af661f2bc02",
+      "source": "Hacker News",
+      "timestamp": 1783553863000,
+      "engagement": {
+        "votes": 1234,
+        "comments": 257
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 1246.47
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847298",
+      "title": "Show HN: LastShelf – an emergency map of your family's documents bills& contacts",
+      "excerpt": "After my father was diagnosed with Stage 3 kidney cancer, my family was thrown into a tailspin. Getting second opinions, planning surgery, ensuring insurance coverage, coping with the fear. It was a lot to process. In the middle of dealing with all the medical logistics, I realized none of our family could answer if he: - Had a medical directive? - How to trigger his life insurance policy? - Where",
+      "url": "https://www.lastshelf.ai/",
+      "source": "Hacker News",
+      "timestamp": 1783609991000,
+      "engagement": {
+        "votes": 28,
+        "comments": 16
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 57.76
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48848425",
+      "title": "AI 2040: Plan A",
+      "excerpt": "",
+      "url": "https://ai-2040.com/",
+      "source": "Hacker News",
+      "timestamp": 1783614104000,
+      "engagement": {
+        "votes": 23,
+        "comments": 6
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 34.45
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846205",
+      "title": "Transparency efforts behind the Helium Browser",
+      "excerpt": "",
+      "url": "https://helium.computer/blog/transparency",
+      "source": "Hacker News",
+      "timestamp": 1783606316000,
+      "engagement": {
+        "votes": 24,
+        "comments": 15
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 50.98
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48844709",
+      "title": "How version control will evolve for the agent boom",
+      "excerpt": "",
+      "url": "https://entire.io/blog/how-version-control-will-evolve-for-the-agent-boom",
+      "source": "Hacker News",
+      "timestamp": 1783599641000,
+      "engagement": {
+        "votes": 38,
+        "comments": 48
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 122.06
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48835355",
+      "title": "Electronic Plastic: Museum of '80s and '90s handheld and tabletop games",
+      "excerpt": "",
+      "url": "https://www.electronicplastic.com",
+      "source": "Hacker News",
+      "timestamp": 1783534564000,
+      "engagement": {
+        "votes": 5,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "arts & culture",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 3.22
+      },
+      "why": "resists an easy framing — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48843352",
+      "title": "My thoughts on the Bun Rust rewrite",
+      "excerpt": "",
+      "url": "https://andrewkelley.me/post/my-thoughts-bun-rust-rewrite.html",
+      "source": "Hacker News",
+      "timestamp": 1783590448000,
+      "engagement": {
+        "votes": 514,
+        "comments": 454
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 1233.16
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48814023",
+      "title": "I Built the Only 2026 WWII Jeep",
+      "excerpt": "",
+      "url": "https://www.theautopian.com/i-bet-my-company-on-an-impossible-jeep-build-then-a-miracle-happened/",
+      "source": "Hacker News",
+      "timestamp": 1783402706000,
+      "engagement": {
+        "votes": 149,
+        "comments": 54
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 81.65
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845993",
+      "title": "NASA SpaceWASM – A flight-compliant WebAssembly interpreter",
+      "excerpt": "",
+      "url": "https://github.com/nasa/spacewasm",
+      "source": "Hacker News",
+      "timestamp": 1783605600000,
+      "engagement": {
+        "votes": 13,
+        "comments": 2
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 15.99
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846708",
+      "title": "DeepSeek aims to make its own AI chip",
+      "excerpt": "",
+      "url": "https://www.proactiveinvestors.com/companies/news/1095178/deepseek-makes-pivot-that-should-put-silicon-valley-on-high-alert-1095178.html",
+      "source": "Hacker News",
+      "timestamp": 1783608141000,
+      "engagement": {
+        "votes": 6,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 5.72
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845470",
+      "title": "Syria's solar boom is redefining Middle East's energy model",
+      "excerpt": "",
+      "url": "https://www.thenationalnews.com/business/energy/2026/07/06/syrias-solar-boom-is-redefining-middle-easts-energy-model/",
+      "source": "Hacker News",
+      "timestamp": 1783603625000,
+      "engagement": {
+        "votes": 65,
+        "comments": 14
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 86.54
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48784126",
+      "title": "In-browser programmable robot simulator",
+      "excerpt": "",
+      "url": "https://bittlex-sim.petoi.com/",
+      "source": "Hacker News",
+      "timestamp": 1783158090000,
+      "engagement": {
+        "votes": 76,
+        "comments": 7
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 7.73
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48843438",
+      "title": "Bonnie Tyler has died",
+      "excerpt": "",
+      "url": "https://www.bbc.com/news/articles/cg5pd9z2487o",
+      "source": "Hacker News",
+      "timestamp": 1783591353000,
+      "engagement": {
+        "votes": 298,
+        "comments": 114
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 458.36
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845274",
+      "title": "LLMs for technical editing: The good, the bad, and the ugly",
+      "excerpt": "",
+      "url": "https://techstackups.com/articles/llms-for-technical-editing-the-good-the-bad-and-the-ugly/",
+      "source": "Hacker News",
+      "timestamp": 1783602648000,
+      "engagement": {
+        "votes": 9,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 8.33
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48800596",
+      "title": "Cargo-nextest: 3x faster than cargo test, per-test isolation, first-class CI",
+      "excerpt": "",
+      "url": "https://nexte.st/",
+      "source": "Hacker News",
+      "timestamp": 1783311570000,
+      "engagement": {
+        "votes": 160,
+        "comments": 47
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 49.57
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48842611",
+      "title": "Why developers are ditching GitHub for Codeberg and self-hosting alternatives",
+      "excerpt": "",
+      "url": "https://www.howtogeek.com/why-developers-are-ditching-github-for-codeberg-and-self-hosting-alternatives/",
+      "source": "Hacker News",
+      "timestamp": 1783585372000,
+      "engagement": {
+        "votes": 323,
+        "comments": 232
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 664.21
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48841385",
+      "title": "How Donkey Kong Toppled Atari",
+      "excerpt": "",
+      "url": "https://dfarq.homeip.net/how-donkey-kong-toppled-atari/",
+      "source": "Hacker News",
+      "timestamp": 1783575284000,
+      "engagement": {
+        "votes": 65,
+        "comments": 26
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 93.56
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847075",
+      "title": "Show HN: FormGrid – Forms that can look like CLIs, pixel art, GeoCities and more",
+      "excerpt": "Hey HN, Björn here from FormGrid. I feel like the web got very sanitized and template-y lately, so I made a tool that lets you create forms and microsites with a bit more personality. The result can look like pretty much anything, for example: - CLI: https:&#x2F;&#x2F;share.formgrid.com&#x2F;templates&#x2F;sgNeeDu1AUYn2S5d - Pixel art: https:&#x2F;&#x2F;share.formgrid.com&#x2F;templates&#x2F;TVsBQ",
+      "url": "https://www.formgrid.com/",
+      "source": "Hacker News",
+      "timestamp": 1783609253000,
+      "engagement": {
+        "votes": 5,
+        "comments": 2
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 8.63
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845518",
+      "title": "Reverse-engineering Nvidia's CUDA-checkpoint for faster cold starts",
+      "excerpt": "",
+      "url": "https://blog.doubleword.ai/what-happens-when-you-checkpoint-a-cuda-process",
+      "source": "Hacker News",
+      "timestamp": 1783603792000,
+      "engagement": {
+        "votes": 15,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 13.97
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48784857",
+      "title": "Lead Mines of Galena, Kansas",
+      "excerpt": "",
+      "url": "https://dustbowlhighway.com/kansas/lead-mines/",
+      "source": "Hacker News",
+      "timestamp": 1783167328000,
+      "engagement": {
+        "votes": 22,
+        "comments": 11
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 3.97
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48843614",
+      "title": "The internet does not want readers. It wants livestock",
+      "excerpt": "",
+      "url": "https://grumpywelshman.com/the-internet-doesnt-want-readers-it-wants-livestock/",
+      "source": "Hacker News",
+      "timestamp": 1783592798000,
+      "engagement": {
+        "votes": 21,
+        "comments": 11
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 37.76
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48802660",
+      "title": "Vacuum at the Page Level",
+      "excerpt": "",
+      "url": "https://boringsql.com/posts/vacuum-at-the-page-level/",
+      "source": "Hacker News",
+      "timestamp": 1783332128000,
+      "engagement": {
+        "votes": 19,
+        "comments": 5
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.32
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845364",
+      "title": "Files over tools: how we built our agent with a virtual filesystem and bash",
+      "excerpt": "",
+      "url": "https://knock.app/blog/how-we-built-the-knock-agent-virtual-filesystem-and-bash",
+      "source": "Hacker News",
+      "timestamp": 1783603142000,
+      "engagement": {
+        "votes": 13,
+        "comments": 5
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 21.35
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48848735",
+      "title": "The Next Chapter for ChatGPT",
+      "excerpt": "",
+      "url": "https://www.youtube.com/watch?v=Wq45rvPGNHs",
+      "source": "Hacker News",
+      "timestamp": 1783615347000,
+      "engagement": {
+        "votes": 5,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.94
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847597",
+      "title": "Meta's 'Super Sensing' Prototype Glasses Quietly Record Everything",
+      "excerpt": "",
+      "url": "https://www.macrumors.com/2026/07/09/meta-super-sensing-glasses-record-everything/",
+      "source": "Hacker News",
+      "timestamp": 1783611105000,
+      "engagement": {
+        "votes": 8,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 7.75
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48837696",
+      "title": "Benchmarking coding agents on Databricks' multi-million line codebase",
+      "excerpt": "",
+      "url": "https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase",
+      "source": "Hacker News",
+      "timestamp": 1783546209000,
+      "engagement": {
+        "votes": 137,
+        "comments": 62
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 178.65
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48848175",
+      "title": "Degeneracy Is a Symptom",
+      "excerpt": "",
+      "url": "https://henryfudgeofficial.substack.com/p/degeneracy-is-a-symptom",
+      "source": "Hacker News",
+      "timestamp": 1783613123000,
+      "engagement": {
+        "votes": 6,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 7.83
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48835111",
+      "title": "Grok 4.5",
+      "excerpt": "https:&#x2F;&#x2F;cursor.com&#x2F;blog&#x2F;grok-4-5",
+      "url": "https://x.ai/news/grok-4-5",
+      "source": "Hacker News",
+      "timestamp": 1783533632000,
+      "engagement": {
+        "votes": 741,
+        "comments": 1368
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 2225.12
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48829312",
+      "title": "Decoding the obfuscated bash script on a Uniqlo t-shirt",
+      "excerpt": "",
+      "url": "https://tris.sherliker.net/blog/obfuscated-self-evaluating-bash-script-by-cdn-akamai-being-supplied-to-consumers-via-retail-stores/",
+      "source": "Hacker News",
+      "timestamp": 1783500366000,
+      "engagement": {
+        "votes": 1425,
+        "comments": 227
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 1006.48
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48833116",
+      "title": "Chatto is now open source",
+      "excerpt": "",
+      "url": "https://www.hmans.dev/blog/chatto-is-open-source",
+      "source": "Hacker News",
+      "timestamp": 1783523990000,
+      "engagement": {
+        "votes": 1048,
+        "comments": 283
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 980.97
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48829797",
+      "title": "Unicode's transliteration rules are Turing-complete",
+      "excerpt": "",
+      "url": "https://seriot.ch/computation/uts35/",
+      "source": "Hacker News",
+      "timestamp": 1783503860000,
+      "engagement": {
+        "votes": 121,
+        "comments": 32
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 100.96
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48837877",
+      "title": "Rewriting Bun in Rust",
+      "excerpt": "",
+      "url": "https://bun.com/blog/bun-in-rust",
+      "source": "Hacker News",
+      "timestamp": 1783547399000,
+      "engagement": {
+        "votes": 728,
+        "comments": 461
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 1136.61
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48848034",
+      "title": "Farage left fighting a trash can as the UK populist's election gamble backfires",
+      "excerpt": "",
+      "url": "https://www.cnn.com/2026/07/09/uk/nigel-farage-special-election-bin-face-intl",
+      "source": "Hacker News",
+      "timestamp": 1783612584000,
+      "engagement": {
+        "votes": 10,
+        "comments": 5
+      },
+      "engagementModeled": false,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 19.52
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846013",
+      "title": "Show HN: Rubber Duck",
+      "excerpt": "",
+      "url": "https://rubberduck.greg.technology/",
+      "source": "Hacker News",
+      "timestamp": 1783605654000,
+      "engagement": {
+        "votes": 5,
+        "comments": 1
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 6.58
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845999",
+      "title": "Writing a bindless GPU abstraction layer",
+      "excerpt": "",
+      "url": "https://www.kevin-gibson.com/blog/writing-a-bindless-gpu-abstraction-layer/",
+      "source": "Hacker News",
+      "timestamp": 1783605619000,
+      "engagement": {
+        "votes": 7,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.58
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845948",
+      "title": "Show HN: A zero-dependency auditor for decision records in AI-touched systems",
+      "excerpt": "",
+      "url": "https://github.com/forgedculture/legibility-field-kit",
+      "source": "Hacker News",
+      "timestamp": 1783605493000,
+      "engagement": {
+        "votes": 4,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 3.76
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48795591",
+      "title": "Patching MechCommander's \"left arm bug\" for fun and profit",
+      "excerpt": "",
+      "url": "https://mhloppy.com/2026/05/mechcommander-weapons-left-arm-bug-fix/",
+      "source": "Hacker News",
+      "timestamp": 1783269580000,
+      "engagement": {
+        "votes": 84,
+        "comments": 27
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 21.51
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845835",
+      "title": "Tencent/Hy3: 295B MoE model rivals trillion scale SOTA",
+      "excerpt": "",
+      "url": "https://huggingface.co/tencent/Hy3",
+      "source": "Hacker News",
+      "timestamp": 1783605091000,
+      "engagement": {
+        "votes": 3,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 2.81
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48798609",
+      "title": "The Backstory of Jiki",
+      "excerpt": "",
+      "url": "https://jiki.io/blog/the-backstory-of-jiki",
+      "source": "Hacker News",
+      "timestamp": 1783291019000,
+      "engagement": {
+        "votes": 8,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 1.4
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847612",
+      "title": "You paid me, a long-time Linux user, to use Windows 11 exclusively for a month",
+      "excerpt": "",
+      "url": "https://www.osnews.com/story/145459/you-paid-me-a-long-time-linux-user-to-use-windows-11-exclusively-for-a-month-heres-how-it-went/",
+      "source": "Hacker News",
+      "timestamp": 1783611161000,
+      "engagement": {
+        "votes": 10,
+        "comments": 4
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 17.44
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48812736",
+      "title": "Apache Shiro security framework releases 3.0.0",
+      "excerpt": "",
+      "url": "https://shiro.apache.org/blog/2026/06/apache-shiro-300-released.html",
+      "source": "Hacker News",
+      "timestamp": 1783388426000,
+      "engagement": {
+        "votes": 47,
+        "comments": 13
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 21.49
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48836778",
+      "title": "FAANG Simulator",
+      "excerpt": "",
+      "url": "https://www.abeyk.com/escape-the-rat-race/",
+      "source": "Hacker News",
+      "timestamp": 1783541142000,
+      "engagement": {
+        "votes": 458,
+        "comments": 183
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 548.93
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48835439",
+      "title": "OpenMandriva: Statement regarding attempted distribution sabotage",
+      "excerpt": "",
+      "url": "https://forum.openmandriva.org/t/statement-regarding-attempted-distribution-sabotage/8997",
+      "source": "Hacker News",
+      "timestamp": 1783534913000,
+      "engagement": {
+        "votes": 125,
+        "comments": 41
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 133.38
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48839355",
+      "title": "MIRA: Multiplayer Interactive World Models Trained on Rocket League",
+      "excerpt": "https:&#x2F;&#x2F;mira-wm.com&#x2F;blog-post&#x2F;",
+      "url": "https://mira-wm.com/",
+      "source": "Hacker News",
+      "timestamp": 1783556877000,
+      "engagement": {
+        "votes": 94,
+        "comments": 16
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 91.31
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48839397",
+      "title": "Remote Attestation",
+      "excerpt": "",
+      "url": "https://www.liamcvw.com/p/remote-attestation",
+      "source": "Hacker News",
+      "timestamp": 1783557153000,
+      "engagement": {
+        "votes": 104,
+        "comments": 101
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 222.08
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845131",
+      "title": "Show HN: Android Developer Verification Package blacklisted in Aurora Store",
+      "excerpt": "So, I have a Lenovo Idea Tab (11\") tablet where I don't use a Google account, and several Google apps are disabled including the Play Store. I use Aurora Store and F-Droid to install and update packages. Only time I enable Play Store is to install an update to Play Services because Aurora Store can't (conflicting packages, meaning the signing key of the Play Services package has changed). I keep i",
+      "url": "https://news.ycombinator.com/item?id=48845131",
+      "source": "Hacker News",
+      "timestamp": 1783601934000,
+      "engagement": {
+        "votes": 4,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "philosophy & ideas",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 3.69
+      },
+      "why": "a concrete, specific case — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846885",
+      "title": "LinkedIn and X Are Flooded with AI Spam, Browsing Data Suggests",
+      "excerpt": "",
+      "url": "https://www.404media.co/linkedin-and-x-are-flooded-with-ai-spam-browsing-data-suggests/",
+      "source": "Hacker News",
+      "timestamp": 1783608720000,
+      "engagement": {
+        "votes": 8,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 7.65
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48832212",
+      "title": "Mistral's Robostral Navigate: a state of the art robotics navigation model",
+      "excerpt": "",
+      "url": "https://mistral.ai/news/robostral-navigate/",
+      "source": "Hacker News",
+      "timestamp": 1783519757000,
+      "engagement": {
+        "votes": 474,
+        "comments": 108
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 409.99
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48846407",
+      "title": "Altman: GPT-5.6 is 54% more token efficient on agentic coding",
+      "excerpt": "",
+      "url": "https://www.cnbc.com/2026/07/09/open-ai-sam-altman-chatgpt-5-6-sol.html",
+      "source": "Hacker News",
+      "timestamp": 1783607113000,
+      "engagement": {
+        "votes": 13,
+        "comments": 2
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 16.12
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48847148",
+      "title": "The Case for Nationalizing Artificial Intelligence",
+      "excerpt": "",
+      "url": "https://jacobin.com/2026/07/ai-policy-nationalization-commons-work",
+      "source": "Hacker News",
+      "timestamp": 1783609494000,
+      "engagement": {
+        "votes": 5,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 4.8
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845458",
+      "title": "Rust 1.97.0",
+      "excerpt": "",
+      "url": "https://blog.rust-lang.org/2026/07/09/Rust-1.97.0/",
+      "source": "Hacker News",
+      "timestamp": 1783603575000,
+      "engagement": {
+        "votes": 20,
+        "comments": 0
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 18.61
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48799966",
+      "title": "What is Bending Spoons? The little-known AOL and Vimeo owner that's now public",
+      "excerpt": "",
+      "url": "https://techcrunch.com/2026/07/05/what-is-bending-spoons-everything-to-know-about-aols-acquirer/",
+      "source": "Hacker News",
+      "timestamp": 1783304015000,
+      "engagement": {
+        "votes": 25,
+        "comments": 41
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.63,
+        "engagement": 20.05
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48834924",
+      "title": "Show HN: Microsoft releases Flint, a visualization language for AI agents",
+      "excerpt": "Data visualizations are the bridge between user and data. But building AI agents that can generate visualizations reliably can be very tricky: - simple chart specs can be reliable, but generated charts are often of low quality due to reliance on system defaults; - complex chart specs with explicit details can produce good-looking charts, but they are verbose and agents can struggle with reliabilit",
+      "url": "https://microsoft.github.io/flint-chart/#/",
+      "source": "Hacker News",
+      "timestamp": 1783532772000,
+      "engagement": {
+        "votes": 336,
+        "comments": 130
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 379.66
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48836233",
+      "title": "Cloudflare Drop",
+      "excerpt": "",
+      "url": "https://www.cloudflare.com/drop/",
+      "source": "Hacker News",
+      "timestamp": 1783538306000,
+      "engagement": {
+        "votes": 510,
+        "comments": 276
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 696.83
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48843758",
+      "title": "The true cost of saying \"Hi\" to an AI agent",
+      "excerpt": "",
+      "url": "https://quesma.com/blog/the-true-cost-of-saying-hi-to-an-ai-agent/",
+      "source": "Hacker News",
+      "timestamp": 1783593835000,
+      "engagement": {
+        "votes": 9,
+        "comments": 2
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 11.48
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48834296",
+      "title": "EU now one step away from reviving private message scanning rules",
+      "excerpt": "",
+      "url": "https://cyberinsider.com/eu-now-one-step-away-from-reviving-private-message-scanning-rules/",
+      "source": "Hacker News",
+      "timestamp": 1783529586000,
+      "engagement": {
+        "votes": 440,
+        "comments": 169
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 487.23
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48837396",
+      "title": "Separating signal from noise in coding evaluations",
+      "excerpt": "",
+      "url": "https://openai.com/index/separating-signal-from-noise-coding-evaluations/",
+      "source": "Hacker News",
+      "timestamp": 1783544631000,
+      "engagement": {
+        "votes": 236,
+        "comments": 87
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 278.28
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "hn-48845963",
+      "title": "Ask HN: I am not able to find a job. Should I switch stacks?",
+      "excerpt": "I have 4 years of experience working with React, Next.js, and Node.js. Other than that, I have also done some work with React Native and Three.js. My last contract ended about 3 months ago, and I have been trying to find new work since then. I started with LinkedIn, then reached out through my network, HN threads, Wellfound, Reddit, and other platforms. I also tried reaching out directly to startu",
+      "url": "https://news.ycombinator.com/item?id=48845963",
+      "source": "Hacker News",
+      "timestamp": 1783605538000,
+      "engagement": {
+        "votes": 7,
+        "comments": 7
+      },
+      "engagementModeled": false,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.63,
+        "engagement": 19.74
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1150841917",
+      "title": "Will We Ever Find Alien Civilizations?",
+      "excerpt": "Astronomer David Kipping discusses why claims of extraterrestrial life keep dissolving under scrutiny, why we need a more statistically grounded approach to searching for life beyond Earth, and why it’s rational to believe that we may be alone. The post Will We Ever Find Alien Civilizations? first appeared on Quanta Magazine",
+      "url": "https://www.quantamagazine.org/will-we-ever-find-alien-civilizations-20260709/",
+      "source": "Quanta Magazine",
+      "timestamp": 1783604353000,
+      "engagement": {
+        "votes": 61,
+        "comments": 14
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 83.14
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-724086369",
+      "title": "Is Life Just Different?",
+      "excerpt": "The idea of ‘biological agency’ — that life devises its own goals and behaves accordingly — complicates our understanding of what it means to be alive. But does it serve a scientific purpose? The post Is Life Just Different? first appeared on Quanta Magazine",
+      "url": "https://www.quantamagazine.org/is-life-just-different-20260708/",
+      "source": "Quanta Magazine",
+      "timestamp": 1783520496000,
+      "engagement": {
+        "votes": 376,
+        "comments": 47
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.68,
+        "engagement": 280.37
+      },
+      "why": "same shape, distant field — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-327677846",
+      "title": "Researchers Reveal the Power of ‘Quantum Proofs’",
+      "excerpt": "When checking that solutions to certain problems are correct, it turns out, you can’t get around the inherent complexity of the quantum world. The post Researchers Reveal the Power of ‘Quantum Proofs’ first appeared on Quanta Magazine",
+      "url": "https://www.quantamagazine.org/researchers-reveal-the-power-of-quantum-proofs-20260706/",
+      "source": "Quanta Magazine",
+      "timestamp": 1783348436000,
+      "engagement": {
+        "votes": 49,
+        "comments": 60
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 40.17
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-501935790",
+      "title": "Astrophysicists Puzzle Over Webb’s New Universe",
+      "excerpt": "Faced with observations of early black holes and galaxies that weren’t expected to exist, scientists have come up with a wealth of new theories to explain them. Now they just need to figure out which ones are true. The post Astrophysicists Puzzle Over Webb’s New Universe first appeared on Quanta Magazine",
+      "url": "https://www.quantamagazine.org/astrophysicists-puzzle-over-webbs-new-universe-20260702/",
+      "source": "Quanta Magazine",
+      "timestamp": 1783004251000,
+      "engagement": {
+        "votes": 75,
+        "comments": 11
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 3.66
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1914389416",
+      "title": "For the First Time, a Cell Built From Scratch Grows and Divides",
+      "excerpt": "Scientists built a synthetic cell that combines more lifelike properties than ever before — proof of concept that it’s possible to bring nonliving materials to life, or something close to it, in the lab. The post For the First Time, a Cell Built From Scratch Grows and Divides first appeared on Quanta Magazine",
+      "url": "https://www.quantamagazine.org/for-the-first-time-a-cell-built-from-scratch-grows-and-divides-20260701/",
+      "source": "Quanta Magazine",
+      "timestamp": 1782914402000,
+      "engagement": {
+        "votes": 61,
+        "comments": 45
+      },
+      "engagementModeled": true,
+      "domain": "math & abstraction",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 3.52
+      },
+      "why": "resists an easy framing — in math & abstraction",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2026394205",
+      "title": "Africa’s cultural landmarks: rock-hewn churches of Lalibela, Ethiopia",
+      "excerpt": "Most buildings rise from the bottom up, stone by stone. Not so these churches: carved from a single rock, top-to-bottom - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/explore-the-wondrous-ethiopian-churches-that-are-carved-into-the-earth",
+      "source": "Aeon",
+      "timestamp": 1783591260000,
+      "engagement": {
+        "votes": 111,
+        "comments": 16
+      },
+      "engagementModeled": true,
+      "domain": "philosophy & ideas",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 124.55
+      },
+      "why": "cuts closer to a frame — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-320533814",
+      "title": "How to offset your brain",
+      "excerpt": "From confirmation bias to loss aversion, everyone suffers from cognitive biases. Skilfully targeted mindfulness can help - by Stephanie Dorais Read on Aeon",
+      "url": "https://aeon.co/essays/can-mindfulness-help-you-overcome-your-cognitive-biases",
+      "source": "Aeon",
+      "timestamp": 1783591200000,
+      "engagement": {
+        "votes": 194,
+        "comments": 20
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 203.74
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-131843369",
+      "title": "Sangre violenta / sangre violeta",
+      "excerpt": "Confronted with the horrifying reality of gendered violence, radically different people unite in resistance and protest - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/on-the-ground-with-the-voices-fighting-femicide-in-mexico",
+      "source": "Aeon",
+      "timestamp": 1783504860000,
+      "engagement": {
+        "votes": 205,
+        "comments": 10
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 123.45
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1768386149",
+      "title": "‘The emperor is far away’",
+      "excerpt": "Ming Dynasty China left us copious texts, but these veil the lives of the vast majority of its people from our view - by Craig Clunas Read on Aeon",
+      "url": "https://aeon.co/essays/how-little-we-really-know-of-the-mighty-ming-dynasty",
+      "source": "Aeon",
+      "timestamp": 1783418400000,
+      "engagement": {
+        "votes": 231,
+        "comments": 46
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 111.61
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-536501384",
+      "title": "Begone dull care",
+      "excerpt": "Let this exuberant melding of jazz and animation from 1949 blur your senses as abstract visuals interpret the music - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/jazz-and-innovative-animation-form-a-sensory-swirl-in-this-1949-short",
+      "source": "Aeon",
+      "timestamp": 1783332060000,
+      "engagement": {
+        "votes": 28,
+        "comments": 5
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 8.27
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1971737630",
+      "title": "Skill nostalgia",
+      "excerpt": "Is all the beekeeping, baking and leatherwork just escapist fantasy or the start of a radically human approach to work? - by Joshua Habgood-Coote Read on Aeon",
+      "url": "https://aeon.co/essays/the-radical-reasons-why-you-dream-of-making-things-by-hand",
+      "source": "Aeon",
+      "timestamp": 1783332000000,
+      "engagement": {
+        "votes": 37,
+        "comments": 56
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 32.43
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1026139846",
+      "title": "Abyss",
+      "excerpt": "The testimonies of Ukraine’s war widows reveal the mortal risk of love and the possibility of dying while alive: a black pain - by Julie Reshe Read on Aeon",
+      "url": "https://aeon.co/essays/what-ukrainian-war-widows-know-about-love-and-loss",
+      "source": "Aeon",
+      "timestamp": 1783072800000,
+      "engagement": {
+        "votes": 154,
+        "comments": 9
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 9.36
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1598929621",
+      "title": "Karl Hess: toward liberty",
+      "excerpt": "‘Society, in fact, is neighbourhoods’ – how Karl Hess transformed from a Republican speechwriter into a radical welder - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/a-republican-speechwriter-turned-welders-radical-gospel-of-localism",
+      "source": "Aeon",
+      "timestamp": 1782986460000,
+      "engagement": {
+        "votes": 149,
+        "comments": 20
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 6.48
+      },
+      "why": "same shape, distant field — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-750296131",
+      "title": "The anguish of choice",
+      "excerpt": "In the shattered aftermath of war, Sartre delivered a formidable lecture on freedom and meaning. Its urgency remains - by Skye C Cleary Read on Aeon",
+      "url": "https://aeon.co/essays/re-reading-sartres-lecture-existentialism-is-a-humanism",
+      "source": "Aeon",
+      "timestamp": 1782986400000,
+      "engagement": {
+        "votes": 100,
+        "comments": 24
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 5.07
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1013709302",
+      "title": "Noguchi’s New York animations",
+      "excerpt": "Hand-painted animations bring to life Isamu Noguchi’s ideas for playgrounds that could integrate art with everyday life - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/in-noguchis-unrealised-playgrounds-art-and-life-are-inseparable",
+      "source": "Aeon",
+      "timestamp": 1782900060000,
+      "engagement": {
+        "votes": 42,
+        "comments": 38
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.55
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1522619688",
+      "title": "Illegible benefits",
+      "excerpt": "The costs of transformative innovations are immediately clear: it’s the longterm gains that are hardest to understand - by Carlo Cordasco Read on Aeon",
+      "url": "https://aeon.co/essays/what-we-cant-measure-about-ai-yet",
+      "source": "Aeon",
+      "timestamp": 1782813600000,
+      "engagement": {
+        "votes": 206,
+        "comments": 13
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 3.16
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-813209529",
+      "title": "Timelapse of the Universe",
+      "excerpt": "When 13 billion years of the cosmos get condensed into 10 epic minutes, when in the timelapse do you think humans appear? - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/the-13-billion-years-that-led-to-us-a-cosmological-timelapse",
+      "source": "Aeon",
+      "timestamp": 1782727260000,
+      "engagement": {
+        "votes": 188,
+        "comments": 26
+      },
+      "engagementModeled": true,
+      "domain": "philosophy & ideas",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.06
+      },
+      "why": "same shape, distant field — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-173625663",
+      "title": "The measure of flourishing",
+      "excerpt": "Human prosperity depends on nature, but no global metric has captured this with precision. Enter the Nature Relationship Index - by Yadvinder Malhi Read on Aeon",
+      "url": "https://aeon.co/essays/it-doesnt-have-to-be-us-versus-nature",
+      "source": "Aeon",
+      "timestamp": 1782727200000,
+      "engagement": {
+        "votes": 51,
+        "comments": 28
+      },
+      "engagementModeled": true,
+      "domain": "philosophy & ideas",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0.92
+      },
+      "why": "resists an easy framing — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1359571576",
+      "title": "The violence specialists",
+      "excerpt": "Every society depends on violence workers, but what makes young men take a job that risks their lives and harms others? - by Raúl Zepeda Gil Read on Aeon",
+      "url": "https://aeon.co/essays/organised-violence-is-a-trade-whether-legal-or-illegal",
+      "source": "Aeon",
+      "timestamp": 1782468000000,
+      "engagement": {
+        "votes": 21,
+        "comments": 18
+      },
+      "engagementModeled": true,
+      "domain": "philosophy & ideas",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.65,
+        "engagement": 0.12
+      },
+      "why": "cuts closer to a frame — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1682838333",
+      "title": "Reset: Hat",
+      "excerpt": "This portrait of a life reimagined is a meditation on identity, happiness and the balance between freedom and conformity - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/in-the-american-west-a-man-named-hat-sets-out-to-leave-no-trace",
+      "source": "Aeon",
+      "timestamp": 1782381660000,
+      "engagement": {
+        "votes": 123,
+        "comments": 3
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.17
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1325165345",
+      "title": "Who are the fire-tamers?",
+      "excerpt": "From remote farmhouses to oncology clinics, a secret world of French healers works in parallel with conventional medicine - by Susanna Crossman Read on Aeon",
+      "url": "https://aeon.co/essays/who-are-the-fire-taming-healers-of-modern-france",
+      "source": "Aeon",
+      "timestamp": 1782381600000,
+      "engagement": {
+        "votes": 64,
+        "comments": 8
+      },
+      "engagementModeled": true,
+      "domain": "health & mind",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.63,
+        "engagement": 0.11
+      },
+      "why": "same shape, distant field — in health & mind",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-953843171",
+      "title": "The memories of others",
+      "excerpt": "How a Japanese war photographer became one of the most insightful chroniclers of the Troubles in Northern Ireland - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/a-japanese-photographers-striking-perceptive-images-of-the-troubles",
+      "source": "Aeon",
+      "timestamp": 1782295260000,
+      "engagement": {
+        "votes": 72,
+        "comments": 2
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0.06
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-518214224",
+      "title": "And Granny would dance",
+      "excerpt": "Woven from memories of her childhood in Iran, an animator recalls her Granny’s story of loss, love and friendship - by Aeon Video Watch on Aeon",
+      "url": "https://aeon.co/videos/memories-of-a-childhood-in-tehran-form-a-celebration-of-iranian-women",
+      "source": "Aeon",
+      "timestamp": 1782122460000,
+      "engagement": {
+        "votes": 46,
+        "comments": 3
+      },
+      "engagementModeled": true,
+      "domain": "philosophy & ideas",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.02
+      },
+      "why": "resists an easy framing — in philosophy & ideas",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1328095273",
+      "title": "No one is self-made",
+      "excerpt": "The idea that success is deserved has great traction in the world. But Zhuangzi argues that it is a deeply flawed notion - by Christine Abigail L Tan Read on Aeon",
+      "url": "https://aeon.co/essays/zhuangzi-and-the-case-against-meritocracy",
+      "source": "Aeon",
+      "timestamp": 1782122400000,
+      "engagement": {
+        "votes": 34,
+        "comments": 15
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.02
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-803974624",
+      "title": "Trauma creep",
+      "excerpt": "From a broken life to a broken nail, ‘trauma’ has been bleached by overuse. But it names something real – and must be reclaimed - by Lily Dunn Read on Aeon",
+      "url": "https://aeon.co/essays/not-everything-is-trauma-language-needs-to-mean-something",
+      "source": "Aeon",
+      "timestamp": 1781863200000,
+      "engagement": {
+        "votes": 78,
+        "comments": 8
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.01
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-97753583",
+      "title": "If You Want Animals to Understand You, Speak Slowly",
+      "excerpt": "A new study suggests almost all animal communication shares a common, slow rhythm The post If You Want Animals to Understand You, Speak Slowly appeared first on Nautilus .",
+      "url": "https://nautil.us/if-you-want-animals-to-understand-you-speak-slowly-1282586/",
+      "source": "Nautilus",
+      "timestamp": 1783612800000,
+      "engagement": {
+        "votes": 340,
+        "comments": 34
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 398.75
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1730799637",
+      "title": "How a Heat Wave Disturbs Generations of This Sex-Changing Spider",
+      "excerpt": "A maternally inherited bacteria that turns males into females is foiled by a brief warm spell The post How a Heat Wave Disturbs Generations of This Sex-Changing Spider appeared first on Nautilus .",
+      "url": "https://nautil.us/how-a-heat-wave-disturbs-generations-of-this-sex-changing-spider-1282583/",
+      "source": "Nautilus",
+      "timestamp": 1783606718000,
+      "engagement": {
+        "votes": 32,
+        "comments": 55
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.42,
+        "engagement": 134.34
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1378257627",
+      "title": "Can We Geoengineer Our Way Out of a Super El Nino?",
+      "excerpt": "A natural experiment in sun-scorched Australia points the way The post Can We Geoengineer Our Way Out of a Super El Nino? appeared first on Nautilus .",
+      "url": "https://nautil.us/can-we-geoengineer-our-way-out-of-a-super-el-nino-1282580/",
+      "source": "Nautilus",
+      "timestamp": 1783548000000,
+      "engagement": {
+        "votes": 371,
+        "comments": 57
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.63,
+        "engagement": 335.17
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1299581418",
+      "title": "When Galaxies Clash",
+      "excerpt": "Is a new image of star systems colliding a vision of our Milky Way’s future? The post When Galaxies Clash appeared first on Nautilus .",
+      "url": "https://nautil.us/when-galaxies-clash-1282574/",
+      "source": "Nautilus",
+      "timestamp": 1783544400000,
+      "engagement": {
+        "votes": 148,
+        "comments": 16
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 122.02
+      },
+      "why": "same shape, distant field — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-866943329",
+      "title": "Why Do Men Develop Parkinson’s Disease More Often Than Women?",
+      "excerpt": "Differing gene expression patterns could be to blame The post Why Do Men Develop Parkinson’s Disease More Often Than Women? appeared first on Nautilus .",
+      "url": "https://nautil.us/why-do-men-develop-parkinsons-disease-more-often-than-women-1282568/",
+      "source": "Nautilus",
+      "timestamp": 1783540800000,
+      "engagement": {
+        "votes": 84,
+        "comments": 58
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.68,
+        "engagement": 132.99
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1710577507",
+      "title": "Hunting for a New Hallucinogen in the Lilliputian Psychedelic",
+      "excerpt": "The chemical substance behind these visions isn’t like any other known to science The post Hunting for a New Hallucinogen in the Lilliputian Psychedelic appeared first on Nautilus .",
+      "url": "https://nautil.us/hunting-for-a-new-hallucinogen-in-the-lilliputian-psychedelic-1282565/",
+      "source": "Nautilus",
+      "timestamp": 1783537200000,
+      "engagement": {
+        "votes": 247,
+        "comments": 49
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 225.04
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2103073781",
+      "title": "The Surprising Evolutionary Trade-offs Between Fangs, Stingers, and Claws",
+      "excerpt": "The science behind nature’s different puncture tools The post The Surprising Evolutionary Trade-offs Between Fangs, Stingers, and Claws appeared first on Nautilus .",
+      "url": "https://nautil.us/the-surprising-evolutionary-trade-offs-between-fangs-stingers-and-claws-1282561/",
+      "source": "Nautilus",
+      "timestamp": 1783533660000,
+      "engagement": {
+        "votes": 368,
+        "comments": 47
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 295.7
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-681325920",
+      "title": "What Makes Humans Stupid",
+      "excerpt": "It takes intelligence to get things spectacularly wrong. An essay on our undoing. The post What Makes Humans Stupid appeared first on Nautilus .",
+      "url": "https://nautil.us/what-makes-humans-stupid-1282459/",
+      "source": "Nautilus",
+      "timestamp": 1783512000000,
+      "engagement": {
+        "votes": 341,
+        "comments": 42
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 242.27
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1086309158",
+      "title": "Childhood Trauma Echoes Through Romantic Relationships",
+      "excerpt": "Abuse, neglect, and loss can reverberate in a partner’s behavior The post Childhood Trauma Echoes Through Romantic Relationships appeared first on Nautilus .",
+      "url": "https://nautil.us/childhood-trauma-echoes-through-romantic-relationships-1282554/",
+      "source": "Nautilus",
+      "timestamp": 1783463400000,
+      "engagement": {
+        "votes": 83,
+        "comments": 77
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 104.18
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1409325035",
+      "title": "The Loving Embrace of the Milky Way",
+      "excerpt": "Researchers have discovered that our galaxy’s outermost spiral arms are wide open and farther away than we thought The post The Loving Embrace of the Milky Way appeared first on Nautilus .",
+      "url": "https://nautil.us/the-loving-embrace-of-the-milky-way-1282550/",
+      "source": "Nautilus",
+      "timestamp": 1783459800000,
+      "engagement": {
+        "votes": 33,
+        "comments": 72
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 76.32
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1812825561",
+      "title": "Rob Hann’s Chromatic and Quirky Landscapes Evoke Long-Distance Road Trips",
+      "excerpt": "Hann's subjects range from handmade road signs and vintage buildings to peculiar local attractions. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Rob Hann’s Chromatic and Quirky Landscapes Evoke Long-Distance Road Trips appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/rob-hann-photography-landscapes-united-states-nostlagia/",
+      "source": "Colossal",
+      "timestamp": 1783610892000,
+      "engagement": {
+        "votes": 49,
+        "comments": 42
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 128.66
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1914258424",
+      "title": "Atmospheric Scenes and Layered Interpretations Top the 2026 Hasselblad Masters Contest",
+      "excerpt": "This year, photographers in 160 countries submitted more than 108,000 images. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Atmospheric Scenes and Layered Interpretations Top the 2026 Hasselblad Masters Contest appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/hasselblad-masters-2026-winning-photographs/",
+      "source": "Colossal",
+      "timestamp": 1783522946000,
+      "engagement": {
+        "votes": 298,
+        "comments": 54
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 245.39
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-158043437",
+      "title": "Collin van der Sluijs’ ‘Wanderland’ Imagines a Vast Ecosystem Encompassing the Momentous and Mundane",
+      "excerpt": "The Dutch artist reflects on loss, grief, and the therapeutic powers of nature in his first presentation at Joy Machine. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Collin van der Sluijs’ ‘Wanderland’ Imagines a Vast Ecosystem Encompassing the Momentous and Mundane appeared first o",
+      "url": "https://www.thisiscolossal.com/2026/07/collin-van-der-sluijs-wanderland-chicago/",
+      "source": "Colossal",
+      "timestamp": 1783461052000,
+      "engagement": {
+        "votes": 125,
+        "comments": 46
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 94.19
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-805185951",
+      "title": "Enigmatic Iconography and Incomplete Narratives Merge in Phlegm’s Murals and Engravings",
+      "excerpt": "The London-based artist's monochrome compositions evoke wonder, mischief, and riddles. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Enigmatic Iconography and Incomplete Narratives Merge in Phlegm’s Murals and Engravings appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/phlegm-murals-engravings-street-art-printmaking/",
+      "source": "Colossal",
+      "timestamp": 1783443600000,
+      "engagement": {
+        "votes": 152,
+        "comments": 82
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 124.94
+      },
+      "why": "resists an easy framing — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2095347877",
+      "title": "Amelia Cross Blends Bespoke Tailoring and Trompe-L’œil Painting in Her Sartorial Studies",
+      "excerpt": "\"You can almost build up a whole character for someone based on what’s inside their pocket or what socks they are wearing to work!\" Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Amelia Cross Blends Bespoke Tailoring and Trompe-L’œil Painting in Her Sartorial Studies appeared first on",
+      "url": "https://www.thisiscolossal.com/2026/07/amelia-cross-sewn-paintings/",
+      "source": "Colossal",
+      "timestamp": 1783435481000,
+      "engagement": {
+        "votes": 194,
+        "comments": 44
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 106.76
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1539134484",
+      "title": "Nebulae, Comets, and Aurorae, Oh My! See the ZWO Astronomy Photographer of the Year Shortlist",
+      "excerpt": "769 photographers and astronomers submitted more than 4,000 images to this year's competition. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Nebulae, Comets, and Aurorae, Oh My! See the ZWO Astronomy Photographer of the Year Shortlist appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/zwo-astronomy-photographer-of-the-year-2026-shortlist/",
+      "source": "Colossal",
+      "timestamp": 1783368180000,
+      "engagement": {
+        "votes": 300,
+        "comments": 18
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 88.75
+      },
+      "why": "a concrete, specific case — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1454690440",
+      "title": "Veks Van Hillik Suspends Fish, Insects, and Other Objects in Surreal Murals",
+      "excerpt": "Art history and ecology merge in Van Hillik's bold, vaguely unsettling murals. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Veks Van Hillik Suspends Fish, Insects, and Other Objects in Surreal Murals appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/veks-van-hillik-paintings-murals-animals-fish/",
+      "source": "Colossal",
+      "timestamp": 1783360800000,
+      "engagement": {
+        "votes": 40,
+        "comments": 34
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 27.42
+      },
+      "why": "cuts closer to a frame — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-705400945",
+      "title": "Cranbrook Academy of Art Reopens Applications for Fall 2026",
+      "excerpt": "The art institution is accepting applications from June 22 through August 15 for artists and designers considering graduate study. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Cranbrook Academy of Art Reopens Applications for Fall 2026 appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/cranbrook-academy-of-art-reopens-applications-for-fall-2026/",
+      "source": "Colossal",
+      "timestamp": 1783353600000,
+      "engagement": {
+        "votes": 99,
+        "comments": 25
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 36.41
+      },
+      "why": "resists an easy framing — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1200224578",
+      "title": "Vibrant Folded Canvases Form Garment-Like Sculptures by Susan Maddux",
+      "excerpt": "Maddux often stacks the bunches of folds several feet high, mirroring human proportions. Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Vibrant Folded Canvases Form Garment-Like Sculptures by Susan Maddux appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/susan-maddux-paintings-sculpture-textiles/",
+      "source": "Colossal",
+      "timestamp": 1783340878000,
+      "engagement": {
+        "votes": 109,
+        "comments": 10
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 29.45
+      },
+      "why": "a concrete, specific case — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1625500983",
+      "title": "Women Sport Puffer Coats in Bold Baroque Portraits by Nieves González",
+      "excerpt": "\"Creating isn't something we do (in Spain), it's something we are,\" the artist says. \"And I come from that; I carry it in my body.\" Do stories and artists like this matter to you? Become a Colossal Member today and support independent arts publishing for as little as $7 per month. The article Women Sport Puffer Coats in Bold Baroque Portraits by Nieves González appeared first on Colossal .",
+      "url": "https://www.thisiscolossal.com/2026/07/nieves-gonzalez-paintings-portraits-puffer-coats/",
+      "source": "Colossal",
+      "timestamp": 1783260452000,
+      "engagement": {
+        "votes": 136,
+        "comments": 50
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 35.04
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-561697042",
+      "title": "The Hastings Museum Kool-Aid Exhibit in Hastings, Nebraska",
+      "excerpt": "Hastings, Nebraska is where Edwin Perkins invented Kool-Aid. To honor his delicious invention, the local museum has dedicated half of a floor to the drink’s history. Kool-Aid: Discover the Dream is a nostalgic and comprehensive collection of all things Kool-Aid. The only thing missing is a chance to actually imbibe the drink itself. Kool-Aid’s precursor was Fruit Smack, a flavored syrup. Perkins, ",
+      "url": "https://www.atlasobscura.com/places/hastings-museum-koolaid-exhibit",
+      "source": "Atlas Obscura",
+      "timestamp": 1783450800000,
+      "engagement": {
+        "votes": 243,
+        "comments": 55
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 145.05
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-913450488",
+      "title": "These Five Fantastic Events Are Worth Traveling For",
+      "excerpt": "The United States is celebrating its 250th birthday this weekend, but there are loads more events to get excited about around the world this weekend. The International Festival of Life transforms Chicago into a living crossroads of Caribbean rhythms, African traditions, and global culture. Live performances fill the air while vendors offer a marketplace of crafts, goods, and stories from around th",
+      "url": "https://www.atlasobscura.com/articles/these-five-fantastic-events-are-worth-traveling-for",
+      "source": "Atlas Obscura",
+      "timestamp": 1782943200000,
+      "engagement": {
+        "votes": 137,
+        "comments": 32
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 5.47
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1666031909",
+      "title": "Tomb of Dai Anga in Lahore, Pakistan",
+      "excerpt": "Tucked away behind the bustling Grand Trunk Road and modern railway lines in Lahore lies the Tomb of Dai Anga, a brilliant but frequently overlooked piece of Mughal heritage. Built in 1671, this mausoleum belongs to Zeb-un-Nisa, popularly known as Dai Anga, who was the wet nurse of Emperor Shah Jahan and a woman of significant wealth and influence in the royal court. Architectural enthusiasts will",
+      "url": "https://www.atlasobscura.com/places/tomb-of-dai-anga",
+      "source": "Atlas Obscura",
+      "timestamp": 1782928800000,
+      "engagement": {
+        "votes": 224,
+        "comments": 34
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 7.36
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-575072970",
+      "title": "HM Prison Maze (Long Kesh) in Lisburn, Northern Ireland",
+      "excerpt": "Opened in 1971 on the site of a former Royal Air Force base, few places in Northern Ireland tell the story of the Troubles as powerfully as the former HM Prison. Referred to as 'Maze Prison', 'Long Kesh' or 'the H-Blocks', it became one of the most infamous prisons in Europe and worldwide, housing both republican and loyalist paramilitary prisoners during decades of conflict. The prison is best kn",
+      "url": "https://www.atlasobscura.com/places/hm-prison-maze-long-kesh",
+      "source": "Atlas Obscura",
+      "timestamp": 1782921600000,
+      "engagement": {
+        "votes": 186,
+        "comments": 15
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 5.24
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1686250511",
+      "title": "Vancouver Crow Nesting Zone in Burnaby, British Columbia",
+      "excerpt": "If you want a unique bird and crow experience then this is a must. In Vancouver all crows in what we call the Lower Mainland which extends far beyond Vancouver come to roost in the same five block section. This is along the Still Creek Drive between Willingdon Avenue and Gilmour Avenue. The crows will leave at dawn and return at dusk in a massive migration that is loud and obvious. One of the best",
+      "url": "https://www.atlasobscura.com/places/vancouver-crow-nesting-zone",
+      "source": "Atlas Obscura",
+      "timestamp": 1782914400000,
+      "engagement": {
+        "votes": 107,
+        "comments": 54
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.42,
+        "engagement": 5.01
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-221416515",
+      "title": "Gates of the City or Portas da Cidade in Fall River, Massachusetts",
+      "excerpt": "This amazing monument is 60 feet tall and and 30 feet wide. It is an exact replica of the Gates to the City monument in the city of Ponta Delgada on the island of San Miguel in the Azores Islands. Built in 2006, it commemorates the sister city relationship between Fall River and Ponta Delgada and honors the many Portuguese immigrants to the city of Fall River. It is a short walking distance from n",
+      "url": "https://www.atlasobscura.com/places/gates-of-the-city-or-portas-da-cidade",
+      "source": "Atlas Obscura",
+      "timestamp": 1782849600000,
+      "engagement": {
+        "votes": 122,
+        "comments": 48
+      },
+      "engagementModeled": true,
+      "domain": "nature & environment",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 3.6
+      },
+      "why": "same shape, distant field — in nature & environment",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-743765637",
+      "title": "The Looming Head of Jānis Zvīdra in Rēzekne, Latvia",
+      "excerpt": "If you are driving through the town of Rēzekne in Latvia's Latgale region, keep your eyes peeled near the train station junction. Right there on a grassy corner, you’ll encounter an incredibly stoic, oversized stone head staring intensely into the distance. This is the monument to Jānis Zvīdra, and it is a textbook example of how the Soviet Union loved to turn local teenagers into monumental legen",
+      "url": "https://www.atlasobscura.com/places/the-looming-head-of-janis-zvidra",
+      "source": "Atlas Obscura",
+      "timestamp": 1782842400000,
+      "engagement": {
+        "votes": 182,
+        "comments": 12
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 3.27
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1599539568",
+      "title": "Payson Grotto in Payson, Utah",
+      "excerpt": "Grotto Falls is a lovely little gem! A short easy hike leads to a little enclosure with a pool of water (shallow enough for most children) fed by a small waterfall. You can bring a swimsuit and wade while enjoying the lovely surrounding nature. It is also possible to hike to the top of the waterfall. Wading is best in the summer because the water is cold, but in the fall the canyon trees light up ",
+      "url": "https://www.atlasobscura.com/places/payson-grotto",
+      "source": "Atlas Obscura",
+      "timestamp": 1782835200000,
+      "engagement": {
+        "votes": 145,
+        "comments": 10
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.52
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1706452186",
+      "title": "Podcast: The Black Surfmen Behind One of the Greatest Water Rescues Ever",
+      "excerpt": "Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. In this episode of The Atlas Obscura Podcast , we visit the Outer Banks of North Carolina and unearth some surprising history about a place known as the Graveyard of the Atlantic because of how many shipwrecks have occurred there. It was also home to early efforts at lifesaving and a precursor to the U.S. Coast Guard. K",
+      "url": "https://www.atlasobscura.com/articles/podcast-america-s-finest-lifesaving-station",
+      "source": "Atlas Obscura",
+      "timestamp": 1782832920000,
+      "engagement": {
+        "votes": 127,
+        "comments": 15
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 2.37
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-620455753",
+      "title": "Visiting All 50 U.S. States",
+      "excerpt": "",
+      "url": "https://www.atlasobscura.com/articles/visiting-all-50-u-s-states",
+      "source": "Atlas Obscura",
+      "timestamp": 1782738540000,
+      "engagement": {
+        "votes": 156,
+        "comments": 39
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 2.13
+      },
+      "why": "same shape, distant field — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-442115587",
+      "title": "This Illinois Tower Was Built Exclusively for Swiss Goats",
+      "excerpt": "Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. Kelly McEvers: This episode is for the DIY nation. The people who see something they like and say, “I can make that.” People like Marcia and Dave Johnson. Their farm in Windsor, Illinois, is filled with DIY projects. The house… Marcia Johnson: The house is modeled after one in Williamsburg, Virginia. We found the house ",
+      "url": "https://www.atlasobscura.com/articles/podcast-goat-tower",
+      "source": "Atlas Obscura",
+      "timestamp": 1782566100000,
+      "engagement": {
+        "votes": 167,
+        "comments": 13
+      },
+      "engagementModeled": true,
+      "domain": "craft & making",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.7
+      },
+      "why": "cuts closer to a frame — in craft & making",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1654377570",
+      "title": "7 Essential Experiences in Southwest Louisiana",
+      "excerpt": "In Southwest Louisiana, culture isn’t something tucked away in museums; it spills out of dance halls, crawfish pots, and marshes. In this region, accordion music echoes through restaurants, migratory birds fill coastal skies, and recipes passed down for generations still define local identity. As America celebrates its 250th anniversary, Southwest Louisiana offers a chance to experience a place wh",
+      "url": "https://www.atlasobscura.com/articles/essential-experiences-in-southwest-louisiana",
+      "source": "Atlas Obscura",
+      "timestamp": 1782489720000,
+      "engagement": {
+        "votes": 82,
+        "comments": 8
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.37,
+        "engagement": 0.24
+      },
+      "why": "cuts closer to a frame — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-399310273",
+      "title": "The Santander to Alar del Rey  Railway  Line in Alar del Rey, Spain",
+      "excerpt": "Whilst heritage railways are fairly frequent entries in Atlas Obscura rail lines that are still operating commercially are much rarer but not unknown . This, Iberian standard gauge, line is actually the the northern section, through the Cantabrian Mountains, in Spain, of a line which actually runs south as far as Palencia , which is northwest of Madrid. It is remarkable for its spectacular scenery",
+      "url": "https://www.atlasobscura.com/places/the-santander-to-palencia-railway-line",
+      "source": "Atlas Obscura",
+      "timestamp": 1782489600000,
+      "engagement": {
+        "votes": 17,
+        "comments": 33
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.2
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1328156851",
+      "title": "Horror Studies Archive in Pittsburgh, Pennsylvania",
+      "excerpt": "What do you do when the family of famous and locally loved horror director George Romero offers to donate 100 boxes of manuscripts, letters, marketing and other rare materials to your university? First, obviously, you say yes, and then you set about creating the world's first and only center for the academic study of the horror genre. Romero was no stranger to Pittsburgh - he shot nearly a dozen f",
+      "url": "https://www.atlasobscura.com/places/horror-studies-archive",
+      "source": "Atlas Obscura",
+      "timestamp": 1782482400000,
+      "engagement": {
+        "votes": 37,
+        "comments": 34
+      },
+      "engagementModeled": true,
+      "domain": "business & economics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0.24
+      },
+      "why": "a concrete, specific case — in business & economics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1774210914",
+      "title": "Doorless Shrine of Gogni in Gogni, Georgia",
+      "excerpt": "Georgians call it \"Karugdebeli\" -- literally, \"Door-thrown-off\". For as long as anyone can remember, no building on this holy mountain has been able to survive with its doors intact, so all its shrines remain open to the public 24 hours a day. The first shrine dedicated to St. George is said to have been built here in the 7th or 8th century C.E. - although, as is often the case in the Caucasus, a ",
+      "url": "https://www.atlasobscura.com/places/doorless-shrine-of-gogni",
+      "source": "Atlas Obscura",
+      "timestamp": 1782417600000,
+      "engagement": {
+        "votes": 31,
+        "comments": 18
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.11
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2141580467",
+      "title": "Convent of Santa Maria de Mave in Santa María de Mave, Spain",
+      "excerpt": "This building is in the village of Santa Maria de Mave , The village takes name from the church and convento at its centre and is close to the larger settlement of Mave close to the border of Cantabria and Castile y Leòn . In Spain the term Convento is used to distinguish the institution as housing a group of religious members of an order which is active in the community in which it is based as op",
+      "url": "https://www.atlasobscura.com/places/monestary-of-santa-maria-de-mave",
+      "source": "Atlas Obscura",
+      "timestamp": 1782417600000,
+      "engagement": {
+        "votes": 98,
+        "comments": 25
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.24
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1941323559",
+      "title": "Hello Kitty Cafe in Las Vegas, Nevada",
+      "excerpt": "Situated in the middle of the bustling strip is an adorable oasis. Unlike its equally cute sister locations, this Hello Kitty cafe is located inside a lush green park, boasting plenty of seating for the perfect picnic outside. The park is already a great opportunity to hide away amid the city's limited greenery, so having the cafe is just a bonus on top of an already great space. The cafe itself i",
+      "url": "https://www.atlasobscura.com/places/hello-kitty-cafe-at-the-park-mgm-las-vegas",
+      "source": "Atlas Obscura",
+      "timestamp": 1782410400000,
+      "engagement": {
+        "votes": 96,
+        "comments": 10
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.18
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1084999052",
+      "title": "The Wooden Way: A Cross-Pennsylvania Pilgrimage to the Golden Age of Thrills",
+      "excerpt": "Long before massive steel coasters launched riders into physics-defying drops and corkscrews, Pennsylvania helped define the art of the wooden roller coaster. When they debuted in the early 20th century, many of the state’s classic amusement parks drew city dwellers to lakesides, river valleys, and wooded hillsides for fresh air and excitement. By the 1920s, innovative coaster engineers at local f",
+      "url": "https://www.atlasobscura.com/articles/pennsylvania-wooden-roller-coasters",
+      "source": "Atlas Obscura",
+      "timestamp": 1781555400000,
+      "engagement": {
+        "votes": 77,
+        "comments": 6
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1195894404",
+      "title": "The Atlas Obscura Guide to the World’s Biggest Sporting Event",
+      "excerpt": "As the biggest tournament in the world brings fans across North America, Atlas Obscura and Hilton invite listeners to go beyond the matches and into the stories, flavors, neighborhoods, and hidden wonders that make each host city so unforgettable. Our series explores the culture surrounding the world’s biggest sporting event — from unexpected local traditions to offbeat road trips between cities —",
+      "url": "https://www.atlasobscura.com/articles/ao-guide-worlds-biggest-sporting-event",
+      "source": "Atlas Obscura",
+      "timestamp": 1779396720000,
+      "engagement": {
+        "votes": 72,
+        "comments": 9
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0
+      },
+      "why": "a concrete, specific case — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1274468638",
+      "title": "The Candy Shop Where You Can Taste History",
+      "excerpt": "Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. Kelly McEvers: Today we’re going to talk about a candy store in Harpers Ferry , West Virginia . And about how candy stores have always played a big role in the town’s history. Back in the 1840s, a German immigrant named Frederick Roeder set up a little sweet shop in Harpers Ferry. He sold cakes, candies, and pies and li",
+      "url": "https://www.atlasobscura.com/articles/podcast-true-treats",
+      "source": "Atlas Obscura",
+      "timestamp": 1779308100000,
+      "engagement": {
+        "votes": 29,
+        "comments": 1
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0
+      },
+      "why": "a concrete, specific case — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1362694051",
+      "title": "What the Light Knows",
+      "excerpt": "The first time it happened, my father had been dead for one week. My mother and I were in the Smoky Mountains in Tennessee, in April, trying to do something with ourselves. We were walking an overlook with long views across the ridgelines when something appeared in the air in front of us. Not in a photograph. Not on a screen. In the air. A shaft of colored light — blues and greens — moving as we m",
+      "url": "https://www.atlasobscura.com/articles/what-the-light-knows",
+      "source": "Atlas Obscura",
+      "timestamp": 1777990020000,
+      "engagement": {
+        "votes": 13,
+        "comments": 15
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1811658896",
+      "title": "In the Middle of Somewhere",
+      "excerpt": "Where are you? Two friends texted, separately, within an hour of each other. Western Nebraska, I said. So you're in the middle of nowhere, both of them wrote back. I really paused. I had flown into Denver and taken a nine-seater plane to Alliance: a tiny plane, a tiny airport, a tiny place. And just before the texts came in, I had been looking at the Atlas Obscura map and counted eight other place",
+      "url": "https://www.atlasobscura.com/articles/the-middle-of-somewhere",
+      "source": "Atlas Obscura",
+      "timestamp": 1777467600000,
+      "engagement": {
+        "votes": 40,
+        "comments": 1
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-929988752",
+      "title": "Route 66: The Mother Road",
+      "excerpt": "Since the early 1920s, when word first spread of a highway that would run from Chicago to Los Angeles, Route 66 has defined the American dream—symbolizing the country's sense of freedom, ingenuity, and continuous transformation. Join us as we drive the \"Mother Road\" from start to finish, exploring everything from outsider art to indigenous history. Episode 1: The Mother Road We start our journey i",
+      "url": "https://www.atlasobscura.com/articles/route-66-the-mother-road-video-series",
+      "source": "Atlas Obscura",
+      "timestamp": 1777392660000,
+      "engagement": {
+        "votes": 72,
+        "comments": 14
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0
+      },
+      "why": "resists an easy framing — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-591409270",
+      "title": "The Fight to Save Kenilworth Park & Aquatic Gardens",
+      "excerpt": "Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. Kelly McEvers: Gina Geffrard has a very specific memory about the first time she encountered the place we’re talking about today. Gina Geffrard: In 2019, I filmed an episode of House Hunters. And one of the houses on the show is across the street from the gardens. I remember talking to the producers of the show, asking ",
+      "url": "https://www.atlasobscura.com/articles/podcast-kenilworth-park-aquatic-gardens",
+      "source": "Atlas Obscura",
+      "timestamp": 1776872460000,
+      "engagement": {
+        "votes": 41,
+        "comments": 16
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 0
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1360938028",
+      "title": "Leigh’s Favorite Oatmeal Chocolate Chip Cookies",
+      "excerpt": "Leigh Myers’ signature cookies are crispy on the edges, tender in the center, and jazzed up with spicy nuts. Ingredients 1 1/2 cup (200 grams) all-purpose flour 1 teaspoon baking soda 1 teaspoon fine sea salt 1 teaspoon cinnamon 16 tablespoons (228 grams) unsalted butter, softened 1 cup (188 grams) packed brown sugar 1/2 cup (118 grams) granulated sugar 2 large eggs, at room temperature 4 tablespo",
+      "url": "https://www.atlasobscura.com/foods/leighs-favorite-oatmeal-chocolate-chip-cookies",
+      "source": "Atlas Obscura",
+      "timestamp": 1775695800000,
+      "engagement": {
+        "votes": 45,
+        "comments": 18
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0
+      },
+      "why": "resists an easy framing — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-374775065",
+      "title": "Joan’s Crunchy Strawberry Shortcakes",
+      "excerpt": "Joan Weed found this shortcake recipe on the back of a magazine and decided to make it her own. While the original recipe was for a traditional layer cake, Weed decided to take a more biscuit-based approach (with delicious results). Ingredients: 3 cups sifted flour 4-1/2 tsp baking powder 1tsp salt 1/3 cup sugar 3/4 cup shortening (butter) 2 eggs 2/3 cup milk (about) 2 tbsp melted butter 2 qts str",
+      "url": "https://www.atlasobscura.com/foods/joans-strawberry-short-cakes",
+      "source": "Atlas Obscura",
+      "timestamp": 1774872900000,
+      "engagement": {
+        "votes": 14,
+        "comments": 3
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-429807784",
+      "title": "A Puerto Rico Government Agency Exposed 1 Million Social Security Numbers",
+      "excerpt": "The post A Puerto Rico Government Agency Exposed 1 Million Social Security Numbers appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/puerto-rico-crim-data-breach",
+      "source": "ProPublica",
+      "timestamp": 1783587600000,
+      "engagement": {
+        "votes": 46,
+        "comments": 89
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 191.32
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1244384352",
+      "title": "Top Legal Adviser to Joint Chiefs Is Stepping Down Nearly a Year Before Completing Term",
+      "excerpt": "The post Top Legal Adviser to Joint Chiefs Is Stepping Down Nearly a Year Before Completing Term appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/eric-widmar-retiring-joint-chiefs-legal-adviser",
+      "source": "ProPublica",
+      "timestamp": 1783549500000,
+      "engagement": {
+        "votes": 50,
+        "comments": 14
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 54.34
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1653753817",
+      "title": "Wall Street Wants to Change the Rules for Your 401(k). It Could Put Your Retirement at Risk.",
+      "excerpt": "The post Wall Street Wants to Change the Rules for Your 401(k). It Could Put Your Retirement at Risk. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/401k-retirement-investment-plan-risk-trump",
+      "source": "ProPublica",
+      "timestamp": 1783504800000,
+      "engagement": {
+        "votes": 325,
+        "comments": 83
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 269.31
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1816998691",
+      "title": "Have a 401(k)? Help ProPublica Investigate What’s Really Happening to Your Money.",
+      "excerpt": "The post Have a 401(k)? Help ProPublica Investigate What’s Really Happening to Your Money. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/getinvolved/share-401k-fees-retirement-investment",
+      "source": "ProPublica",
+      "timestamp": 1783504500000,
+      "engagement": {
+        "votes": 373,
+        "comments": 48
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.68,
+        "engagement": 256.84
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1626395238",
+      "title": "Washington Law Says to Alert the Public When Doctors Are Accused of Misconduct. It Can Take Months.",
+      "excerpt": "The post Washington Law Says to Alert the Public When Doctors Are Accused of Misconduct. It Can Take Months. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/washington-doctor-misconduct-failed-disclosure",
+      "source": "ProPublica",
+      "timestamp": 1783501200000,
+      "engagement": {
+        "votes": 183,
+        "comments": 36
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 137.2
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1616422091",
+      "title": "Ken Paxton Vowed to Crack Down on “Illegal Voting.” He May Have Violated Texas Election Law.",
+      "excerpt": "The post Ken Paxton Vowed to Crack Down on “Illegal Voting.” He May Have Violated Texas Election Law. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/ken-paxton-voter-registration-election-law",
+      "source": "ProPublica",
+      "timestamp": 1783445400000,
+      "engagement": {
+        "votes": 109,
+        "comments": 66
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 96.21
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2061826481",
+      "title": "The First Major Overhaul of Public Lands Grazing Regulations in a Generation Looks to Cut Out Public Involvement",
+      "excerpt": "The post The First Major Overhaul of Public Lands Grazing Regulations in a Generation Looks to Cut Out Public Involvement appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/public-land-livestock-grazing-ranching-access",
+      "source": "ProPublica",
+      "timestamp": 1783414800000,
+      "engagement": {
+        "votes": 169,
+        "comments": 38
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.37,
+        "engagement": 83.04
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1862940675",
+      "title": "Amid Mounting War Casualties, Pete Hegseth “Defunded and Impeded” Efforts to Protect Civilians, Lawmakers Say",
+      "excerpt": "The post Amid Mounting War Casualties, Pete Hegseth “Defunded and Impeded” Efforts to Protect Civilians, Lawmakers Say appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/hegseth-trump-war-civilian-casualties-elizabeth-warren-pentagon",
+      "source": "ProPublica",
+      "timestamp": 1783353600000,
+      "engagement": {
+        "votes": 195,
+        "comments": 61
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 77.45
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-553743098",
+      "title": "These Immigrant Kids Were Once Protected. Under Trump, Their Deportations Have Tripled.",
+      "excerpt": "The post These Immigrant Kids Were Once Protected. Under Trump, Their Deportations Have Tripled. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/unaccompanied-minors-deportations-elder-chavez",
+      "source": "ProPublica",
+      "timestamp": 1783332000000,
+      "engagement": {
+        "votes": 202,
+        "comments": 70
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 74.44
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1502226313",
+      "title": "Left in the Dust: How a Billionaire-Owned Concrete Plant Took Over a Detroit Community",
+      "excerpt": "The post Left in the Dust: How a Billionaire-Owned Concrete Plant Took Over a Detroit Community appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/detroit-kronos-morouns-concrete-neighborhood-takeover",
+      "source": "ProPublica",
+      "timestamp": 1783328400000,
+      "engagement": {
+        "votes": 272,
+        "comments": 22
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 67.47
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-667860142",
+      "title": "“He Didn’t Need to Die.” How an Immigration Detention Center Repeatedly Failed to Address a Mental Health Crisis.",
+      "excerpt": "The post “He Didn’t Need to Die.” How an Immigration Detention Center Repeatedly Failed to Address a Mental Health Crisis. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/camp-east-montana-mental-health-immigration",
+      "source": "ProPublica",
+      "timestamp": 1783069200000,
+      "engagement": {
+        "votes": 251,
+        "comments": 30
+      },
+      "engagementModeled": true,
+      "domain": "health & mind",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.42,
+        "engagement": 16.6
+      },
+      "why": "resists an easy framing — in health & mind",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1131458986",
+      "title": "Massachusetts Set to Extend Statute of Limitations for Rape Cases With DNA Evidence",
+      "excerpt": "The post Massachusetts Set to Extend Statute of Limitations for Rape Cases With DNA Evidence appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/rape-statute-limitations-dna-evidence-massachusetts",
+      "source": "ProPublica",
+      "timestamp": 1783025400000,
+      "engagement": {
+        "votes": 257,
+        "comments": 37
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 13.98
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-445761587",
+      "title": "How Google and AI Nearly Made a Seasoned Reporter Spiral",
+      "excerpt": "The post How Google and AI Nearly Made a Seasoned Reporter Spiral appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/google-ai-reporting",
+      "source": "ProPublica",
+      "timestamp": 1782982800000,
+      "engagement": {
+        "votes": 247,
+        "comments": 27
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 10.12
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1937738445",
+      "title": "A Troubling Milestone: Most Supreme Court Rulings Are Secretive Votes With Little Justification",
+      "excerpt": "The post A Troubling Milestone: Most Supreme Court Rulings Are Secretive Votes With Little Justification appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/supreme-court-shadow-docket-rulings-milestone",
+      "source": "ProPublica",
+      "timestamp": 1782896400000,
+      "engagement": {
+        "votes": 203,
+        "comments": 42
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 6.08
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1990816540",
+      "title": "“That Guy Is Still Out There”",
+      "excerpt": "The post “That Guy Is Still Out There” appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/alice-sebold-anthony-broadwater-rape-exoneration-syracuse",
+      "source": "ProPublica",
+      "timestamp": 1782815400000,
+      "engagement": {
+        "votes": 101,
+        "comments": 41
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 2.51
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-526198616",
+      "title": "To Protect Its Drinking Water, This City Has to Appeal to the Oil Regulators That Put It at Risk",
+      "excerpt": "The post To Protect Its Drinking Water, This City Has to Appeal to the Oil Regulators That Put It at Risk appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/enid-oklahoma-oil-gas-pollution-water-protections",
+      "source": "ProPublica",
+      "timestamp": 1782813600000,
+      "engagement": {
+        "votes": 106,
+        "comments": 24
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.1
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1307102742",
+      "title": "Trump’s DOJ Said Police Reform Was “Factually Unjustified.” A New Report Shows Otherwise.",
+      "excerpt": "The post Trump’s DOJ Said Police Reform Was “Factually Unjustified.” A New Report Shows Otherwise. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/aclu-trump-police-reform-doj-minneapolis-louisville-phoenix-memphis",
+      "source": "ProPublica",
+      "timestamp": 1782811800000,
+      "engagement": {
+        "votes": 55,
+        "comments": 23
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 1.36
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1573982264",
+      "title": "Florida Is Executing Prisoners at a Record Pace, Even as Most of the U.S. Abandons the Death Penalty",
+      "excerpt": "The post Florida Is Executing Prisoners at a Record Pace, Even as Most of the U.S. Abandons the Death Penalty appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/florida-death-penalty-executions-ron-desantis",
+      "source": "ProPublica",
+      "timestamp": 1782810000000,
+      "engagement": {
+        "votes": 77,
+        "comments": 46
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.26
+      },
+      "why": "resists an easy framing — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-547034005",
+      "title": "Louisiana Supreme Court Frees Death Row Prisoner, Calling Evidence Against Him “Scientifically Indefensible”",
+      "excerpt": "The post Louisiana Supreme Court Frees Death Row Prisoner, Calling Evidence Against Him “Scientifically Indefensible” appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/louisiana-death-row-prisoner-freed-jimmie-duncan",
+      "source": "ProPublica",
+      "timestamp": 1782772500000,
+      "engagement": {
+        "votes": 149,
+        "comments": 33
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 2.35
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1254865479",
+      "title": "Native American Tribes Came Together to Secure Their Rights to Colorado River Water. Four States Are Stalling the Deal.",
+      "excerpt": "The post Native American Tribes Came Together to Secure Their Rights to Colorado River Water. Four States Are Stalling the Deal. appeared first on ProPublica .",
+      "url": "https://www.propublica.org/article/colorado-river-basin-water-arizona-native-tribes",
+      "source": "ProPublica",
+      "timestamp": 1782723600000,
+      "engagement": {
+        "votes": 49,
+        "comments": 30
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 0.92
+      },
+      "why": "cuts closer to a frame — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1023860144",
+      "title": "Payloads used to dictate the terms of launch. That&#039;s finally changing.",
+      "excerpt": "\"The Starship Pez dispenser demonstrates very smart industrial design and scale.\"",
+      "url": "https://arstechnica.com/space/2026/07/rocket-developers-used-to-chase-satellite-trends-is-the-inverse-now-true/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783594826000,
+      "engagement": {
+        "votes": 224,
+        "comments": 20
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 234.36
+      },
+      "why": "cuts closer to a frame — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1020718529",
+      "title": "TikTok users don&#039;t have as much agency over their FYPs as they think",
+      "excerpt": "The \"not interested\" feature is your friend, but users must intentionally and constantly curate their FYPs",
+      "url": "https://arstechnica.com/science/2026/07/how-much-control-do-tiktok-users-really-have-over-fyps/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783533649000,
+      "engagement": {
+        "votes": 257,
+        "comments": 69
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 252.8
+      },
+      "why": "same shape, distant field — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1369851103",
+      "title": "Miami-based City Labs achieves a first for commercial nuclear power in space",
+      "excerpt": "\"The BOHR mission serves as a pathfinder for future nuclear-powered spacecraft.\"",
+      "url": "https://arstechnica.com/space/2026/07/miami-based-city-labs-achieves-a-first-for-commercial-nuclear-power-in-space/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783531604000,
+      "engagement": {
+        "votes": 211,
+        "comments": 42
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 186.75
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-836435850",
+      "title": "Ocean rift zone saw spreading happen in a sudden burst",
+      "excerpt": "The crust expands at mid-ocean rifts. But how?",
+      "url": "https://arstechnica.com/science/2026/07/newly-installed-monitoring-system-watched-the-seafloor-spread/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783523378000,
+      "engagement": {
+        "votes": 309,
+        "comments": 84
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 288.97
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1139273900",
+      "title": "US rare earths flow to Asia as domestic demand is slow to emerge",
+      "excerpt": "Miners backed by Trump admin sell to Japan, South Korea despite push to develop domestic supply chain.",
+      "url": "https://arstechnica.com/science/2026/07/us-rare-earths-flow-to-asia-as-domestic-demand-is-slow-to-emerge/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783517170000,
+      "engagement": {
+        "votes": 298,
+        "comments": 55
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 239.1
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-966428658",
+      "title": "Dragonflies maneuver like fighter pilots",
+      "excerpt": "Male dragonflies' dramatic aerial combat maneuvers emerge from relatively simple vision-based rules.",
+      "url": "https://arstechnica.com/science/2026/07/dragonflies-maneuver-like-fighter-pilots/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783439658000,
+      "engagement": {
+        "votes": 162,
+        "comments": 3
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 65.04
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-2022007911",
+      "title": "NRC is (sort of) getting rid of \"as low as reasonably achievable\" standard",
+      "excerpt": "Its issues with current nuclear safety standards are termed semantic, not physical.",
+      "url": "https://arstechnica.com/science/2026/07/nuclear-regulatory-commission-plans-really-minor-changes-to-safety-regs/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783360125000,
+      "engagement": {
+        "votes": 136,
+        "comments": 27
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 48.07
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1367079881",
+      "title": "Katalyst&#039;s satellite rescue mission is now in pursuit of NASA&#039;s Swift",
+      "excerpt": "It will take several weeks for the Link spacecraft to rendezvous with NASA's Swift observatory.",
+      "url": "https://arstechnica.com/space/2026/07/katalysts-satellite-rescue-mission-is-now-in-pursuit-of-nasas-swift/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783358049000,
+      "engagement": {
+        "votes": 293,
+        "comments": 64
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 105.34
+      },
+      "why": "a concrete, specific case — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1693113153",
+      "title": "Chemical accidents rise as Trump administration proposes weakening safety rules",
+      "excerpt": "Chemicals from accidents that injured or killed people increased by nearly 50 percent in recent years.",
+      "url": "https://arstechnica.com/science/2026/07/chemical-accidents-rise-as-trump-administration-proposes-weakening-safety-rules/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783249522000,
+      "engagement": {
+        "votes": 167,
+        "comments": 18
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 28.43
+      },
+      "why": "same shape, distant field — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1575977869",
+      "title": "The missing 500 million: Cosmic bombardment melted Earth&#039;s first crust",
+      "excerpt": "The heat of the Hadean may have come from impacts as well as the interior.",
+      "url": "https://arstechnica.com/science/2026/07/the-missing-500-million-cosmic-bombardment-melted-earths-first-crust/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783248902000,
+      "engagement": {
+        "votes": 139,
+        "comments": 45
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 31.96
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1567127807",
+      "title": "When the ability to smell goes away",
+      "excerpt": "Disturbances in this critical sense are often linked to problems with brain health.",
+      "url": "https://arstechnica.com/science/2026/07/when-the-ability-to-smell-goes-away/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783163071000,
+      "engagement": {
+        "votes": 55,
+        "comments": 28
+      },
+      "engagementModeled": true,
+      "domain": "health & mind",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 9.79
+      },
+      "why": "same shape, distant field — in health & mind",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1058941400",
+      "title": "A martian rock has lots of carbon on it, and it&#039;s not clear why",
+      "excerpt": "Biology could explain the find, but there are other potential explanations.",
+      "url": "https://arstechnica.com/science/2026/07/a-martian-rock-has-lots-of-carbon-on-it-and-its-not-clear-why/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783162841000,
+      "engagement": {
+        "votes": 37,
+        "comments": 17
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 6.25
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1964824855",
+      "title": "Rocket Report: Indian startup nears first launch; SpaceX&#039;s millenary milestone",
+      "excerpt": "NASA awarded Rocket Lab deals for three dedicated launches using the company's Electron rocket.",
+      "url": "https://arstechnica.com/space/2026/07/rocket-report-indian-startup-nears-first-launch-spacexs-millenary-milestone/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783086935000,
+      "engagement": {
+        "votes": 217,
+        "comments": 42
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 17.67
+      },
+      "why": "a concrete, specific case — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-522607514",
+      "title": "Artificial cell manages a few rounds of cell division",
+      "excerpt": "It only works for a few divisions thanks to a lot of added materials.",
+      "url": "https://arstechnica.com/science/2026/07/artificial-cell-manages-a-few-rounds-of-cell-division/",
+      "source": "Ars Technica Science",
+      "timestamp": 1783009283000,
+      "engagement": {
+        "votes": 89,
+        "comments": 25
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 5.39
+      },
+      "why": "cuts closer to a frame — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1805704767",
+      "title": "Editorial: It&#039;s time to step up and have your say for science",
+      "excerpt": "Your comments on a dangerous rule putting politicals in charge of science can matter.",
+      "url": "https://arstechnica.com/science/2026/07/editorial-the-most-important-thing-you-can-do-to-protect-science/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782986427000,
+      "engagement": {
+        "votes": 162,
+        "comments": 47
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 8.78
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-967632490",
+      "title": "US home battery installations hit record high on rising electricity costs",
+      "excerpt": "Record home battery installations unlock options for grids—and AI data centers.",
+      "url": "https://arstechnica.com/science/2026/07/us-home-battery-installations-hit-record-high-in-early-2026/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782933075000,
+      "engagement": {
+        "votes": 146,
+        "comments": 48
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 6.24
+      },
+      "why": "same shape, distant field — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1830383566",
+      "title": "Superworms could replace beetles for cleaning skeletal remains",
+      "excerpt": "An optimal ratio of 10-15 grams of larvae per gram of specimen minimized cleaning time with no bone damage.",
+      "url": "https://arstechnica.com/science/2026/07/museums-could-use-ravenous-superworms-to-clean-skeletons/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782932361000,
+      "engagement": {
+        "votes": 98,
+        "comments": 37
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 4.42
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-295303781",
+      "title": "June research roundup: 6 cool science stories we almost missed",
+      "excerpt": "Also, the science of poop's distinctive shape, boron buckyballs, and the secret to a soccer feint.",
+      "url": "https://arstechnica.com/science/2026/06/june-research-roundup-6-cool-science-stories-we-almost-missed/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782857470000,
+      "engagement": {
+        "votes": 195,
+        "comments": 23
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 4.15
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1667101382",
+      "title": "Florida bans local governments from pursuing net-zero emissions goals",
+      "excerpt": "Gov. Ron DeSantis calls it a crackdown on \"radical climate policies.\"",
+      "url": "https://arstechnica.com/science/2026/06/florida-bans-local-governments-from-pursuing-net-zero-emissions-goals/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782826816000,
+      "engagement": {
+        "votes": 164,
+        "comments": 36
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.5,
+        "engagement": 3.45
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-600264647",
+      "title": "US renewable boom passes key milestone in April",
+      "excerpt": "Small-scale solar helped renewables hit nearly triple coal's generation in the US.",
+      "url": "https://arstechnica.com/science/2026/06/solar-outproduced-coal-in-april-but-not-on-the-grid/",
+      "source": "Ars Technica Science",
+      "timestamp": 1782763950000,
+      "engagement": {
+        "votes": 176,
+        "comments": 14
+      },
+      "engagementModeled": true,
+      "domain": "science",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.32,
+        "engagement": 2.13
+      },
+      "why": "resists an easy framing — in science",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1461959295",
+      "title": "Scientists Just Learned That This Bat Eats Birds Midflight. A Renaissance Painter May Have Known About It Hundreds of Years Ago",
+      "excerpt": "Last fall, scientists reported the first known recordings of greater noctule bats hunting and feasting on songbirds during night flights. But a 17th-century artwork by Jan Brueghel the Elder seems to depict the species flying with feathered prey in its mouth",
+      "url": "https://www.smithsonianmag.com/smart-news/scientists-just-learned-that-this-bat-eats-birds-midflight-a-renaissance-painter-may-have-known-about-it-hundreds-of-years-ago-180989096/",
+      "source": "Smithsonian",
+      "timestamp": 1783613878000,
+      "engagement": {
+        "votes": 263,
+        "comments": 46
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 348.95
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1688111004",
+      "title": "Kazakhstan's Iron Age 'Golden Man' and Other Elite Scythians of Eurasia Inherited Their High Social Status, Ancient DNA Suggests",
+      "excerpt": "Researchers have long wondered whether upper-class members of the ancient nomadic warriors earned their social status through individual achievements or birthright",
+      "url": "https://www.smithsonianmag.com/smart-news/kazakhstans-iron-age-golden-man-and-other-elite-scythians-of-eurasia-inherited-their-high-social-status-ancient-dna-suggests-180989089/",
+      "source": "Smithsonian",
+      "timestamp": 1783613048000,
+      "engagement": {
+        "votes": 102,
+        "comments": 85
+      },
+      "engagementModeled": true,
+      "domain": "society & politics",
+      "moveType": "ground",
+      "slot": "ground",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 266.18
+      },
+      "why": "a concrete, specific case — in society & politics",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1116582344",
+      "title": "Smallpox Scabs That British Doctors Used to Inoculate Patients May Have Introduced the Deadly Disease to Australia, New Research Suggests",
+      "excerpt": "Two new studies find that British colonists arriving via ship in the late 18th century likely introduced smallpox, which devastated Aboriginal communities far more than previously known",
+      "url": "https://www.smithsonianmag.com/smart-news/smallpox-scabs-that-british-doctors-used-to-inoculate-patients-may-have-introduced-the-deadly-disease-to-australia-new-research-suggests-180989093/",
+      "source": "Smithsonian",
+      "timestamp": 1783606476000,
+      "engagement": {
+        "votes": 142,
+        "comments": 36
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 202.19
+      },
+      "why": "cuts closer to a frame — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1384984289",
+      "title": "Take an Exclusive Look at Three Newly Discovered Medieval Shipwrecks in Menorca's 'Cove of Mysteries'",
+      "excerpt": "Meteorological tsunamis likely sank the 13th-century trading vessels, whose cargo included objects from both Christian kingdoms and Moorish communities on the Iberian Peninsula",
+      "url": "https://www.smithsonianmag.com/history/take-an-exclusive-look-at-three-newly-discovered-medieval-shipwrecks-in-menorcas-cove-of-mysteries-180989092/",
+      "source": "Smithsonian",
+      "timestamp": 1783601100000,
+      "engagement": {
+        "votes": 89,
+        "comments": 33
+      },
+      "engagementModeled": true,
+      "domain": "history",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.6,
+        "engagement": 142.3
+      },
+      "why": "resists an easy framing — in history",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-337098163",
+      "title": "New Images Reveal That This Asteroid Is Actually Two Conjoined Space Rocks. They Form a Peanut-Shaped Object Called a 'Contact Binary'",
+      "excerpt": "A flyby conducted by the Japanese spacecraft Hayabusa2 uncovered the asteroid's strange shape. Data gathered by the probe will also help defend the planet against potentially threatening space rocks",
+      "url": "https://www.smithsonianmag.com/smart-news/new-images-reveal-that-this-asteroid-is-actually-two-conjoined-space-rocks-that-form-a-peanut-shaped-object-called-a-contact-binary-180989090/",
+      "source": "Smithsonian",
+      "timestamp": 1783545685000,
+      "engagement": {
+        "votes": 305,
+        "comments": 78
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 314.66
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-485619681",
+      "title": "The City of Boston Discovered One of the Oldest Known Gravestones of a Free Black American, Who Shared a Name With the Massachusetts Capital",
+      "excerpt": "Also known as Sebastian, he died in 1729 and is buried alongside Samuel Adams, John Hancock and Paul Revere. His life tells a story of slavery and freedom in the North before the American Revolution",
+      "url": "https://www.smithsonianmag.com/smart-news/the-city-of-boston-discovered-one-of-the-oldest-known-gravestones-of-a-free-black-american-who-shared-a-name-with-the-massachusetts-capital-180989088/",
+      "source": "Smithsonian",
+      "timestamp": 1783544166000,
+      "engagement": {
+        "votes": 154,
+        "comments": 3
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "complicate",
+      "slot": "complicate",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 108.33
+      },
+      "why": "resists an easy framing — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1771375225",
+      "title": "'Like an Explosion in a Glass Factory': Frank Gehry's Seven-Ton 'Icehenge' Desk That Once Graced a Skyscraper Lobby Is Up for Auction",
+      "excerpt": "Designed for the Inland Steel Building in Chicago, the desk is made from more than a dozen blocks of jagged, green-tinted glass",
+      "url": "https://www.smithsonianmag.com/smart-news/like-an-explosion-in-a-glass-factory-frank-gehrys-seven-ton-icehenge-desk-that-once-graced-a-skyscraper-is-up-for-auction-180989087/",
+      "source": "Smithsonian",
+      "timestamp": 1783535016000,
+      "engagement": {
+        "votes": 124,
+        "comments": 60
+      },
+      "engagementModeled": true,
+      "domain": "arts & culture",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 157.31
+      },
+      "why": "same shape, distant field — in arts & culture",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-700669750",
+      "title": "Did This Duke Poison His Brother? A New DNA Analysis May Solve the Centuries-Old Medici Mystery",
+      "excerpt": "Researchers found evidence of malaria in Francesco I de' Medici's bones, leading them to argue \"with scientific certainty\" that it was disease, not arsenic, that led to his death in 1587",
+      "url": "https://www.smithsonianmag.com/smart-news/did-this-duke-poison-his-brother-a-new-dna-analysis-may-solve-the-centuries-old-medici-mystery-180989086/",
+      "source": "Smithsonian",
+      "timestamp": 1783530302000,
+      "engagement": {
+        "votes": 288,
+        "comments": 5
+      },
+      "engagementModeled": true,
+      "domain": "technology",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.63,
+        "engagement": 187.34
+      },
+      "why": "cuts closer to a frame — in technology",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1975291437",
+      "title": "The Arctic Ocean May Have Passed a Crucial Tipping Point That Could Harm Food Webs and Worsen Climate Change",
+      "excerpt": "Sea ice loss seems to have triggered a decline in the nutrient nitrate, affecting the tiny organisms that form the foundations of marine food chains and absorb atmospheric carbon dioxide, according to a new study",
+      "url": "https://www.smithsonianmag.com/smart-news/the-arctic-ocean-may-have-passed-a-crucial-tipping-point-that-could-harm-food-webs-and-worsen-climate-change-180989083/",
+      "source": "Smithsonian",
+      "timestamp": 1783524966000,
+      "engagement": {
+        "votes": 249,
+        "comments": 33
+      },
+      "engagementModeled": true,
+      "domain": "nature & environment",
+      "moveType": "bridge",
+      "slot": "bridge",
+      "scores": {
+        "bridging": 0.37,
+        "engagement": 192.46
+      },
+      "why": "same shape, distant field — in nature & environment",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    },
+    {
+      "id": "rss-1398434748",
+      "title": "Our Ancestors Loved Shell Trinkets, Just Like Neanderthals. New Research Suggests It's a Sign of Shared Culture Across Species",
+      "excerpt": "Based on artifacts found in a limestone cave on the Mediterranean coast, scientists think the two species might have shared similar survival strategies, stone tool technologies and symbolic traditions",
+      "url": "https://www.smithsonianmag.com/smart-news/our-ancestors-loved-shell-trinkets-just-like-neanderthals-new-research-suggests-its-a-sign-of-shared-culture-across-species-180989085/",
+      "source": "Smithsonian",
+      "timestamp": 1783520816000,
+      "engagement": {
+        "votes": 293,
+        "comments": 87
+      },
+      "engagementModeled": true,
+      "domain": "nature & environment",
+      "moveType": "sharpen",
+      "slot": "sharpen",
+      "scores": {
+        "bridging": 0.55,
+        "engagement": 279.06
+      },
+      "why": "cuts closer to a frame — in nature & environment",
+      "scored_by": "heuristic",
+      "perspectiveAttributes": null
+    }
+  ]
+}

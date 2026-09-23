@@ -1,0 +1,108 @@
+/* Library — a private mirror of the record. */
+.lib-sub { margin: 8px 0 0; color: var(--ink-soft); max-width: 720px; }
+.lib-empty { margin-top: 14px; color: var(--ink-soft); }
+.lib-empty a { color: var(--accent); }
+.lib-toc { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 14px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; }
+.lib-toc a { color: var(--ink-faded); text-decoration: none; }
+.lib-toc a:hover { color: var(--accent); }
+.lib .section { scroll-margin-top: 16px; }
+.lib .section-head h2 { font-size: 22px; }
+.lib-note { font-size: 12.5px; color: var(--ink-faded); margin: 8px 0 0; }
+.lib-small { font-size: 13.5px; margin: 4px 0 0; }
+.lib-tlink { font-family: var(--serif); text-decoration: none; color: var(--ink); }
+.lib-tlink:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.lib-tlink.closed { font-style: italic; color: var(--ink-soft); }
+
+/* mosaic: readable panel list, phones only */
+.lib .ms-exhibit { margin: 0; }
+.lib-panels { display: none; list-style: none; margin: 14px 0 0; padding: 0; }
+.lib-panels li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--rule-soft); }
+.lib-panels .lib-tlink { display: block; font-size: 15.5px; line-height: 1.3; }
+.lib-panel-dot { flex: 0 0 auto; width: 10px; height: 10px; margin-top: 5px; border: 1px solid var(--ink-faded); transform: rotate(45deg); }
+.lib-panel-meta { display: block; font-size: 12.5px; color: var(--ink-faded); margin-top: 2px; }
+
+/* weeks */
+.lib-weeks { position: relative; }
+.lib-wk-row { display: grid; grid-template-columns: minmax(200px, 300px) repeat(16, minmax(0, 1fr)); gap: 3px; align-items: center; cursor: pointer; padding: 3px 0; }
+.lib-wk-row:not(.lib-wk-head):hover .lib-wk-label { color: var(--accent); }
+.lib-wk-head { cursor: default; }
+.lib-wk-month { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faded); white-space: nowrap; overflow: visible; height: 16px; }
+.lib-wk-label { font-family: var(--serif); font-size: 14px; line-height: 1.25; color: var(--ink); text-decoration: none; padding-right: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lib-wk-label.closed { font-style: italic; color: var(--ink-soft); }
+.lib-wk-cell { position: relative; display: block; height: 30px; border-radius: 2px; background: transparent; border: 1px solid var(--rule-soft); }
+.lib-wk-cell.t1 { background: #cdd2b9; border-color: #c2c8ab; }
+.lib-wk-cell.t2 { background: #9aa385; border-color: #9aa385; }
+.lib-wk-cell.t3 { background: #6b7559; border-color: #6b7559; }
+.lib-wk-cell.real::after { content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1.5px var(--panel); }
+.lib-wk-cell.shut::before { content: ""; position: absolute; right: -1px; top: -1px; bottom: -1px; width: 3px; background: var(--gold); border-radius: 0 2px 2px 0; }
+.lib-wk-row:not(.lib-wk-head) .lib-wk-cell:hover { outline: 1.5px solid var(--ink); outline-offset: 0; }
+.lib-tip { position: absolute; transform: translate(-50%, calc(-100% - 8px)); z-index: 5; width: 220px; background: var(--ink); color: #f5f0e6; padding: 8px 10px; border-radius: 3px; font-size: 12.5px; line-height: 1.45; pointer-events: none; }
+.lib-tip-week { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.lib-tip-title { font-family: var(--serif); font-size: 13px; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lib-wk-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 12.5px; color: var(--ink-soft); }
+.lib-wk-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lib-wk-legend .lib-wk-cell { display: inline-block; width: 18px; height: 14px; }
+.lib-wk-legend .lib-wk-cell.real::after { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; }
+
+/* how you move */
+.lib-move { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 44px; }
+.lib-h { font-family: var(--serif); font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+.lib-lead { margin: 0 0 10px; color: var(--ink-soft); font-size: 14.5px; }
+.lib-mini { margin: 10px 0 4px; }
+.lib-slots { display: grid; gap: 6px; }
+.lib-slot-row { display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; align-items: center; }
+.lib-slot-bar { display: flex; gap: 2px; height: 12px; }
+.lib-slot-bar i { display: block; height: 100%; border-radius: 1px; }
+.lib-slot-bar i.m { background: var(--slot-color); }
+.lib-slot-bar i.n { background: var(--rule); }
+.lib-slot-bar i.c { background: repeating-linear-gradient(135deg, var(--ink-faded) 0 1.5px, transparent 1.5px 4px); border: 1px solid var(--ink-faded); }
+.lib-slot-nums { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+.lib-plain { list-style: none; margin: 0; padding: 0; }
+.lib-plain li { padding: 3px 0; font-size: 14px; }
+.lib-rec + .lib-rec { margin-top: 8px; }
+.lib-corr { list-style: none; margin: 0; padding: 0; }
+.lib-corr li { display: grid; grid-template-columns: 72px 1fr; gap: 10px; padding: 6px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; }
+.lib-corr-kind { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); padding-top: 3px; }
+.lib-corr-kind.k-rejected { color: var(--accent); }
+.lib-corr-text { display: block; }
+.lib-corr-thread { display: block; font-size: 12.5px; color: var(--ink-faded); margin-top: 1px; }
+
+/* kept */
+.lib-filter { display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.lib-filter button { border: none; background: var(--panel); padding: 4px 10px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; }
+.lib-filter button + button { border-left: 1px solid var(--rule); }
+.lib-filter button.on { background: var(--ink); color: var(--bg); }
+.lib-kept-group { margin-bottom: 18px; }
+.lib-kept-thread { display: block; font-size: 16.5px; margin-bottom: 4px; }
+.lib-kept-list { list-style: none; margin: 0; padding: 0; }
+.lib-kept-list li { display: grid; grid-template-columns: 96px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--rule-soft); }
+.lib-kept-list .slot-tag { padding-top: 3px; }
+.lib-kept-title { color: var(--ink); font-weight: 500; text-underline-offset: 3px; }
+.lib-kept-title:hover { color: var(--accent); }
+.lib-kept-src { font-size: 13px; color: var(--ink-faded); }
+.lib-kept-note { margin: 4px 0 0; padding-left: 10px; border-left: 2px solid var(--rule); font-size: 14px; color: var(--ink-soft); }
+
+/* closed */
+.lib-closed { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.lib-closed-card { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.lib-closed-q { font-family: var(--serif); font-size: 19px; line-height: 1.3; color: var(--ink); text-decoration: none; }
+.lib-closed-q:hover { color: var(--accent); }
+.lib-closed-began { margin: 0; font-size: 13.5px; color: var(--ink-faded); }
+.lib-closed-began .label { margin-right: 4px; }
+.lib-synth { margin: 0; padding-left: 12px; border-left: 2px solid var(--gold); font-family: var(--serif); font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+
+@media (max-width: 760px) {
+  .lib-panels { display: block; }
+  .lib .ms-legend { grid-template-columns: 1fr; }
+  .lib-wk-row { grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 2px; }
+  .lib-wk-label { grid-column: 1 / -1; padding: 8px 0 3px; -webkit-line-clamp: 2; }
+  .lib-wk-head .lib-wk-label { display: none; }
+  .lib-wk-month { font-size: 8.5px; letter-spacing: 0; }
+  .lib-wk-cell { height: 22px; }
+  .lib-move { grid-template-columns: 1fr; }
+  .lib-slot-row { grid-template-columns: 78px 1fr; }
+  .lib-slot-nums { grid-column: 1 / -1; margin-top: -2px; }
+  .lib-kept-list li { grid-template-columns: 1fr; gap: 2px; }
+  .lib-closed { grid-template-columns: 1fr; }
+  .lib .section-head { flex-wrap: wrap; }
+}
