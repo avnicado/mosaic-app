@@ -9,7 +9,7 @@ import * as A from '../../data/actions.js';
 import { useRecord, useBusy } from '../../data/hooks.js';
 import { SLOTS } from '../../engine/prompts.js';
 import { SlotTag, Spinner, timeAgo, hostOf } from '../kit.jsx';
-import { Icon, MediaChip, OpenButton } from '../icons.jsx';
+import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
 import { go, threadPath } from '../router.js';
 import ItemCard, { SkeletonCard, FailedCard, EmptySlotCard, NoteList } from '../thread/ItemCard.jsx';
 import Reading from '../thread/Reading.jsx';
@@ -259,7 +259,7 @@ function Kept({ items }) {
                 <SlotTag slot={i.slot} />
                 <button className="th-keep on small" title="Unkeep" onClick={() => A.toggleKeep(i.id)}><Icon name="kept" size={14} /></button>
               </div>
-              <a className="th-kept-title" href={i.url} target="_blank" rel="noopener noreferrer" onClick={() => A.markOpened(i.id)}>{i.title}</a>
+              <a className="th-kept-title" href={i.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(i, () => A.markOpened(i.id))}>{i.title}</a>
               <div className="th-kept-src">{[i.source || hostOf(i.url), fmtDate(i.createdAt)].filter(Boolean).join(' · ')}</div>
               <NoteList item={i} />
               <OpenButton item={i} compact onOpen={() => A.markOpened(i.id)} />

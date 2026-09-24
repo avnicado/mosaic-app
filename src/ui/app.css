@@ -152,3 +152,11 @@ textarea.field.serif { font-family: var(--serif); font-size: 18px; }
 .side-link.active .ic, .side-link:hover .ic { color: var(--ink); }
 .btn .ic { margin-right: 2px; }
 .slot-tag .slot-ic { --icon-accent: var(--slot-color, var(--ink-soft)); }
+
+.open-pair { display: inline-flex; align-items: stretch; max-width: 100%; }
+.open-pair .open-btn { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.open-site { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--fam) 28%, transparent); border-left: none;
+  border-radius: 0 3px 3px 0; color: var(--ink-faded); text-decoration: none; font-size: 12.5px; background: var(--panel); min-width: 0; }
+.open-site span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.open-site:hover { color: var(--ink); background: var(--highlight); }
+.open-pair.compact .open-site { padding: 0 7px; }

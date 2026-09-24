@@ -4,6 +4,7 @@
 // mic head). The solid piece takes --icon-accent, so a media chip can tint it.
 import React from 'react';
 import { mediaInfo } from '../media.js';
+import { openReader } from './reader/store.js';
 
 const c = (cx, cy, r) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0z`;
 
@@ -102,19 +103,41 @@ export function MediaChip({ type, url, label = false, size = 15 }) {
   );
 }
 
-// The clear way into an item: "Watch on youtube.com", "Read on aeon.co".
+// A record item (has a session) opens with its ✦ / keep controls in the reader.
+const readerTarget = (item) => (item.id && item.sessionId
+  ? { itemId: item.id }
+  : { url: item.url, title: item.title, source: item.source, mediaType: item.mediaType, why: item.why, preview: item.preview || item.excerpt });
+
+// Open an item in the Mosaic reader. For links: a plain click opens the
+// reader; cmd/ctrl/shift/middle-click keeps the browser's "open in new tab".
+export function readerClick(item, after) {
+  return (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+    e.preventDefault();
+    openReader(readerTarget(item));
+    after?.();
+  };
+}
+
+// The clear way into an item: "Watch", "Read", "Listen" opens it inside
+// Mosaic; the small arrow beside it goes to the original site.
 export function OpenButton({ item, onOpen, compact = false }) {
   const m = mediaInfo(item.mediaType, item.url);
   let host = '';
   try { host = new URL(item.url).hostname.replace(/^www\./, ''); } catch { /* no url */ }
   if (!item.url) return null;
   return (
-    <a className={`open-btn fam-${m.family} ${compact ? 'compact' : ''}`} href={item.url} target="_blank" rel="noopener noreferrer"
-      onClick={onOpen} title={`${m.verb}: ${item.title || item.url}`}>
-      <Icon name={m.type} size={compact ? 14 : 16} />
-      <span className="open-verb">{m.verb}</span>
-      {!compact && host && <span className="open-host">on {host}</span>}
-      <Icon name="open" size={compact ? 12 : 13} className="open-ext" />
-    </a>
+    <span className={`open-pair fam-${m.family} ${compact ? 'compact' : ''}`}>
+      <a className={`open-btn fam-${m.family} ${compact ? 'compact' : ''}`} href={item.url} target="_blank" rel="noopener noreferrer"
+        onClick={readerClick(item, onOpen)} title={`${m.verb} in Mosaic: ${item.title || item.url}`}>
+        <Icon name={m.type} size={compact ? 14 : 16} />
+        <span className="open-verb">{m.verb}</span>
+        {!compact && <span className="open-host">in Mosaic</span>}
+      </a>
+      <a className="open-site" href={item.url} target="_blank" rel="noopener noreferrer" onClick={onOpen}
+        title={`Open on ${host || 'the site'}`} aria-label={`Open on ${host || 'the site'}`}>
+        <Icon name="open" size={compact ? 12 : 14} />{!compact && host && <span>{host}</span>}
+      </a>
+    </span>
   );
 }

@@ -4,7 +4,7 @@ import { useRecord } from '../../data/hooks.js';
 import { go, threadPath } from '../router.js';
 import { SlotTag, hostOf, timeAgo } from '../kit.jsx';
 import ReadingMosaic from '../mosaic/ReadingMosaic.jsx';
-import { MediaChip, OpenButton, Icon } from '../icons.jsx';
+import { MediaChip, OpenButton, Icon, readerClick } from '../icons.jsx';
 import {
   snapshot, weekGrid, slotSignals, recurring, corrections, verdicts,
   SLOT_ORDER, joinWords, cap, fmtDate,
@@ -347,7 +347,7 @@ function KeptSection({ threads, items }) {
                   <MediaChip type={i.mediaType} url={i.url} />
                   <div className="lib-kept-body">
                     {i.url
-                      ? <a className="lib-kept-title" href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>
+                      ? <a className="lib-kept-title" href={i.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(i)}>{i.title}</a>
                       : <span className="lib-kept-title">{i.title}</span>}
                     <span className="lib-kept-src"> · {i.source || hostOf(i.url)} · <SlotTag slot={i.slot} />{i.signal === 'moved' && <> · <Icon name="moved" size={11} style={{ color: 'var(--accent)' }} /></>}</span>
                     <div className="lib-kept-open"><OpenButton item={i} compact /></div>

@@ -2,7 +2,7 @@
 import '../pages/promenade.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { SlotTag, hostOf } from '../kit.jsx';
-import { MediaChip, OpenButton } from '../icons.jsx';
+import { MediaChip, OpenButton, readerClick } from '../icons.jsx';
 import { go, threadPath } from '../router.js';
 import { holdItem } from '../../data/actions.js';
 import { useRecord } from '../../data/hooks.js';
@@ -36,7 +36,7 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
       </div>
       <h3 className="pm-title">
         {card.url
-          ? <a href={card.url} target="_blank" rel="noopener noreferrer">{card.title}</a>
+          ? <a href={card.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(card)}>{card.title}</a>
           : card.title}
       </h3>
       {source && <div className="pm-source">{source}</div>}

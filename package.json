@@ -11,6 +11,9 @@
     "engine-smoke": "node scripts/engine-smoke.mjs"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "dompurify": "^3.4.16",
+    "linkedom": "^0.18.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "vercel": "^59.26.0"

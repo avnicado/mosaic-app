@@ -4,7 +4,7 @@ import React from 'react';
 import * as R from '../../data/record.js';
 import { SlotTag } from '../kit.jsx';
 import { threadPath } from '../router.js';
-import { Icon, MediaChip } from '../icons.jsx';
+import { Icon, MediaChip, readerClick } from '../icons.jsx';
 
 const fmtDate = (ts) => {
   const d = new Date(ts);
@@ -36,7 +36,7 @@ function SignalledItems({ items }) {
       <span className="th-tl-glyph"><Icon name={glyph} size={12} /></span>
       <MediaChip type={i.mediaType} url={i.url} size={13} />
       <SlotTag slot={i.slot} />
-      <a href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>
+      <a href={i.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(i)}>{i.title}</a>
       {i.replacedBy && <span className="th-tl-swapped">swapped out</span>}
     </li>
   );

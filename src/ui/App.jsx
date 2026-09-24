@@ -13,6 +13,7 @@ import SharedThread from './pages/SharedThread.jsx';
 import { startSharing, subscribeShared, getSharedVersion, getOthers } from '../data/sharing.js';
 import { getSessionInfo } from '../session.js';
 import { Icon } from './icons.jsx';
+import Reader from './reader/Reader.jsx';
 
 function Sidebar({ route, onNavigate }) {
   const [showClosed, setShowClosed] = useState(false);
@@ -122,6 +123,7 @@ export default function App() {
         </header>
         {page}
       </div>
+      <Reader />
     </div>
   );
 }

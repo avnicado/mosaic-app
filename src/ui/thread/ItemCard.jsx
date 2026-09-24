@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import * as A from '../../data/actions.js';
 import { SlotTag, Spinner, hostOf, RATING_AXES } from '../kit.jsx';
 import { go, threadPath } from '../router.js';
-import { Icon, MediaChip, OpenButton } from '../icons.jsx';
+import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
 import { mediaInfo } from '../../media.js';
 
 const SIGNALS = [
@@ -97,7 +97,7 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
         {item.openedAt ? <span className="th-opened">opened {new Date(item.openedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span> : null}
       </div>
       <h3 className="th-card-title">
-        <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => A.markOpened(item.id)}>{item.title}</a>
+        <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(item, () => A.markOpened(item.id))}>{item.title}</a>
       </h3>
       <div className="th-card-src">
         {[item.source, host && host !== (item.source || '').toLowerCase() ? host : null].filter(Boolean).join(' · ')}
