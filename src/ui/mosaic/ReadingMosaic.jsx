@@ -159,7 +159,7 @@ function Legend({ model }) {
           <path d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z" fill={tessera(hue, KINDS.read.t, 0)} stroke="rgba(38,30,20,0.45)" strokeWidth="1" strokeLinejoin="round" />
           <path d="M5,19 L34,19 L27,31 L11,31 Z" fill="url(#rm-lg-tx)" />
         </svg></span>
-        <span><b>Hatching or stipple</b>: how much of it you finished, filled from the bottom. Textured edge to edge: finished (85% played, or read to the end at a reading pace for how dense it is). No texture: not tracked.</span></div>
+        <span><b>Hatching or stipple</b>: how much of it you finished, filled from the bottom. A narrow band: started. Textured edge to edge: finished (85% played, or read to the end at a reading pace for how dense it is). No texture: not tracked.</span></div>
       <div className="rm-legend-row"><span className="rm-swatch rm-swatch-ic"><Icon name="video" size={16} /></span>
         <span><b>Icon in a stone</b>: what the item is (article, video, podcast…).</span></div>
       <p className="rm-key">One stone per item, one panel per field; the hue is the field's. Stones on the same topic are laid side by side.</p>

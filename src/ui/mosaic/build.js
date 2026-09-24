@@ -52,6 +52,24 @@ function texturePattern(id, type, r, ink) {
   return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${f(s)}" height="${f(s)}" patternTransform="rotate(${angle})">${body}</pattern>`;
 }
 
+// Any item you started shows at least this share of its stone, so a few
+// minutes of a long piece still reads as begun; above it, fill is linear.
+const STARTED = 0.15;
+const areaOf = (poly) => Math.abs(poly.reduce((n, a, i) => { const b = poly[(i + 1) % poly.length]; return n + a[0] * b[1] - b[0] * a[1]; }, 0)) / 2;
+// The part of the stone below a level line, cut so it holds `share` of the
+// stone's area (stones narrow toward the bottom, so height would under-fill).
+function fillFromBottom(face, share) {
+  const ys = face.map((pt) => pt[1]);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  const total = areaOf(face);
+  const below = (y) => clipHalfPlane(face, [0, y], [0, -1]);
+  for (let k = 0; k < 18; k++) {
+    const mid = (lo + hi) / 2;
+    if (areaOf(below(mid)) / total > share) lo = mid; else hi = mid;
+  }
+  return below((lo + hi) / 2);
+}
+
 export function buildReadingMosaic({ fields, links }) {
   if (!fields.length) return '';
   const rand = mulberry32(hashStr(fields.map((f) => f.name).join('|')) || 7);
@@ -251,10 +269,8 @@ export function buildReadingMosaic({ fields, links }) {
         const pid = `rm-tx-${patterns.length}`;
         const ink = dark ? 'rgba(255,248,236,0.62)' : 'rgba(38,28,16,0.5)';
         patterns.push(texturePattern(pid, TEXTURES[Math.floor(tr() * TEXTURES.length)], tr, ink));
-        const ys = face.map((pt) => pt[1]);
-        const top = Math.min(...ys), bot = Math.max(...ys);
-        const level = p.fill.done ? 1 : Math.max(0.08, p.fill.level);
-        const part = level >= 1 ? face : clipHalfPlane(face, [0, bot - (bot - top) * level], [0, -1]);
+        const share = p.fill.done ? 1 : STARTED + (1 - STARTED) * p.fill.level;
+        const part = share >= 1 ? face : fillFromBottom(face, share);
         if (part.length >= 3) texture = `<path class="rm-tx" d="${pathOf(part)}" fill="url(#${pid})"/>`;
       }
       tiles.push(open +
