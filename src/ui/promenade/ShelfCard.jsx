@@ -2,6 +2,7 @@
 import '../pages/promenade.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { SlotTag, hostOf } from '../kit.jsx';
+import { MediaChip, OpenButton } from '../icons.jsx';
 import { go, threadPath } from '../router.js';
 import { holdItem } from '../../data/actions.js';
 import { useRecord } from '../../data/hooks.js';
@@ -30,11 +31,12 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
     <article className={`pm-card ${compact ? 'compact' : ''} ${card.editorial ? 'editorial' : ''}`}>
       <div className="pm-card-top">
         <SlotTag slot={card.slot} />
+        {card.url && <MediaChip type={card.mediaType} url={card.url} size={13} />}
         <span className="pm-domain">{card.domain}</span>
       </div>
       <h3 className="pm-title">
         {card.url
-          ? <a href={card.url} target="_blank" rel="noopener noreferrer">{card.title}<span className="pm-ext" aria-hidden>↗</span></a>
+          ? <a href={card.url} target="_blank" rel="noopener noreferrer">{card.title}</a>
           : card.title}
       </h3>
       {source && <div className="pm-source">{source}</div>}
@@ -44,6 +46,7 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
         <div className="pm-dev">bridging {card.scores.bridging} · engagement {card.scores.engagement} · {card.scored_by}{card.tieBrokenByEngagement ? ' · tie-broken' : ''}</div>
       )}
       <div className="pm-foot">
+        {card.url && <OpenButton item={card} compact />}
         {heldBy ? (
           <a className="pm-held" href={'#' + threadPath(heldBy.id)}>You hold this <span className="pm-held-q">— {heldBy.text}</span> →</a>
         ) : compact ? (

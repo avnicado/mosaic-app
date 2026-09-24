@@ -5,11 +5,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import * as A from '../../data/actions.js';
 import { SlotTag, Spinner, hostOf, RATING_AXES } from '../kit.jsx';
 import { go, threadPath } from '../router.js';
+import { Icon, MediaChip, OpenButton } from '../icons.jsx';
+import { mediaInfo } from '../../media.js';
 
 const SIGNALS = [
-  { key: 'moved', glyph: '✦', label: 'moved me' },
-  { key: 'neutral', glyph: '○', label: 'neutral' },
-  { key: 'closed', glyph: '–', label: 'closed it down' },
+  { key: 'moved', label: 'moved me' },
+  { key: 'neutral', label: 'neutral' },
+  { key: 'closed', label: 'closed it down' },
 ];
 
 export function Provenance({ item }) {
@@ -54,7 +56,7 @@ export function NoteList({ item }) {
       {item.notes.map((n) => (
         <li key={n.at}>
           <span className="th-note-text">{n.text}</span>
-          <button className="th-x" title="Remove this note" onClick={() => A.removeNote(item.id, n.at)}>✕</button>
+          <button className="th-x" title="Remove this note" onClick={() => A.removeNote(item.id, n.at)}><Icon name="x" size={12} /></button>
         </li>
       ))}
     </ul>
@@ -86,18 +88,24 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
         <SlotTag slot={item.slot} blurb />
         <button className={`th-keep ${item.kept ? 'on' : ''}`} onClick={() => A.toggleKeep(item.id)}
           title={item.kept ? 'Kept — click to unkeep' : 'Keep this item'} aria-pressed={!!item.kept}>
-          {item.kept ? '★' : '☆'}<span className="th-keep-l">{item.kept ? 'Kept' : 'Keep'}</span>
+          <Icon name={item.kept ? 'kept' : 'keep'} size={15} /><span className="th-keep-l">{item.kept ? 'Kept' : 'Keep'}</span>
         </button>
       </header>
 
+      <div className="th-card-kind">
+        <MediaChip type={item.mediaType} url={item.url} label />
+        {item.openedAt ? <span className="th-opened">opened {new Date(item.openedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span> : null}
+      </div>
       <h3 className="th-card-title">
         <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => A.markOpened(item.id)}>{item.title}</a>
       </h3>
       <div className="th-card-src">
-        {[item.source, host && host !== (item.source || '').toLowerCase() ? host : null, item.mediaType].filter(Boolean).join(' · ')}
-        {item.openedAt ? <span className="th-opened"> · opened</span> : null}
+        {[item.source, host && host !== (item.source || '').toLowerCase() ? host : null].filter(Boolean).join(' · ')}
       </div>
       {item.preview && <p className="th-card-preview">{item.preview}</p>}
+      <div className="th-card-open">
+        <OpenButton item={item} onOpen={() => A.markOpened(item.id)} />
+      </div>
       <div className="th-why"><span className="th-why-l">Why here</span>{item.why}</div>
       <div className="th-card-prov"><Provenance item={item} /></div>
 
@@ -105,7 +113,7 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
         {SIGNALS.map((s) => (
           <button key={s.key} className={`th-sig th-sig-${s.key} ${item.signal === s.key ? 'on' : ''}`}
             aria-pressed={item.signal === s.key} onClick={() => A.setSignal(item.id, s.key)}>
-            <span className="th-sig-g">{s.glyph}</span> {s.label}
+            <Icon name={s.key} size={13} className="th-sig-g" /> {s.label}
           </button>
         ))}
       </div>
@@ -118,11 +126,11 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
       )}
 
       <div className="th-actions">
-        <button className={`th-act ${panel === 'note' ? 'on' : ''}`} onClick={() => toggle('note')}>Note</button>
-        {ratingsOn && <button className={`th-act ${panel === 'rate' ? 'on' : ''}`} onClick={() => toggle('rate')}>Rate</button>}
-        {!threadClosed && <button className="th-act" disabled={replacing} onClick={() => A.replaceItem(item.id)} title="Swap in a different item for this slot">↻ Different item</button>}
+        <button className={`th-act ${panel === 'note' ? 'on' : ''}`} onClick={() => toggle('note')}><Icon name="note" size={14} /> Note</button>
+        {ratingsOn && <button className={`th-act ${panel === 'rate' ? 'on' : ''}`} onClick={() => toggle('rate')}><Icon name="rate" size={14} /> Rate</button>}
+        {!threadClosed && <button className="th-act" disabled={replacing} onClick={() => A.replaceItem(item.id)} title="Swap in a different item for this slot"><Icon name="swap" size={14} /> Different item</button>}
         <span className="th-act-spacer" />
-        <button className={`th-act th-pursue ${panel === 'pursue' ? 'on' : ''}`} onClick={() => toggle('pursue')} title="Start a new thread from this item">Pursue →</button>
+        <button className={`th-act th-pursue ${panel === 'pursue' ? 'on' : ''}`} onClick={() => toggle('pursue')} title="Start a new thread from this item"><Icon name="pursue" size={14} /> Pursue</button>
       </div>
 
       {panel === 'note' && (

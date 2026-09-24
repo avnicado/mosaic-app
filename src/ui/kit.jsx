@@ -1,11 +1,12 @@
 // Small shared UI pieces.
 import React from 'react';
 import { SLOT_BLURB } from '../engine/prompts.js';
+import { Icon } from './icons.jsx';
 
 export function SlotTag({ slot, blurb = false }) {
   return (
     <span className={`slot-tag slot-${slot}`}>
-      {slot}{blurb && SLOT_BLURB[slot] ? <span className="muted" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--sans)', fontStyle: 'italic', marginLeft: 8 }}>{SLOT_BLURB[slot]}</span> : null}
+      <Icon name={slot} size={13} className="slot-ic" />{slot}{blurb && SLOT_BLURB[slot] ? <span className="muted" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--sans)', fontStyle: 'italic', marginLeft: 8 }}>{SLOT_BLURB[slot]}</span> : null}
     </span>
   );
 }

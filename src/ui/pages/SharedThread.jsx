@@ -4,6 +4,7 @@ import { subscribeShared, getSharedVersion, getOthers, othersReady } from '../..
 import { Verdict, Moves } from '../thread/Timeline.jsx';
 import { SlotTag, timeAgo, hostOf } from '../kit.jsx';
 import { go } from '../router.js';
+import { Icon, MediaChip, OpenButton } from '../icons.jsx';
 
 const fmtDate = (ts) => new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -65,7 +66,7 @@ export default function SharedThread({ userId, id }) {
                       <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0' }}>
                         {ss.items.map((it, k) => (
                           <li key={k} style={{ fontSize: 14, margin: '3px 0' }}>
-                            <span style={{ color: it.signal === 'moved' ? 'var(--accent)' : 'var(--ink-faded)', marginRight: 8 }}>{it.signal === 'moved' ? '✦' : '–'}</span>
+                            <span style={{ color: it.signal === 'moved' ? 'var(--accent)' : 'var(--ink-faded)', marginRight: 8 }}><Icon name={it.signal === 'moved' ? 'moved' : 'closed'} size={12} /></span><MediaChip type={it.mediaType} url={it.url} size={13} />{' '}
                             <SlotTag slot={it.slot} />{' '}
                             <a href={it.url} target="_blank" rel="noreferrer">{it.title}</a>
                           </li>
@@ -96,7 +97,8 @@ export default function SharedThread({ userId, id }) {
               <div key={i} style={{ margin: '0 0 14px' }}>
                 <SlotTag slot={k.slot} />
                 <div className="serif" style={{ fontSize: 15.5, lineHeight: 1.3, margin: '3px 0 2px' }}><a href={k.url} target="_blank" rel="noreferrer">{k.title}</a></div>
-                <div className="muted" style={{ fontSize: 12.5 }}>{k.source || hostOf(k.url)}</div>
+                <div className="muted" style={{ fontSize: 12.5, marginBottom: 6 }}>{k.source || hostOf(k.url)}</div>
+                <OpenButton item={k} compact />
                 {(k.notes || []).map((n, j) => <p key={j} style={{ fontSize: 13.5, margin: '4px 0 0', paddingLeft: 10, borderLeft: '2px solid var(--rule)' }}>{n}</p>)}
               </div>
             ))}

@@ -4,6 +4,7 @@ import React from 'react';
 import * as R from '../../data/record.js';
 import { SlotTag } from '../kit.jsx';
 import { threadPath } from '../router.js';
+import { Icon, MediaChip } from '../icons.jsx';
 
 const fmtDate = (ts) => {
   const d = new Date(ts);
@@ -32,13 +33,14 @@ function SignalledItems({ items }) {
   if (!moved.length && !closed.length) return null;
   const row = (i, glyph) => (
     <li key={i.id} className={`slot-${i.slot}`}>
-      <span className="th-tl-glyph">{glyph}</span>
+      <span className="th-tl-glyph"><Icon name={glyph} size={12} /></span>
+      <MediaChip type={i.mediaType} url={i.url} size={13} />
       <SlotTag slot={i.slot} />
       <a href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>
       {i.replacedBy && <span className="th-tl-swapped">swapped out</span>}
     </li>
   );
-  return <ul className="th-tl-items">{moved.map((i) => row(i, '✦'))}{closed.map((i) => row(i, '–'))}</ul>;
+  return <ul className="th-tl-items">{moved.map((i) => row(i, 'moved'))}{closed.map((i) => row(i, 'closed'))}</ul>;
 }
 
 function Entry({ at, kind, children }) {

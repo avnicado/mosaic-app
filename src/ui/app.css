@@ -39,7 +39,8 @@ input, textarea, select { font: inherit; color: var(--ink); }
 /* ---- sidebar ---- */
 .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid var(--rule); background: var(--bg-deep); display: flex; flex-direction: column; padding: 18px 14px 14px; gap: 6px; }
 .brand { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 21px; text-decoration: none; padding: 2px 8px 10px; display: block; }
-.brand::before { content: "✦ "; color: var(--accent); font-style: normal; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-ic { color: var(--accent); --icon-accent: var(--accent); }
 .side-new { margin: 2px 4px 10px; }
 .side-link { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 4px; text-decoration: none; color: var(--ink-soft); font-size: 14px; }
 .side-link:hover { background: var(--highlight); color: var(--ink); }
@@ -94,7 +95,7 @@ textarea.field.serif { font-family: var(--serif); font-size: 18px; }
 .empty { padding: 28px 0; color: var(--ink-faded); font-style: italic; }
 
 /* ---- slot tags ---- */
-.slot-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--slot-color, var(--ink-soft)); }
+.slot-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--slot-color, var(--ink-soft)); }
 .slot-sharpen { --slot-color: var(--sharpen); }
 .slot-complicate { --slot-color: var(--complicate); }
 .slot-bridge { --slot-color: var(--bridge); }
@@ -117,3 +118,37 @@ textarea.field.serif { font-family: var(--serif); font-size: 18px; }
   .btn { min-height: 40px; }
   .field { font-size: 16px; }
 }
+
+/* ---- icons (see ui/icons.jsx) ---- */
+.ic { flex: 0 0 auto; vertical-align: -0.18em; }
+:root {
+  --fam-read: #8a6a1f;   --fam-read-bg: #f1e5c6;
+  --fam-watch: #3d5875;  --fam-watch-bg: #dde5ee;
+  --fam-listen: #4f5d38; --fam-listen-bg: #e1e8d3;
+  --fam-look: #8f3a2a;   --fam-look-bg: #f2dcd4;
+  --fam-talk: #5b4a78;   --fam-talk-bg: #e6dfef;
+}
+.fam-read { --fam: var(--fam-read); --fam-bg: var(--fam-read-bg); }
+.fam-watch { --fam: var(--fam-watch); --fam-bg: var(--fam-watch-bg); }
+.fam-listen { --fam: var(--fam-listen); --fam-bg: var(--fam-listen-bg); }
+.fam-look { --fam: var(--fam-look); --fam-bg: var(--fam-look-bg); }
+.fam-talk { --fam: var(--fam-talk); --fam-bg: var(--fam-talk-bg); }
+
+/* A media chip is a small cut tile: not a circle, not a square. */
+.mchip { display: inline-flex; align-items: center; gap: 6px; color: var(--fam); vertical-align: middle; }
+.mchip-tile { display: inline-grid; place-items: center; width: 24px; height: 22px; background: var(--fam-bg); color: var(--fam); --icon-accent: var(--fam);
+  clip-path: polygon(8% 12%, 62% 0, 100% 18%, 94% 86%, 40% 100%, 0 78%); }
+.mchip-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* The way into an item. */
+.open-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 10px; border-radius: 3px; text-decoration: none;
+  background: var(--fam-bg); color: var(--fam); border: 1px solid color-mix(in srgb, var(--fam) 28%, transparent); --icon-accent: var(--fam);
+  font-size: 13.5px; font-weight: 600; line-height: 1.2; max-width: 100%; }
+.open-btn:hover { background: var(--fam); color: var(--panel); --icon-accent: var(--panel); }
+.open-btn .open-host { font-weight: 400; opacity: 0.85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.open-btn .open-ext { opacity: 0.7; }
+.open-btn.compact { padding: 3px 8px 3px 7px; font-size: 12px; gap: 5px; }
+.side-link .ic { color: var(--ink-faded); --icon-accent: var(--accent); }
+.side-link.active .ic, .side-link:hover .ic { color: var(--ink); }
+.btn .ic { margin-right: 2px; }
+.slot-tag .slot-ic { --icon-accent: var(--slot-color, var(--ink-soft)); }

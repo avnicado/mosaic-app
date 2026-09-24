@@ -9,6 +9,7 @@ import * as A from '../../data/actions.js';
 import { useRecord, useBusy } from '../../data/hooks.js';
 import { SLOTS } from '../../engine/prompts.js';
 import { SlotTag, Spinner, timeAgo, hostOf } from '../kit.jsx';
+import { Icon, MediaChip, OpenButton } from '../icons.jsx';
 import { go, threadPath } from '../router.js';
 import ItemCard, { SkeletonCard, FailedCard, EmptySlotCard, NoteList } from '../thread/ItemCard.jsx';
 import Reading from '../thread/Reading.jsx';
@@ -198,7 +199,7 @@ function ResultCard({ result, onDismiss }) {
         <span className="label">Session closed</span>
         {diff && <Verdict diff={diff} />}
         <span className="th-spacer" />
-        <button className="th-x" onClick={onDismiss} title="Dismiss">✕</button>
+        <button className="th-x" onClick={onDismiss} title="Dismiss"><Icon name="x" size={13} /></button>
       </div>
       {before && after && before.trim() !== after.trim() ? (
         <div className="th-tl-diff">
@@ -249,17 +250,19 @@ function Kept({ items }) {
   return (
     <section className="th-kept">
       <div className="th-rail-head"><h2 className="th-rail-title">Kept</h2><span className="th-rail-meta">{items.length || ''}</span></div>
-      {!items.length ? <p className="muted th-small">Nothing kept yet. ☆ on an item keeps it here; a note keeps it too.</p> : (
+      {!items.length ? <p className="muted th-small">Nothing kept yet. Keep on an item puts it here; a note keeps it too.</p> : (
         <ul className="th-kept-list">
           {items.map((i) => (
             <li key={i.id} className={`slot-${i.slot}`}>
               <div className="th-kept-top">
+                <MediaChip type={i.mediaType} url={i.url} size={13} />
                 <SlotTag slot={i.slot} />
-                <button className="th-keep on small" title="Unkeep" onClick={() => A.toggleKeep(i.id)}>★</button>
+                <button className="th-keep on small" title="Unkeep" onClick={() => A.toggleKeep(i.id)}><Icon name="kept" size={14} /></button>
               </div>
               <a className="th-kept-title" href={i.url} target="_blank" rel="noopener noreferrer" onClick={() => A.markOpened(i.id)}>{i.title}</a>
               <div className="th-kept-src">{[i.source || hostOf(i.url), fmtDate(i.createdAt)].filter(Boolean).join(' · ')}</div>
               <NoteList item={i} />
+              <OpenButton item={i} compact onOpen={() => A.markOpened(i.id)} />
             </li>
           ))}
         </ul>
@@ -347,7 +350,7 @@ export default function ThreadPage({ id }) {
       {busy.error && (
         <div className="error th-error">
           <span>{busy.error}</span>
-          <button className="th-x" onClick={() => A.clearError(id)} title="Dismiss">✕</button>
+          <button className="th-x" onClick={() => A.clearError(id)} title="Dismiss"><Icon name="x" size={13} /></button>
         </div>
       )}
       <div className="th-layout">

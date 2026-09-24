@@ -4,6 +4,10 @@
 // thread.js → buildContext) feeds every prompt, so a correction made on the
 // thread page shapes the next reading, the next feed, and the movement judgement.
 
+import { MEDIA_TYPES, FIELDS, TAG_FIELDS_SPEC, vocabHint } from '../media.js';
+
+const FIELDS_LIST = FIELDS.join(', ');
+
 export const SLOTS = ['sharpen', 'complicate', 'bridge', 'ground'];
 
 export const clip = (s, n) => {
@@ -150,10 +154,11 @@ Output ONLY valid JSON:
   "title": "the item's actual title (clean up encoding/truncation if needed)",
   "source": "author, publication, channel, or speaker",
   "url": "the chosen candidate's url, verbatim",
-  "mediaType": "one of: video, essay, interview, reddit, film, art, classical, primer, podcast, paper, image",
+  "mediaType": "what the link opens, one of: ${MEDIA_TYPES.join(', ')}",
   "preview": "2-3 sentences giving a vivid sense of what's in the item — match the register",
-  "why": "2-3 sentences: why this item, in this slot, for this thread — honest about imperfect fit"
-}`;
+  "why": "2-3 sentences: why this item, in this slot, for this thread — honest about imperfect fit",
+${TAG_FIELDS_SPEC}
+}${vocabHint(ctx.vocab)}`;
 
 // Last-resort tier: the model proposes a well-known item whose URL must be an
 // English Wikipedia article (enforced in code — see feed.js).
@@ -165,7 +170,23 @@ ${retry ? 'Your previous suggestion was rejected. Propose a DIFFERENT item.' : '
 Propose ONE real, well-known, substantial item that fits this slot — a book, essay, film, talk, or documented case. "url" MUST be its English Wikipedia article: https://en.wikipedia.org/wiki/<Article_Title>. Nothing else is acceptable. ${excludeUrls.length ? 'Already used: ' + excludeUrls.slice(-20).join(', ') : ''}
 
 Output ONLY valid JSON:
-{"title": "", "source": "", "url": "https://en.wikipedia.org/wiki/…", "mediaType": "primer", "preview": "2-3 sentences", "why": "2-3 sentences: why this item, in this slot, for this thread"}`;
+{
+  "title": "", "source": "", "url": "https://en.wikipedia.org/wiki/…", "preview": "2-3 sentences", "why": "2-3 sentences: why this item, in this slot, for this thread",
+${TAG_FIELDS_SPEC}
+}${vocabHint(ctx.vocab)}`;
+
+// Tag items after the fact (records made before items carried a field and
+// topics). items: [{title, source, url, mediaType, preview}] → [{i, field, topics, mediaType}]
+export const tagItemsPrompt = (items, vocab = []) => `Tag each item below for a personal reading record. For each: the ONE broad field it belongs to, 2-4 short topic tags, and what the link opens.
+
+${items.map((it, i) => `${i + 1}. "${clip(it.title, 120)}"${it.source ? ` — ${clip(it.source, 60)}` : ''}\n   ${it.url || ''}\n   ${clip(it.preview, 220)}`).join('\n')}
+
+Rules:
+- "field" is exactly one of: ${FIELDS_LIST}
+- "topics": 2-4 short lowercase subject tags, general enough to recur across different items ('attention', 'game theory', 'grief'). Tag what the item is ABOUT, not its format.
+- "mediaType" is one of: ${MEDIA_TYPES.join(', ')}${vocabHint(vocab)}
+
+Output ONLY valid JSON: {"tags": [{"i": 1, "field": "", "topics": [""], "mediaType": ""}, ...]} — one entry per item, same numbering.`;
 
 export const diffPrompt = ({ before, after, moved = [], closed = [], note = '', kept = [] }) => `A user is holding a question on Mosaic. At the start of this session they put it as:
 

@@ -3,7 +3,8 @@ import * as R from '../../data/record.js';
 import { useRecord } from '../../data/hooks.js';
 import { go, threadPath } from '../router.js';
 import { SlotTag, hostOf, timeAgo } from '../kit.jsx';
-import MosaicView, { profileFromRecord, panelTone } from '../../MosaicView.jsx';
+import ReadingMosaic from '../mosaic/ReadingMosaic.jsx';
+import { MediaChip, OpenButton, Icon } from '../icons.jsx';
 import {
   snapshot, weekGrid, slotSignals, recurring, corrections, verdicts,
   SLOT_ORDER, joinWords, cap, fmtDate,
@@ -46,13 +47,15 @@ export default function Library() {
       </p>
       <nav className="lib-toc" aria-label="On this page">
         <a href="#/library" onClick={(e) => jump(e, 'lib-mosaic')}>Mosaic</a>
+        <a href="#/library" onClick={(e) => jump(e, 'lib-threads')}>Threads</a>
         <a href="#/library" onClick={(e) => jump(e, 'lib-weeks')}>Weeks</a>
         <a href="#/library" onClick={(e) => jump(e, 'lib-move')}>How you move</a>
         <a href="#/library" onClick={(e) => jump(e, 'lib-kept')}>Kept</a>
         {closed.length > 0 && <a href="#/library" onClick={(e) => jump(e, 'lib-closed')}>Closed</a>}
       </nav>
 
-      <MosaicSection threads={threads} sessions={sessions} />
+      <MosaicSection threads={threads} items={items} />
+      <ThreadsSection threads={threads} sessions={sessions} />
       <WeeksSection rec={rec} />
       <MoveSection threads={threads} sessions={sessions} items={items} />
       <KeptSection threads={threads} items={items} />
@@ -67,33 +70,39 @@ function jump(e, id) {
 }
 
 // ---- 1. mosaic -------------------------------------------------------------------
-function MosaicSection({ threads, sessions }) {
-  const profile = useMemo(() => profileFromRecord(threads, sessions), [threads, sessions]);
-  const byId = Object.fromEntries(threads.map((t) => [t.id, t]));
+function MosaicSection({ threads, items }) {
   return (
     <section className="section" id="lib-mosaic">
-      <div className="section-head"><h2>Mosaic</h2><span className="label">one panel per thread</span></div>
-      <MosaicView threads={threads} sessions={sessions} onOpenThread={openThread} compact />
-      {/* On a phone the captions inside the canvas are too small to read. */}
+      <div className="section-head"><h2>Mosaic</h2><span className="label">what you've read and seen</span></div>
+      <ReadingMosaic threads={threads} items={items} />
+    </section>
+  );
+}
+
+// Which threads really moved: one line per thread, real / cosmetic / not judged.
+function ThreadsSection({ threads, sessions }) {
+  const rows = [...threads].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map((t) => {
+    const done = sessions.filter((s) => s.threadId === t.id && s.closedAt);
+    const real = done.filter((s) => s.diff?.verdict === 'real').length;
+    const cos = done.filter((s) => s.diff?.verdict === 'cosmetic').length;
+    return { t, n: done.length, real, cos, un: done.length - real - cos };
+  });
+  return (
+    <section className="section" id="lib-threads">
+      <div className="section-head"><h2>Threads</h2><span className="label">did the question move?</span></div>
       <ul className="lib-panels">
-        {profile.domains.map((d) => {
-          const real = d.cuts.filter((c) => c.kind === 'real').length;
-          const cos = d.cuts.filter((c) => c.kind === 'cosmetic').length;
-          const un = d.cuts.length - real - cos;
-          const t = byId[d.threadId];
-          return (
-            <li key={d.threadId}>
-              <span className="lib-panel-dot" style={{ background: real ? panelTone(d) : 'transparent' }} />
-              <span>
-                <ThreadLink t={t} className={d.closed ? 'closed' : ''} />
-                <span className="lib-panel-meta">
-                  {d.cuts.length ? [real && `${real} real`, cos && `${cos} cosmetic`, un && `${un} not judged`].filter(Boolean).join(' · ') : 'no finished session'}
-                  {d.closed && ' · closed'}{d.dormant && ' · quiet'}
-                </span>
+        {rows.map(({ t, n, real, cos, un }) => (
+          <li key={t.id}>
+            <span className={`lib-panel-dot ${real ? 'real' : ''}`} title={real ? 'really moved at least once' : 'not yet really moved'} />
+            <span>
+              <ThreadLink t={t} className={t.status === 'closed' ? 'closed' : ''} />
+              <span className="lib-panel-meta">
+                {n ? [real && `${real} real`, cos && `${cos} cosmetic`, un && `${un} not judged`].filter(Boolean).join(' · ') : 'no finished session'}
+                {t.status === 'closed' && ' · closed'}{R.isDormant(t) && ' · quiet'}
               </span>
-            </li>
-          );
-        })}
+            </span>
+          </li>
+        ))}
       </ul>
     </section>
   );
@@ -335,12 +344,13 @@ function KeptSection({ threads, items }) {
             <ul className="lib-kept-list">
               {its.map((i) => (
                 <li key={i.id}>
-                  <SlotTag slot={i.slot} />
+                  <MediaChip type={i.mediaType} url={i.url} />
                   <div className="lib-kept-body">
                     {i.url
                       ? <a className="lib-kept-title" href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>
                       : <span className="lib-kept-title">{i.title}</span>}
-                    <span className="lib-kept-src"> · {i.source || hostOf(i.url)}{i.signal === 'moved' && ' · ✦'}</span>
+                    <span className="lib-kept-src"> · {i.source || hostOf(i.url)} · <SlotTag slot={i.slot} />{i.signal === 'moved' && <> · <Icon name="moved" size={11} style={{ color: 'var(--accent)' }} /></>}</span>
+                    <div className="lib-kept-open"><OpenButton item={i} compact /></div>
                     {(i.notes || []).map((n) => (
                       <p className="lib-kept-note" key={n.at}>{n.text} <span className="muted">· {timeAgo(n.at)}</span></p>
                     ))}

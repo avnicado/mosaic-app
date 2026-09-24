@@ -12,6 +12,7 @@ import Settings from './pages/Settings.jsx';
 import SharedThread from './pages/SharedThread.jsx';
 import { startSharing, subscribeShared, getSharedVersion, getOthers } from '../data/sharing.js';
 import { getSessionInfo } from '../session.js';
+import { Icon } from './icons.jsx';
 
 function Sidebar({ route, onNavigate }) {
   const [showClosed, setShowClosed] = useState(false);
@@ -25,8 +26,8 @@ function Sidebar({ route, onNavigate }) {
       open: openIds,
     };
   });
-  const link = (name, path, label) => (
-    <a href={'#' + path} className={`side-link ${route.name === name ? 'active' : ''}`} onClick={onNavigate}>{label}</a>
+  const link = (name, path, label, icon) => (
+    <a href={'#' + path} className={`side-link ${route.name === name ? 'active' : ''}`} onClick={onNavigate}><Icon name={icon} size={17} />{label}</a>
   );
   const threadLink = (t, cls = '') => (
     <a key={t.id} href={'#' + threadPath(t.id)} onClick={onNavigate}
@@ -37,9 +38,9 @@ function Sidebar({ route, onNavigate }) {
   );
   return (
     <nav className="sidebar" aria-label="Main">
-      <a className="brand" href="#/" onClick={onNavigate}>Mosaic</a>
-      <a className="btn primary side-new" href="#/new" onClick={onNavigate}>+ New thread</a>
-      {link('desk', '/', 'Desk')}
+      <a className="brand" href="#/" onClick={onNavigate}><Icon name="mosaic" size={20} className="brand-ic" />Mosaic</a>
+      <a className="btn primary side-new" href="#/new" onClick={onNavigate}><Icon name="plus" size={15} /> New thread</a>
+      {link('desk', '/', 'Desk', 'desk')}
       <div className="side-section">Threads</div>
       {active.length ? active.map((t) => threadLink(t)) : <div className="side-link muted" style={{ fontStyle: 'italic' }}>None yet</div>}
       {quiet.length > 0 && <div className="side-section">Quiet</div>}
@@ -54,9 +55,9 @@ function Sidebar({ route, onNavigate }) {
       <SharedSection route={route} onNavigate={onNavigate} />
       <div className="side-spacer" />
       <div className="side-foot">
-        {link('promenade', '/promenade', 'Promenade')}
-        {link('library', '/library', 'Library')}
-        {link('settings', '/settings', 'Settings')}
+        {link('promenade', '/promenade', 'Promenade', 'promenade')}
+        {link('library', '/library', 'Library', 'library')}
+        {link('settings', '/settings', 'Settings', 'settings')}
         <SignedInAs />
       </div>
     </nav>
@@ -88,7 +89,7 @@ function SignedInAs() {
   return (
     <div className="side-user">
       <span>{user.name}</span>
-      <a href="/?logout" className="btn link">Sign out</a>
+      <a href="/?logout" className="btn link"><Icon name="signout" size={14} /> Sign out</a>
     </div>
   );
 }
@@ -116,8 +117,8 @@ export default function App() {
       <Sidebar route={route} onNavigate={() => setDrawer(false)} />
       <div className="main" onClick={() => drawer && setDrawer(false)}>
         <header className="topbar">
-          <button className="menu-btn" aria-label="Menu" onClick={(e) => { e.stopPropagation(); setDrawer(true); }}>☰</button>
-          <a className="brand" href="#/">Mosaic</a>
+          <button className="menu-btn" aria-label="Menu" onClick={(e) => { e.stopPropagation(); setDrawer(true); }}><Icon name="menu" size={20} /></button>
+          <a className="brand" href="#/"><Icon name="mosaic" size={18} className="brand-ic" />Mosaic</a>
         </header>
         {page}
       </div>

@@ -27,7 +27,7 @@ export function snapshotOf(threadId) {
   const t = R.getThread(threadId);
   if (!t) return null;
   const items = Object.fromEntries(R.itemsFor(threadId).map((i) => [i.id, i]));
-  const pick = (i) => ({ slot: i.slot, title: i.title, url: i.url, source: i.source, signal: i.signal || null });
+  const pick = (i) => ({ slot: i.slot, title: i.title, url: i.url, source: i.source, mediaType: i.mediaType || null, signal: i.signal || null });
   const sessions = R.sessionsFor(threadId).filter((s) => s.closedAt).map((s) => ({
     openedAt: s.openedAt, closedAt: s.closedAt,
     before: s.articulationAtOpen, after: s.articulationAtClose,

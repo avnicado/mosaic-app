@@ -16,9 +16,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const MAX_VALUE_BYTES = 900_000; // Upstash request limit is ~1MB
-const DATA_DIR = process.env.MOSAIC_DATA_DIR || path.join(process.cwd(), '.data'); // override for isolated test servers
+// MOSAIC_DATA_DIR makes an isolated test server: it always uses files there,
+// even when Upstash keys are present (dev loads them from .env.local).
+const DATA_DIR = process.env.MOSAIC_DATA_DIR || path.join(process.cwd(), '.data');
 
 function upstash() {
+  if (process.env.MOSAIC_DATA_DIR) return null;
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
   return url && token ? { url: url.replace(/\/$/, ''), token } : null;

@@ -65,3 +65,6 @@
   .pm-grid, .pm-grid.compact { grid-template-columns: 1fr; }
   .pm-section { margin-top: 30px; }
 }
+.pm-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pm-card-top .mchip { margin-right: auto; margin-left: 8px; }
+.pm-card-top { align-items: center; }

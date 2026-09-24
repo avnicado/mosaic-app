@@ -6,6 +6,7 @@
 import * as R from './record.js';
 import { readThread, analyzeImage, judgeMovement, effectHistory, applyCorrections, tasteProfile } from '../engine/thread.js';
 import { fillSlot } from '../engine/feed.js';
+import { tagItems, vocabulary } from '../engine/tags.js';
 import { SLOTS } from '../engine/prompts.js';
 
 // ---- busy state ------------------------------------------------------------
@@ -45,6 +46,7 @@ export function buildContext(threadId) {
     seed: t.seed,
     lineage: parent ? { fromQuestion: R.currentArticulation(parent), anchorTitle: t.spawnAnchor?.title } : null,
     taste: R.getSettings().ratings ? tasteProfile(R.allItems()) : null,
+    vocab: vocabulary(R.allItems()),
   };
 }
 
@@ -279,3 +281,37 @@ export const setRating = (itemId, axis, value) => R.patchItem(itemId, (i) => ({ 
 export const holdItem = (card, text) => createThread({
   text, seed: { title: card.title, source: card.source, url: card.url, why: card.why, excerpt: card.excerpt || '' },
 });
+
+// ---- tags ----------------------------------------------------------------------
+// Items you've engaged with (opened, marked, kept, noted, rated) that have no
+// field/topic tags yet get them, in batches. Returns how many were tagged.
+// One run at a time; onProgress(done, total) for the Library's status line.
+export const engaged = (i) => !i.failed && !i.duplicate && !!(i.openedAt || i.signal || i.kept || (i.notes || []).length
+  || (i.rating && Object.values(i.rating).some((v) => v > 0)));
+let tagging = null;
+export function tagUntagged(onProgress = () => {}) {
+  if (tagging) return tagging;
+  tagging = (async () => {
+    const todo = R.allItems().filter((i) => engaged(i) && !i.topics?.length && !i.tagFailed);
+    let done = 0;
+    for (let k = 0; k < todo.length; k += 15) {
+      const batch = todo.slice(k, k + 15);
+      onProgress(done, todo.length);
+      try {
+        const tags = await tagItems(batch, vocabulary(R.allItems()));
+        batch.forEach((it, j) => {
+          const t = tags[j];
+          if (t.topics.length) R.patchItem(it.id, { field: t.field || it.field || null, topics: t.topics, mediaType: t.mediaType });
+          else R.patchItem(it.id, { tagFailed: true });
+        });
+      } catch (e) {
+        console.warn('[tags]', e.message);
+        break;
+      }
+      done += batch.length;
+    }
+    onProgress(done, todo.length);
+    return done;
+  })().finally(() => { tagging = null; });
+  return tagging;
+}

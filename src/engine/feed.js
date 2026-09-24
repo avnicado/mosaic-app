@@ -7,6 +7,7 @@
 
 import { callLLM, parseJSON, apiFetch, sleep, suggestedWaitMs } from './llm.js';
 import { SLOTS, searchQueryPrompt, selectFromResultsPrompt, knowledgePrompt } from './prompts.js';
+import { normalizeMediaType, normalizeField, normalizeTopics } from '../media.js';
 
 const TIMEOUT_MS = 120000;
 const WIKI_RE = /^https:\/\/en\.wikipedia\.org\/wiki\/[^\s#?]+$/;
@@ -73,9 +74,11 @@ const pick = (it) => ({
   title: String(it.title || '').trim(),
   source: String(it.source || '').trim(),
   url: it.url,
-  mediaType: it.mediaType || 'essay',
+  mediaType: normalizeMediaType(it.mediaType, it.url),
   preview: String(it.preview || '').trim(),
   why: String(it.why || '').trim(),
+  field: normalizeField(it.field),
+  topics: normalizeTopics(it.topics),
 });
 
 // → { slot, title, source, url, mediaType, preview, why, provenance, linkCheck } | { slot, failed: true, error }
@@ -92,12 +95,12 @@ export async function fillSlot(slot, ctx, exclude = []) {
   }
   for (const retry of [false, true]) {
     try {
-      const item = parseJSON(await withRetry(() => withTimeout(callLLM({ prompt: knowledgePrompt(slot, ctx, exclude, retry), maxTokens: 700 }))));
+      const item = parseJSON(await withRetry(() => withTimeout(callLLM({ prompt: knowledgePrompt(slot, ctx, exclude, retry), maxTokens: 1000 }))));
       if (!WIKI_RE.test(item.url || '')) { lastError = 'non-Wikipedia URL from knowledge tier'; continue; }
       if (exclude.includes(item.url)) { lastError = 'duplicate'; continue; }
       const linkCheck = await verifyUrl(item.url);
       if (linkCheck === 'dead') { lastError = 'dead link: ' + item.url; continue; }
-      return { slot, ...pick(item), mediaType: 'primer', provenance: 'knowledge', linkCheck };
+      return { slot, ...pick(item), mediaType: 'reference', provenance: 'knowledge', linkCheck };
     } catch (e) { lastError = e.message; }
   }
   return { slot, failed: true, error: lastError };

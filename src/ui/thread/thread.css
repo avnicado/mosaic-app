@@ -252,3 +252,17 @@
 
 .th-share { margin-left: 12px; }
 .th-share.on { color: var(--sage); text-decoration-color: var(--sage); }
+
+/* v1.5: media kind, open button, icon actions */
+.th-card-kind { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.th-card-kind .th-opened { font-size: 12px; }
+.th-card-open { margin: 2px 0 2px; }
+.th-sig { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.th-sig-moved .ic { color: var(--accent); }
+.th-sig.on .ic { color: currentColor; --icon-accent: currentColor; }
+.th-act { display: inline-flex; align-items: center; gap: 5px; }
+.th-act .ic { opacity: 0.8; --icon-accent: currentColor; }
+.th-keep .ic { --icon-accent: var(--gold); }
+.th-kept-top { gap: 8px; }
+.th-kept-top .slot-tag { margin-right: auto; }
+.th-kept-list .open-btn { margin-top: 6px; }
