@@ -3,6 +3,7 @@
 // you're spreading out. Pure reads over the record; no React, no writes.
 import { mediaInfo, normalizeField, FIELDS } from '../../media.js';
 import { engaged } from '../../data/actions.js';
+import { completion } from '../../data/progress.js';
 
 const DAY = 864e5;
 export const UNSORTED = 'unsorted';
@@ -41,6 +42,8 @@ export function piecesFrom(items, threads) {
       threadId: i.threadId, mediaType: m.type, family: m.family,
       field, topics: i.topics || [], tagged: !!(i.topics || []).length,
       kind: kindOf(i), ts: i.openedAt || i.createdAt || 0,
+      fill: completion(i.progress), // { level, done } or null: how much of it you finished
+
     };
   }).sort((a, b) => a.ts - b.ts);
 }

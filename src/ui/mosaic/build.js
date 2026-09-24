@@ -8,12 +8,18 @@
 //   a panel   — one broad field. Hue is the field's own.
 //   in a panel, pieces that share a topic are laid next to each other, so a
 //               subject you keep coming back to shows as a patch.
+//   fullness  — how much of the item you finished (data/progress.js) is laid
+//               as a hand-drawn texture (hatching, cross-hatching, stipple
+//               or ripples, picked at random per stone) that fills the stone
+//               from the bottom up; a finished item is textured edge to edge.
+//               No texture: Mosaic doesn't know (never opened in the reader).
+//               Depth stays with what happened, texture with how much.
 //   overlap   — fields that share topics are pulled together and joined by a
 //               brass seam named with what they share. Pieces carrying a shared
 //               topic are laid on the side facing the other field.
 // Deterministic: the same record lays the same mosaic.
 import {
-  mulberry32, clamp, esc, tessera, voronoiCell, inset, pathOf, polyCentroid, hashStr,
+  mulberry32, clamp, esc, tessera, voronoiCell, inset, pathOf, polyCentroid, hashStr, clipHalfPlane,
 } from './geometry.js';
 import { KINDS, UNSORTED, topicSlug } from './model.js';
 import { iconMarkup } from '../icons.jsx';
@@ -23,6 +29,28 @@ export const VB_W = 1000;
 export const VB_H = 470;
 const SQ = 0.82; // the floor is seen a little from above
 const GROUT = 1.4;
+
+// One texture per stone, drawn in the stone's own ink. Every stone gets its
+// own pattern, so angle, spacing and stipple layout vary like a hand did them.
+const TEXTURES = ['hatch', 'cross', 'stipple', 'ripple'];
+function texturePattern(id, type, r, ink) {
+  const f = (n) => n.toFixed(2);
+  const angle = Math.round(r() * 180);
+  const sw = 0.5 + r() * 0.2;
+  const line = (d) => `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${f(sw)}" stroke-linecap="round"/>`;
+  let s, body;
+  if (type === 'hatch') { s = 2.8 + r() * 1.2; body = line(`M0,${f(s / 2)}H${f(s)}`); }
+  else if (type === 'cross') { s = 3.4 + r() * 1.2; body = line(`M0,${f(s / 2)}H${f(s)}M${f(s / 2)},0V${f(s)}`); }
+  else if (type === 'ripple') {
+    s = 4 + r() * 1.4;
+    const a = 0.7 + r() * 0.5;
+    body = line(`M0,${f(s / 2)}Q${f(s / 4)},${f(s / 2 - a)} ${f(s / 2)},${f(s / 2)}T${f(s)},${f(s / 2)}`);
+  } else {
+    s = 5 + r() * 1.5;
+    body = Array.from({ length: 4 }, () => `<circle cx="${f(r() * s)}" cy="${f(r() * s)}" r="${f(0.42 + r() * 0.22)}" fill="${ink}"/>`).join('');
+  }
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${f(s)}" height="${f(s)}" patternTransform="rotate(${angle})">${body}</pattern>`;
+}
 
 export function buildReadingMosaic({ fields, links }) {
   if (!fields.length) return '';
@@ -165,7 +193,7 @@ export function buildReadingMosaic({ fields, links }) {
   });
 
   // ---- 3. cut the pieces ------------------------------------------------------------
-  const beds = [], tiles = [], icons = [], seams = [], labels = [];
+  const beds = [], tiles = [], icons = [], seams = [], labels = [], patterns = [];
 
   panels.forEach((P) => {
     const { pr, sites, reach } = P;
@@ -204,7 +232,8 @@ export function buildReadingMosaic({ fields, links }) {
       const { p, jitter, hueJit, sparkle } = s.piece;
       const K = KINDS[p.kind];
       const topics = p.topics.map(topicSlug).join(' ');
-      const tip = `${p.title}${p.source ? ' — ' + p.source : ''}\n${K.label}${p.topics.length ? ' · ' + p.topics.join(', ') : ''}`;
+      const how = p.fill ? (p.fill.done ? ' · finished' : ` · ${Math.round(p.fill.level * 100)}% of the way`) : '';
+      const tip = `${p.title}${p.source ? ' — ' + p.source : ''}\n${K.label}${how}${p.topics.length ? ' · ' + p.topics.join(', ') : ''}`;
       const open = `<g class="rm-piece k-${p.kind}" data-item="${esc(p.id)}" data-t="${esc(topics)}" data-f="${fid}"><title>${esc(tip)}</title>`;
       let fill, dark = false;
       if (K.t == null || unsorted) {
@@ -215,8 +244,21 @@ export function buildReadingMosaic({ fields, links }) {
         dark = K.t > 0.7;
       }
       const dash = K.t == null ? ' stroke-dasharray="2.5 2.2"' : '';
+      // Fullness: texture from the bottom of the stone up to how far you got.
+      let texture = '';
+      if (p.fill && p.fill.level > 0) {
+        const tr = mulberry32(hashStr(p.id) || 3);
+        const pid = `rm-tx-${patterns.length}`;
+        const ink = dark ? 'rgba(255,248,236,0.62)' : 'rgba(38,28,16,0.5)';
+        patterns.push(texturePattern(pid, TEXTURES[Math.floor(tr() * TEXTURES.length)], tr, ink));
+        const ys = face.map((pt) => pt[1]);
+        const top = Math.min(...ys), bot = Math.max(...ys);
+        const level = p.fill.done ? 1 : Math.max(0.08, p.fill.level);
+        const part = level >= 1 ? face : clipHalfPlane(face, [0, bot - (bot - top) * level], [0, -1]);
+        if (part.length >= 3) texture = `<path class="rm-tx" d="${pathOf(part)}" fill="url(#${pid})"/>`;
+      }
       tiles.push(open +
-        `<path d="${pathOf(face)}" fill="${fill}" stroke="rgba(30,22,12,0.48)" stroke-width="0.7" stroke-linejoin="round"${dash}/>` +
+        `<path d="${pathOf(face)}" fill="${fill}" stroke="rgba(30,22,12,0.48)" stroke-width="0.7" stroke-linejoin="round"${dash}/>` + texture +
         `<path d="${pathOf(inset(face, 1.2))}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.9" stroke-linejoin="round"/>` +
         `</g>`);
       // The media icon, set into the stone where it fits.
@@ -273,7 +315,7 @@ export function buildReadingMosaic({ fields, links }) {
   });
 
   return `<svg class="rm-svg" viewBox="0 0 ${VB_W} ${VB_H}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">` +
-    CM_GROUND_DEFS + `<use href="#cm-ground" transform="scale(1 ${(VB_H / 420).toFixed(4)})"/>` +
+    CM_GROUND_DEFS + (patterns.length ? `<defs>${patterns.join('')}</defs>` : '') + `<use href="#cm-ground" transform="scale(1 ${(VB_H / 420).toFixed(4)})"/>` +
     seams.join('') + beds.join('') + tiles.join('') + icons.join('') + labelEls.join('') +
     `</svg>`;
 }

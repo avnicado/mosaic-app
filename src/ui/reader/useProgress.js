@@ -17,7 +17,8 @@ const FLUSH_MS = 15000;
 const IDLE_MS = 90000;
 const MAX_STEP_S = 4; // a position jump bigger than this is a seek, not playback
 
-export function useProgress({ itemId, kind, mode, minutes, ready, scrollRef, articleRef, frameRef }) {
+export function useProgress({ itemId, kind, mode, provider, article, ready, scrollRef, articleRef, frameRef }) {
+  const { minutes = null, expectSec = null, density = null } = article || {};
   const s = useRef(null);
   if (!s.current) {
     s.current = {
@@ -49,7 +50,7 @@ export function useProgress({ itemId, kind, mode, minutes, ready, scrollRef, art
       recordProgress(itemId, {
         kind, ms: Math.round(p.ms), visit: p.visit,
         estimated: mode === 'estimate',
-        ...(mode === 'read' ? { depth: p.depth, minutes } : { spans: p.spans, dur: st.dur, pos: st.pos }),
+        ...(mode === 'read' ? { depth: p.depth, minutes, expectSec, density } : { spans: p.spans, dur: st.dur, pos: st.pos, provider }),
       });
       st.pending = { ms: 0, spans: [], depth: 0, visit: false };
     };
@@ -98,7 +99,7 @@ export function useProgress({ itemId, kind, mode, minutes, ready, scrollRef, art
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [itemId, kind, mode, minutes, ready]);
+  }, [itemId, kind, mode, provider, minutes, expectSec, density, ready]);
 
   return onPlayer;
 }

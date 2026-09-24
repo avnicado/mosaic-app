@@ -153,6 +153,13 @@ function Legend({ model }) {
       ))}
       <div className="rm-legend-row"><span className="rm-swatch"><svg viewBox="0 0 38 38" width="22" height="22"><line x1="4" y1="19" x2="34" y2="19" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 6" /></svg></span>
         <span><b>Brass seam</b>: two fields that share topics. Thicker means more in common.</span></div>
+      <div className="rm-legend-row"><span className="rm-swatch">
+        <svg viewBox="0 0 38 38" width="22" height="22" aria-hidden="true">
+          <defs><pattern id="rm-lg-tx" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(35)"><path d="M0,1.8H3.6" stroke="rgba(38,28,16,0.6)" strokeWidth="0.7" /></pattern></defs>
+          <path d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z" fill={tessera(hue, KINDS.read.t, 0)} stroke="rgba(38,30,20,0.45)" strokeWidth="1" strokeLinejoin="round" />
+          <path d="M5,19 L34,19 L27,31 L11,31 Z" fill="url(#rm-lg-tx)" />
+        </svg></span>
+        <span><b>Hatching or stipple</b>: how much of it you finished, filled from the bottom. Textured edge to edge: finished (85% played, or read to the end at a reading pace for how dense it is). No texture: not tracked.</span></div>
       <div className="rm-legend-row"><span className="rm-swatch rm-swatch-ic"><Icon name="video" size={16} /></span>
         <span><b>Icon in a stone</b>: what the item is (article, video, podcast…).</span></div>
       <p className="rm-key">One stone per item, one panel per field; the hue is the field's. Stones on the same topic are laid side by side.</p>

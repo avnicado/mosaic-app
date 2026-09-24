@@ -128,7 +128,9 @@ export async function readArticle(url) {
   if (!art || !art.content || (art.textContent || '').trim().length < 300) {
     throw Object.assign(new Error('Couldn’t find an article on this page.'), { status: 422, empty: true });
   }
-  const words = (art.textContent || '').trim().split(/\s+/).length;
+  const text = (art.textContent || '').trim();
+  const words = text.split(/\s+/).length;
+  const pace = readingPace(text, words, art.content);
   return {
     ok: true,
     url: page.url,
@@ -138,6 +140,31 @@ export async function readArticle(url) {
     published: art.publishedTime || meta('meta[property="article:published_time"]'),
     html: art.content,
     words,
-    minutes: Math.max(1, Math.round(words / 230)),
+    ...pace,
   };
+}
+
+// How dense the text is, and so how long it should take. Flesch reading ease
+// (sentence length and syllables per word) sets the reading speed: easy prose
+// ~270 words a minute, dense technical text ~150. Pictures, code and tables
+// add a little time each. → { minutes, expectSec, density, wpm, ease }
+const syllables = (w) => {
+  w = w.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  if (w.length <= 3) return 1;
+  const groups = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '').match(/[aeiouy]{1,2}/g);
+  return Math.max(1, groups ? groups.length : 1);
+};
+export function readingPace(text, words, html = '') {
+  const sample = text.split(/\s+/).filter((w) => /[a-z]/i.test(w)).slice(0, 4000);
+  const sentences = Math.max(1, (text.match(/[.!?]+(?=\s|$)/g) || []).length);
+  const asl = Math.min(60, words / sentences);
+  const asw = sample.length ? sample.reduce((n, w) => n + syllables(w), 0) / sample.length : 1.5;
+  const ease = Math.round(206.835 - 1.015 * asl - 84.6 * asw);
+  const wpm = Math.round(Math.max(150, Math.min(270, 150 + (ease - 10) * 2)));
+  const count = (re) => (html.match(re) || []).length;
+  const extras = Math.min(20, count(/<img\b/gi)) * 8 + Math.min(20, count(/<pre\b/gi)) * 20 + Math.min(10, count(/<table\b/gi)) * 25;
+  const expectSec = Math.round((words / wpm) * 60 + extras);
+  const density = ease >= 60 ? 'light' : ease >= 45 ? 'moderate' : ease >= 30 ? 'dense' : 'very dense';
+  return { minutes: Math.max(1, Math.round(expectSec / 60)), expectSec, density, wpm, ease };
 }

@@ -75,7 +75,8 @@ function ReaderPanel({ target }) {
     itemId: target.itemId,
     kind: !embed ? 'read' : embed.kind === 'audio' ? 'listen' : 'watch',
     mode: !embed ? 'read' : canTrack(embed) && !spotifyFailed ? 'player' : 'estimate',
-    minutes: article?.minutes || null,
+    provider: embed?.provider || null,
+    article: article?.html ? { minutes: article.minutes, expectSec: article.expectSec, density: article.density } : null,
     ready: !!article?.html,
     scrollRef, articleRef, frameRef,
   });
@@ -116,7 +117,7 @@ function ReaderPanel({ target }) {
     article?.byline && article.byline !== item.source ? article.byline : null,
     item.source || article?.siteName,
     host,
-    article?.minutes ? `${article.minutes} min read` : null,
+    article?.minutes ? `${article.minutes} min read${article.density ? ` · ${article.density}` : ''}` : null,
   ].filter(Boolean);
 
   return (
