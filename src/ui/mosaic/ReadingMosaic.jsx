@@ -7,6 +7,7 @@ import * as R from '../../data/record.js';
 import { tagUntagged, engaged } from '../../data/actions.js';
 import { threadPath } from '../router.js';
 import { Icon, MediaChip, OpenButton } from '../icons.jsx';
+import { progressText } from '../../data/progress.js';
 import { MEDIA, FAMILY } from '../../media.js';
 import { piecesFrom, fieldsFrom, spreadStats, KINDS, topicSlug, UNSORTED } from './model.js';
 import { buildReadingMosaic } from './build.js';
@@ -112,7 +113,7 @@ function ItemDetail({ item, threads, onTopic, focus, onClose }) {
       <div className="rm-detail-body">
         <div className="rm-detail-title">{item.title}</div>
         <div className="rm-detail-meta">
-          {[item.source, item.field, item.signal && SIGNAL_WORDS[item.signal], item.kept && 'kept'].filter(Boolean).join(' · ')}
+          {[item.source, item.field, item.signal && SIGNAL_WORDS[item.signal], item.kept && 'kept', progressText(item.progress)].filter(Boolean).join(' · ')}
         </div>
         {!!item.topics?.length && (
           <div className="rm-topics">

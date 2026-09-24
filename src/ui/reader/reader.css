@@ -62,3 +62,5 @@
   .rd-foot-q { display: none; }
   .rd-signals { flex: 1 1 100%; order: 2; }
 }
+.rd-had { order: 3; margin-left: auto; font-size: 12.5px; color: var(--ink-faded); font-style: italic; white-space: nowrap; }
+@media (max-width: 700px) { .rd-had { order: 1; margin-left: 0; } }

@@ -6,6 +6,7 @@ import * as A from '../../data/actions.js';
 import { SlotTag, Spinner, hostOf, RATING_AXES } from '../kit.jsx';
 import { go, threadPath } from '../router.js';
 import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
+import { progressText } from '../../data/progress.js';
 import { mediaInfo } from '../../media.js';
 
 const SIGNALS = [
@@ -94,7 +95,7 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
 
       <div className="th-card-kind">
         <MediaChip type={item.mediaType} url={item.url} label />
-        {item.openedAt ? <span className="th-opened">opened {new Date(item.openedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span> : null}
+        {item.openedAt ? <span className="th-opened">opened {new Date(item.openedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}{progressText(item.progress) ? ` · ${progressText(item.progress)}` : ''}</span> : null}
       </div>
       <h3 className="th-card-title">
         <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(item, () => A.markOpened(item.id))}>{item.title}</a>

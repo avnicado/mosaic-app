@@ -1,14 +1,18 @@
 // The Mosaic reader: an item opened inside the app. Video and audio play in
 // the site's own embed player; articles are extracted on the server
 // (/api/read) and set in Mosaic's type. When neither works, it says why and
-// offers the site. The original is always one click away.
-import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+// offers the site. The original is always one click away. While it is open,
+// useProgress records how much of it you read, watched or listened to.
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import DOMPurify from 'dompurify';
 import * as R from '../../data/record.js';
 import * as A from '../../data/actions.js';
 import { useRecord } from '../../data/hooks.js';
 import { apiFetch } from '../../engine/llm.js';
 import { embedFor } from '../../embed.js';
+import { progressText } from '../../data/progress.js';
+import { canTrack, connectPlayer, mountSpotify } from './players.js';
+import { useProgress } from './useProgress.js';
 import { mediaInfo } from '../../media.js';
 import { Icon, MediaChip } from '../icons.jsx';
 import { SlotTag, Spinner, hostOf } from '../kit.jsx';
@@ -56,10 +60,37 @@ export default function Reader() {
 function ReaderPanel({ target }) {
   const stored = useRecord(() => (target.itemId ? R.getItem(target.itemId) : null), [target.itemId]);
   const item = stored || target;
-  const embed = embedFor(item.url);
+  const embed = useMemo(() => embedFor(item.url), [item.url]);
   const m = mediaInfo(item.mediaType, item.url);
   const [article, setArticle] = useState(embed ? null : { loading: true });
+  const [spotifyFailed, setSpotifyFailed] = useState(false);
   const panel = useRef(null);
+  const scrollRef = useRef(null);
+  const articleRef = useRef(null);
+  const frameRef = useRef(null);
+  const spotifyRef = useRef(null);
+  const spotify = embed?.provider === 'spotify' && !spotifyFailed;
+
+  const onPlayer = useProgress({
+    itemId: target.itemId,
+    kind: !embed ? 'read' : embed.kind === 'audio' ? 'listen' : 'watch',
+    mode: !embed ? 'read' : canTrack(embed) && !spotifyFailed ? 'player' : 'estimate',
+    minutes: article?.minutes || null,
+    ready: !!article?.html,
+    scrollRef, articleRef, frameRef,
+  });
+  useEffect(() => {
+    if (!embed || spotify || !frameRef.current) return undefined;
+    return connectPlayer(frameRef.current, embed, onPlayer);
+  }, [embed, spotify]);
+  useEffect(() => {
+    if (!spotify || !spotifyRef.current) return undefined;
+    let cleanup = null, alive = true;
+    mountSpotify(spotifyRef.current, embed, onPlayer)
+      .then((c) => { if (alive) cleanup = c; else c(); })
+      .catch(() => { if (alive) setSpotifyFailed(true); });
+    return () => { alive = false; cleanup?.(); };
+  }, [spotify]);
 
   useEffect(() => { if (target.itemId) A.markOpened(target.itemId); }, [target.itemId]);
   useEffect(() => {
@@ -101,15 +132,16 @@ function ReaderPanel({ target }) {
           <button className="rd-close" onClick={closeReader} title="Close (Esc)" aria-label="Close"><Icon name="x" size={18} /></button>
         </header>
 
-        <div className="rd-scroll">
+        <div className="rd-scroll" ref={scrollRef}>
           <div className={`rd-body ${embed ? 'rd-media' : ''}`}>
             <h1 className="rd-title">{article?.title && !embed ? article.title : item.title}</h1>
             <div className="rd-meta">{meta.join(' · ')}</div>
             {item.why && <p className="rd-why"><span className="label">Why here</span> {item.why}</p>}
 
-            {embed && (
+            {spotify && <div className="rd-embed audio" ref={spotifyRef} style={{ height: embed.height }} />}
+            {embed && !spotify && (
               <div className={`rd-embed ${embed.kind}`} style={embed.height ? { height: embed.height } : undefined}>
-                <iframe src={embed.src} title={item.title} loading="lazy" allowFullScreen
+                <iframe ref={frameRef} src={embed.src} title={item.title} loading="lazy" allowFullScreen
                   allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write"
                   referrerPolicy="strict-origin-when-cross-origin" />
               </div>
@@ -127,7 +159,7 @@ function ReaderPanel({ target }) {
               </div>
             )}
             {!embed && article?.html && (
-              <article className="rd-article" dangerouslySetInnerHTML={{ __html: article.html }} />
+              <article className="rd-article" ref={articleRef} dangerouslySetInnerHTML={{ __html: article.html }} />
             )}
             {!embed && article?.html && (
               <p className="rd-end">
@@ -144,10 +176,12 @@ function ReaderPanel({ target }) {
   );
 }
 
-// ✦ / ○ / – and keep, without leaving the reader.
+// ✦ / ○ / – and keep, without leaving the reader, and how much of it you've had.
 function ReaderFoot({ item }) {
+  const had = progressText(item.progress);
   return (
     <footer className="rd-foot">
+      {had && <span className="rd-had" title="Recorded while it was open in Mosaic">{had}</span>}
       <span className="rd-foot-q">How did it land?</span>
       <div className="th-signals rd-signals" role="group" aria-label="How did this land?">
         {SIGNALS.map((s) => (

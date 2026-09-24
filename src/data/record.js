@@ -15,7 +15,8 @@
 //   item    { id, threadId, sessionId, slot, title, source, url, mediaType, preview, why,
 //             provenance:'search'|'knowledge', linkCheck, failed, error,
 //             signal:'moved'|'neutral'|'closed'|null, kept, openedAt, rating:{axis:0-4},
-//             notes:[{text, at}], replacedBy, createdAt }
+//             notes:[{text, at}], replacedBy, createdAt,
+//             progress: how much you read/watched/listened (src/data/progress.js) }
 
 const P = 'm2:';
 export const DORMANT_MS = 30 * 24 * 3600 * 1000;
