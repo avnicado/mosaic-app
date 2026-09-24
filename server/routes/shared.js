@@ -3,8 +3,8 @@
 // POST /api/shared { threadId, snapshot }        publish/refresh one of MY threads
 //                  { threadId, remove: true }    stop sharing it
 
-import { requireAuth } from '../server/auth.js';
-import { listShared, putShared, dropShared, getUser } from '../server/users.js';
+import { requireAuth } from '../auth.js';
+import { listShared, putShared, dropShared, getUser } from '../users.js';
 
 const MAX_SNAPSHOT = 800_000;
 

@@ -7,9 +7,9 @@
 // /corpus.json committed in the repo.
 
 import crypto from 'node:crypto';
-import { requireAuth } from '../server/auth.js';
-import { getBlob, setBlob } from '../server/store.js';
-import { buildCorpus } from '../server/corpus.js';
+import { requireAuth } from '../auth.js';
+import { getBlob, setBlob } from '../store.js';
+import { buildCorpus } from '../corpus.js';
 
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 

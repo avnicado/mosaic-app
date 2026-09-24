@@ -1,6 +1,6 @@
 // POST /api/logout → clears the session cookie.
 
-import { logoutCookie } from '../server/auth.js';
+import { logoutCookie } from '../auth.js';
 
 export default async function handler(req, res) {
   res.setHeader('set-cookie', logoutCookie());

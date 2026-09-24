@@ -1,8 +1,8 @@
 // POST /api/login { name, password } → sets the session cookie.
 // The owner may leave name empty (or use OWNER_NAME) and sign in with APP_PASSWORD.
 
-import { checkLogin, clientIp } from '../server/auth.js';
-import { publicUser } from '../server/users.js';
+import { checkLogin, clientIp } from '../auth.js';
+import { publicUser } from '../users.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

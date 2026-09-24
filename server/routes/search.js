@@ -2,8 +2,8 @@
 // Retrieve→select: real results go to the model, which only chooses among
 // them; URLs are never model-generated. See server/proxyCore.js.
 
-import { handleSearch } from '../server/proxyCore.js';
-import { requireAuth } from '../server/auth.js';
+import { handleSearch } from '../proxyCore.js';
+import { requireAuth } from '../auth.js';
 
 export default async function handler(req, res) {
   if (!(await requireAuth(req, res))) return;

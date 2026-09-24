@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 import fs from 'node:fs';
 
-// Dev-server middleware: mounts the real Vercel functions in api/*.js with a
+// Dev-server middleware: mounts the real route handlers (server/routes/*.js,
+// served on Vercel through api/[route].js) with a
 // Vercel-style req/res shim, so `npm run dev` runs exactly the prod handlers.
 function apiPlugin() {
   return {
@@ -12,7 +13,7 @@ function apiPlugin() {
       server.middlewares.use('/api', async (req, res) => {
         const u = new URL(req.url, 'http://dev');
         const name = u.pathname.replace(/^\/+|\/+$/g, '');
-        const file = resolve(__dirname, 'api', `${name}.js`);
+        const file = resolve(__dirname, 'server/routes', `${name}.js`);
         if (!/^[a-z-]+$/.test(name) || !fs.existsSync(file)) {
           res.statusCode = 404;
           res.end('not found');
@@ -32,7 +33,7 @@ function apiPlugin() {
         res.status = (code) => { res.statusCode = code; return res; };
         res.json = (obj) => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(obj)); return res; };
         try {
-          // ssrLoadModule re-evaluates api/* and the server/* modules they import when any changes.
+          // ssrLoadModule re-evaluates the route and the server/* modules it imports when any changes.
           const mod = await server.ssrLoadModule(file);
           await mod.default(req, res);
         } catch (e) {

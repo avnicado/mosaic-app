@@ -1,8 +1,8 @@
 // POST /api/join { code, name, password } → creates a member account from a
 // one-time invite and signs them in.
 
-import { sessionCookie, clientIp, loginBlocked, noteFailure } from '../server/auth.js';
-import { joinWithInvite, publicUser } from '../server/users.js';
+import { sessionCookie, clientIp, loginBlocked, noteFailure } from '../auth.js';
+import { joinWithInvite, publicUser } from '../users.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

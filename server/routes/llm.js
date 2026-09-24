@@ -2,8 +2,8 @@
 // Forwards {model, max_tokens, messages} to Groq's free-tier API with the
 // server-side key. See server/proxyCore.js for allowlisting and rate limiting.
 
-import { handleLLM } from '../server/proxyCore.js';
-import { requireAuth } from '../server/auth.js';
+import { handleLLM } from '../proxyCore.js';
+import { requireAuth } from '../auth.js';
 
 export default async function handler(req, res) {
   if (!(await requireAuth(req, res))) return;

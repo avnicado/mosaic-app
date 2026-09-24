@@ -5,8 +5,8 @@
 // there means the video doesn't exist); everything else gets HEAD with a GET
 // fallback (some origins reject HEAD).
 
-import { checkUrl } from '../server/proxyCore.js';
-import { requireAuth } from '../server/auth.js';
+import { checkUrl } from '../proxyCore.js';
+import { requireAuth } from '../auth.js';
 
 export default async function handler(req, res) {
   if (!(await requireAuth(req, res))) return;

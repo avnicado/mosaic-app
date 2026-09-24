@@ -2,10 +2,10 @@
 // mode: 'password' | 'open' (local dev, no APP_PASSWORD) | 'locked' (deployed without APP_PASSWORD)
 // store: 'redis' | 'file' (local dev) | 'none' (deployed without Upstash)
 
-import { currentUser, authMode } from '../server/auth.js';
-import { storeMode } from '../server/store.js';
-import { llmBackends } from '../server/proxyCore.js';
-import { publicUser, checkInvite } from '../server/users.js';
+import { currentUser, authMode } from '../auth.js';
+import { storeMode } from '../store.js';
+import { llmBackends } from '../proxyCore.js';
+import { publicUser, checkInvite } from '../users.js';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');

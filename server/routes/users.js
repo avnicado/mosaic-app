@@ -3,8 +3,8 @@
 // POST /api/users { action:'invite' } → { invite }
 //                 { action:'revoke', code } | { action:'remove', id } → { ok }
 
-import { requireOwner } from '../server/auth.js';
-import { listUsers, listInvites, createInvite, revokeInvite, removeUser, publicUser, MAX_MEMBERS } from '../server/users.js';
+import { requireOwner } from '../auth.js';
+import { listUsers, listInvites, createInvite, revokeInvite, removeUser, publicUser, MAX_MEMBERS } from '../users.js';
 
 export default async function handler(req, res) {
   if (!(await requireOwner(req, res))) return;

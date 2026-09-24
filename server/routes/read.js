@@ -3,8 +3,8 @@
 // On failure: { ok: false, reason, message } with reason one of
 // gone | blocked | empty | pdf | bad_url | error — the reader then offers the site.
 
-import { requireAuth } from '../server/auth.js';
-import { readArticle } from '../server/reader.js';
+import { requireAuth } from '../auth.js';
+import { readArticle } from '../reader.js';
 
 const cache = new Map(); // url → { at, body }; per instance, best effort
 const TTL = 30 * 60 * 1000;

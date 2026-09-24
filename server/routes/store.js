@@ -2,8 +2,8 @@
 // POST /api/store   { set: { key: value }, del: [key] } → { ok: true }
 // Each user has a private record (server/store.js → recordHash).
 
-import { requireAuth } from '../server/auth.js';
-import { readRecord, writeRecord } from '../server/store.js';
+import { requireAuth } from '../auth.js';
+import { readRecord, writeRecord } from '../store.js';
 
 export default async function handler(req, res) {
   const user = await requireAuth(req, res);

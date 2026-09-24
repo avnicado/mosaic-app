@@ -19,8 +19,9 @@ cp .env.example .env    # fill in GROQ_API_KEY and TAVILY_API_KEY
 npm run dev             # http://localhost:5200
 ```
 
-The dev server mounts the real Vercel functions in `api/` (same code as
-production). Without Upstash env vars the record is stored in `.data/`.
+The dev server mounts the real route handlers in `server/routes/` (same code
+as production, where they all run through one function, `api/[route].js`, to
+stay under the Hobby plan's 12-function limit). Without Upstash env vars the record is stored in `.data/`.
 
 **Claude fallback (local only).** If Groq is missing, down or rate-limited, the
 local server answers with `claude -p --model sonnet` (the Claude Code CLI on this
@@ -41,7 +42,7 @@ read-only with the others from its page ("Share with others"). Locally without
 | `src/data/` | The record (`record.js`: threads / sessions / items as documents), `actions.js` (engine applied to the record, every step persisted), `hooks.js`. |
 | `src/sync.js` | Mirrors every `m2:*` localStorage key to `/api/store`; pulls at boot; retries offline writes. |
 | `src/ui/` | Sidebar shell, router, pages: Desk, Thread, New thread, Promenade, Library, Settings. |
-| `api/`, `server/` | Groq proxy (allowlisted models), Tavily search, link checks, record store (Upstash or file), single-password auth, daily Promenade corpus. |
+| `api/[route].js`, `server/routes/`, `server/` | Groq proxy (allowlisted models), Tavily search, link checks, record store (Upstash or file), single-password auth, daily Promenade corpus. |
 
 ## Deploy
 
