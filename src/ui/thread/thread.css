@@ -251,6 +251,8 @@
 }
 
 .th-share { margin-left: 12px; }
+.th-jump-kept { display: none; margin-left: 12px; }
+@media (max-width: 1100px) { .th-jump-kept { display: inline-flex; align-items: center; gap: 4px; } #th-kept { scroll-margin-top: 64px; } }
 .th-share.on { color: var(--sage); text-decoration-color: var(--sage); }
 
 /* v1.5: media kind, open button, icon actions */

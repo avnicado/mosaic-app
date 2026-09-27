@@ -3,21 +3,40 @@
 // you're spreading out. Pure reads over the record; no React, no writes.
 import { mediaInfo, normalizeField, FIELDS } from '../../media.js';
 import { engaged } from '../../data/actions.js';
-import { completion } from '../../data/progress.js';
+import { completion, SPOTIFY_PREVIEW } from '../../data/progress.js';
 
 const DAY = 864e5;
 export const UNSORTED = 'unsorted';
 
-// What happened between you and the item, strongest first. It sets the size
-// and depth of the piece: an item that moved you is laid large and dark; one
-// you only opened is small and pale; one that closed the question down is cut
-// but left uncoloured.
+// What happened between you and the item, strongest first. It sets the depth
+// of the piece: an item that moved you is laid dark; one you only opened is
+// pale; one that closed the question down is cut but left uncoloured.
 export const KINDS = {
-  moved:  { r: 25, t: 0.95, label: 'moved you (✦)' },
-  kept:   { r: 19, t: 0.6,  label: 'kept or noted' },
-  read:   { r: 14, t: 0.28, label: 'opened, rated or marked neutral' },
-  closed: { r: 14, t: null, label: 'closed the question down' },
+  moved:  { t: 0.95, label: 'moved you (✦)' },
+  kept:   { t: 0.6,  label: 'kept or noted' },
+  read:   { t: 0.28, label: 'opened, rated or marked neutral' },
+  closed: { t: null, label: 'closed the question down' },
 };
+
+// How long the item is, in seconds, when the reader learned it: an article's
+// expected reading time (set by how dense it is), a player's length. Null when
+// unknown: never opened in the reader, a player that reports nothing, or a
+// signed-out Spotify preview (30 s that says it is the whole track).
+export function lengthOf(p) {
+  if (!p || p.estimated) return null;
+  if (p.kind === 'read') return p.expectSec || (p.minutes ? p.minutes * 60 : null);
+  if (!p.dur || (p.provider === 'spotify' && p.dur <= SPOTIFY_PREVIEW)) return null;
+  return p.dur;
+}
+
+// A stone's size is the item's length, on a log scale: a 2-minute clip is a
+// chip, a 2-hour lecture a slab. Unknown length gets a middling stone.
+export const STONE = { min: 10, max: 30, unknown: 16, short: 120, long: 7200 };
+export function stoneRadius(sec) {
+  if (!sec) return STONE.unknown;
+  const t = Math.log(sec / STONE.short) / Math.log(STONE.long / STONE.short);
+  return STONE.min + (STONE.max - STONE.min) * Math.max(0, Math.min(1, t));
+}
 const kindOf = (i) => (i.signal === 'moved' ? 'moved'
   : i.signal === 'closed' ? 'closed'
   : i.kept || (i.notes || []).length ? 'kept' : 'read');
@@ -43,6 +62,7 @@ export function piecesFrom(items, threads) {
       field, topics: i.topics || [], tagged: !!(i.topics || []).length,
       kind: kindOf(i), ts: i.openedAt || i.createdAt || 0,
       fill: completion(i.progress), // { level, done } or null: how much of it you finished
+      length: lengthOf(i.progress), // seconds or null: sets the stone's size
 
     };
   }).sort((a, b) => a.ts - b.ts);

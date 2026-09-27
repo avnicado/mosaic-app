@@ -141,9 +141,9 @@ function Legend({ model }) {
     </svg>
   );
   const rows = [
-    ['moved', tile(tessera(hue, KINDS.moved.t, 0)), 'Large and dark', 'an item that moved you (✦).'],
+    ['moved', tile(tessera(hue, KINDS.moved.t, 0)), 'Dark', 'an item that moved you (✦).'],
     ['kept', tile(tessera(hue, KINDS.kept.t, 0)), 'Middling', 'an item you kept or wrote a note on.'],
-    ['read', tile(tessera(hue, KINDS.read.t, 0)), 'Small and pale', 'an item you opened, rated or marked neutral.'],
+    ['read', tile(tessera(hue, KINDS.read.t, 0)), 'Pale', 'an item you opened, rated or marked neutral.'],
     ['closed', tile('hsl(40 34% 91%)', '2.5 2.2'), 'Dashed parchment', 'an item that closed the question down.'],
   ];
   return (
@@ -151,15 +151,28 @@ function Legend({ model }) {
       {rows.map(([k, sw, label, body]) => (
         <div className="rm-legend-row" key={k}><span className="rm-swatch">{sw}</span><span><b>{label}</b>: {body}</span></div>
       ))}
+      <div className="rm-legend-row"><span className="rm-swatch rm-swatch-wide">
+        <svg viewBox="0 0 114 38" width="66" height="22" aria-hidden="true">
+          {[[14, 0.4], [44, 0.65], [86, 1]].map(([cx, k]) => (
+            <path key={cx} transform={`translate(${cx} 19) scale(${k}) translate(-19.5 -18.5)`} d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z"
+              fill={tessera(hue, KINDS.kept.t, 0)} stroke="rgba(38,30,20,0.45)" strokeWidth={1 / k} strokeLinejoin="round" />
+          ))}
+        </svg></span>
+        <span><b>Size</b>: how long the item is, from a short clip to a long lecture or a dense long read. Middling when Mosaic doesn't know the length yet (it learns it when you open the item in the reader).</span></div>
       <div className="rm-legend-row"><span className="rm-swatch"><svg viewBox="0 0 38 38" width="22" height="22"><line x1="4" y1="19" x2="34" y2="19" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 6" /></svg></span>
         <span><b>Brass seam</b>: two fields that share topics. Thicker means more in common.</span></div>
-      <div className="rm-legend-row"><span className="rm-swatch">
-        <svg viewBox="0 0 38 38" width="22" height="22" aria-hidden="true">
-          <defs><pattern id="rm-lg-tx" patternUnits="userSpaceOnUse" width="3.6" height="3.6" patternTransform="rotate(35)"><path d="M0,1.8H3.6" stroke="rgba(38,28,16,0.6)" strokeWidth="0.7" /></pattern></defs>
-          <path d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z" fill={tessera(hue, KINDS.read.t, 0)} stroke="rgba(38,30,20,0.45)" strokeWidth="1" strokeLinejoin="round" />
-          <path d="M5,19 L34,19 L27,31 L11,31 Z" fill="url(#rm-lg-tx)" />
+      <div className="rm-legend-row"><span className="rm-swatch rm-swatch-wide">
+        <svg viewBox="0 0 114 38" width="66" height="22" aria-hidden="true">
+          <defs><pattern id="rm-lg-tx" patternUnits="userSpaceOnUse" width="4.4" height="4.4" patternTransform="rotate(35)"><path d="M0,2.2H4.4" stroke={tessera(hue, KINDS.kept.t, 0)} strokeWidth="1.2" /></pattern></defs>
+          {[0, 38, 76].map((dx, k) => (
+            <g key={k} transform={`translate(${dx} 0)`}>
+              <path d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z" fill={k === 2 ? tessera(hue, KINDS.kept.t, 0) : 'hsl(40 32% 93%)'} stroke="rgba(38,30,20,0.4)" strokeWidth="1" strokeLinejoin="round" />
+              {k === 1 && <path d="M5,19 L12,7 L27,6 L34,18 L27,31 L11,31 Z" fill="url(#rm-lg-tx)" />}
+              {k < 2 && <path d="M7.5,19 L13.3,9 L25.8,8.2 L31.6,18 L25.8,28.8 L12.2,28.8 Z" fill="none" stroke={tessera(hue, KINDS.kept.t, 0)} strokeWidth="1.8" strokeLinejoin="round" />}
+            </g>
+          ))}
         </svg></span>
-        <span><b>Hatching or stipple</b>: how much of it you finished, filled from the bottom. A narrow band: started. Textured edge to edge: finished (85% played, or read to the end at a reading pace for how dense it is). No texture: not tracked.</span></div>
+        <span><b>Outline → shaded → full</b>: how much of it you finished. An outline: just opened. Hatched or stippled: partway, denser the further you got. Fully coloured: finished (85% played, or read through at a pace that fits how dense it is), or opened before Mosaic tracked it.</span></div>
       <div className="rm-legend-row"><span className="rm-swatch rm-swatch-ic"><Icon name="video" size={16} /></span>
         <span><b>Icon in a stone</b>: what the item is (article, video, podcast…).</span></div>
       <p className="rm-key">One stone per item, one panel per field; the hue is the field's. Stones on the same topic are laid side by side.</p>

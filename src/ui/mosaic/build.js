@@ -1,27 +1,31 @@
 // Lays the reading mosaic as an SVG string.
 //
-//   a piece   — one item you engaged with. Size and depth come from what
-//               happened (model.KINDS): moved you → large and dark; kept or
-//               noted → middling; only opened → small and pale; closed the
-//               question down → cut but uncoloured parchment. Its media icon is
-//               set into it when there's room.
+//   a piece   — one item you engaged with. Its size is the item's length
+//               (model.stoneRadius, log scale: a short clip is a chip, a long
+//               lecture a slab; unknown length → middling). Its depth comes
+//               from what happened (model.KINDS): moved you → dark; kept or
+//               noted → middling; only opened → pale; closed the question
+//               down → cut but uncoloured parchment. Its media icon is set
+//               into it when there's room.
 //   a panel   — one broad field. Hue is the field's own.
 //   in a panel, pieces that share a topic are laid next to each other, so a
 //               subject you keep coming back to shows as a patch.
-//   fullness  — how much of the item you finished (data/progress.js) is laid
-//               as a hand-drawn texture (hatching, cross-hatching, stipple
-//               or ripples, picked at random per stone) that fills the stone
-//               from the bottom up; a finished item is textured edge to edge.
-//               No texture: Mosaic doesn't know (never opened in the reader).
-//               Depth stays with what happened, texture with how much.
+//   fullness  — how much of the item you finished (data/progress.js). Just
+//               opened: the stone is only an outline in its colour. Partway:
+//               it is shaded in its colour by hand (hatching, cross-hatching,
+//               stipple or ripples, picked at random per stone), denser the
+//               further you got. Finished: fully coloured. Items Mosaic has no
+//               progress for (opened before tracking, or a player that reports
+//               nothing) are laid fully coloured, as they always were.
+//               Depth stays with what happened, fullness with how much.
 //   overlap   — fields that share topics are pulled together and joined by a
 //               brass seam named with what they share. Pieces carrying a shared
 //               topic are laid on the side facing the other field.
 // Deterministic: the same record lays the same mosaic.
 import {
-  mulberry32, clamp, esc, tessera, voronoiCell, inset, pathOf, polyCentroid, hashStr, clipHalfPlane,
+  mulberry32, clamp, esc, tessera, voronoiCell, inset, pathOf, polyCentroid, hashStr,
 } from './geometry.js';
-import { KINDS, UNSORTED, topicSlug } from './model.js';
+import { KINDS, UNSORTED, topicSlug, stoneRadius } from './model.js';
 import { iconMarkup } from '../icons.jsx';
 import { CM_GROUND_DEFS } from '../../groundAssets.js';
 
@@ -30,45 +34,32 @@ export const VB_H = 470;
 const SQ = 0.82; // the floor is seen a little from above
 const GROUT = 1.4;
 
-// One texture per stone, drawn in the stone's own ink. Every stone gets its
-// own pattern, so angle, spacing and stipple layout vary like a hand did them.
+// The shading of a partway stone, drawn in the stone's own colour. Density
+// follows `level` (0–1): a few far-apart strokes just after you start, close
+// and heavy just before done, so the stone looks nearly filled in. Every
+// stone gets its own pattern, so angle and stipple layout vary like a hand
+// did them.
 const TEXTURES = ['hatch', 'cross', 'stipple', 'ripple'];
-function texturePattern(id, type, r, ink) {
+function texturePattern(id, type, r, ink, level) {
   const f = (n) => n.toFixed(2);
+  const L = clamp(level, 0, 1);
   const angle = Math.round(r() * 180);
-  const sw = 0.5 + r() * 0.2;
-  const line = (d) => `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${f(sw)}" stroke-linecap="round"/>`;
+  const line = (d, sw) => `<path d="${d}" fill="none" stroke="${ink}" stroke-width="${f(sw)}" stroke-linecap="round"/>`;
   let s, body;
-  if (type === 'hatch') { s = 2.8 + r() * 1.2; body = line(`M0,${f(s / 2)}H${f(s)}`); }
-  else if (type === 'cross') { s = 3.4 + r() * 1.2; body = line(`M0,${f(s / 2)}H${f(s)}M${f(s / 2)},0V${f(s)}`); }
+  if (type === 'hatch') { s = 7 - 4.4 * L; body = line(`M0,${f(s / 2)}H${f(s)}`, 0.6 + 1.3 * L); }
+  else if (type === 'cross') { s = 8.5 - 5.2 * L; body = line(`M0,${f(s / 2)}H${f(s)}M${f(s / 2)},0V${f(s)}`, 0.55 + 1.0 * L); }
   else if (type === 'ripple') {
-    s = 4 + r() * 1.4;
-    const a = 0.7 + r() * 0.5;
-    body = line(`M0,${f(s / 2)}Q${f(s / 4)},${f(s / 2 - a)} ${f(s / 2)},${f(s / 2)}T${f(s)},${f(s / 2)}`);
+    s = 7.5 - 4.6 * L;
+    const a = 0.6 + r() * 0.5;
+    body = line(`M0,${f(s / 2)}Q${f(s / 4)},${f(s / 2 - a)} ${f(s / 2)},${f(s / 2)}T${f(s)},${f(s / 2)}`, 0.6 + 1.2 * L);
   } else {
-    s = 5 + r() * 1.5;
-    body = Array.from({ length: 4 }, () => `<circle cx="${f(r() * s)}" cy="${f(r() * s)}" r="${f(0.42 + r() * 0.22)}" fill="${ink}"/>`).join('');
+    s = 5;
+    const n = 2 + Math.round(L * 12);
+    body = Array.from({ length: n }, () => `<circle cx="${f(r() * s)}" cy="${f(r() * s)}" r="${f(0.4 + L * 0.55 + r() * 0.15)}" fill="${ink}"/>`).join('');
   }
   return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${f(s)}" height="${f(s)}" patternTransform="rotate(${angle})">${body}</pattern>`;
 }
-
-// Any item you started shows at least this share of its stone, so a few
-// minutes of a long piece still reads as begun; above it, fill is linear.
-const STARTED = 0.15;
-const areaOf = (poly) => Math.abs(poly.reduce((n, a, i) => { const b = poly[(i + 1) % poly.length]; return n + a[0] * b[1] - b[0] * a[1]; }, 0)) / 2;
-// The part of the stone below a level line, cut so it holds `share` of the
-// stone's area (stones narrow toward the bottom, so height would under-fill).
-function fillFromBottom(face, share) {
-  const ys = face.map((pt) => pt[1]);
-  let lo = Math.min(...ys), hi = Math.max(...ys);
-  const total = areaOf(face);
-  const below = (y) => clipHalfPlane(face, [0, y], [0, -1]);
-  for (let k = 0; k < 18; k++) {
-    const mid = (lo + hi) / 2;
-    if (areaOf(below(mid)) / total > share) lo = mid; else hi = mid;
-  }
-  return below((lo + hi) / 2);
-}
+const PAPER = 'hsl(40 32% 93%)';
 
 export function buildReadingMosaic({ fields, links }) {
   if (!fields.length) return '';
@@ -92,7 +83,7 @@ export function buildReadingMosaic({ fields, links }) {
       .sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))
       .flatMap(([k, ps]) => ps.sort((a, b) => kindRank[a.kind] - kindRank[b.kind] || a.ts - b.ts).map((p) => ({ p, patch: k })));
     const pieces = ordered.map(({ p, patch }) => ({
-      p, patch, r: KINDS[p.kind].r * (0.92 + pr() * 0.16),
+      p, patch, r: stoneRadius(p.length) * (0.94 + pr() * 0.12),
       jitter: pr() * 2 - 1, hueJit: pr() * 2 - 1, sparkle: pr() > 0.88 ? pr() : 0,
     }));
     // Lay the stones around (0, 0), unsquashed. Each stone is set against one
@@ -250,8 +241,9 @@ export function buildReadingMosaic({ fields, links }) {
       const { p, jitter, hueJit, sparkle } = s.piece;
       const K = KINDS[p.kind];
       const topics = p.topics.map(topicSlug).join(' ');
-      const how = p.fill ? (p.fill.done ? ' · finished' : ` · ${Math.round(p.fill.level * 100)}% of the way`) : '';
-      const tip = `${p.title}${p.source ? ' — ' + p.source : ''}\n${K.label}${how}${p.topics.length ? ' · ' + p.topics.join(', ') : ''}`;
+      const how = !p.fill ? '' : p.fill.done ? ' · finished' : p.fill.level > 0 ? ` · ${Math.round(p.fill.level * 100)}% of the way` : ' · just opened';
+      const long = p.length ? ` · ~${p.length >= 5400 ? (p.length / 3600).toFixed(1) + ' h' : Math.max(1, Math.round(p.length / 60)) + ' min'} long` : '';
+      const tip = `${p.title}${p.source ? ' — ' + p.source : ''}\n${K.label}${how}${long}${p.topics.length ? ' · ' + p.topics.join(', ') : ''}`;
       const open = `<g class="rm-piece k-${p.kind}" data-item="${esc(p.id)}" data-t="${esc(topics)}" data-f="${fid}"><title>${esc(tip)}</title>`;
       let fill, dark = false;
       if (K.t == null || unsorted) {
@@ -262,26 +254,34 @@ export function buildReadingMosaic({ fields, links }) {
         dark = K.t > 0.7;
       }
       const dash = K.t == null ? ' stroke-dasharray="2.5 2.2"' : '';
-      // Fullness: texture from the bottom of the stone up to how far you got.
-      let texture = '';
-      if (p.fill && p.fill.level > 0) {
-        const tr = mulberry32(hashStr(p.id) || 3);
-        const pid = `rm-tx-${patterns.length}`;
-        const ink = dark ? 'rgba(255,248,236,0.62)' : 'rgba(38,28,16,0.5)';
-        patterns.push(texturePattern(pid, TEXTURES[Math.floor(tr() * TEXTURES.length)], tr, ink));
-        const share = p.fill.done ? 1 : STARTED + (1 - STARTED) * p.fill.level;
-        const part = share >= 1 ? face : fillFromBottom(face, share);
-        if (part.length >= 3) texture = `<path class="rm-tx" d="${pathOf(part)}" fill="url(#${pid})"/>`;
+      const shaded = !!(p.fill && !p.fill.done && p.fill.level > 0);
+      const edge = `<path d="${pathOf(inset(face, 1.2))}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.9" stroke-linejoin="round"/>`;
+      if (!p.fill || p.fill.done) {
+        // Finished, or not tracked: fully coloured.
+        tiles.push(open +
+          `<path d="${pathOf(face)}" fill="${fill}" stroke="rgba(30,22,12,0.48)" stroke-width="0.7" stroke-linejoin="round"${dash}/>` + edge + `</g>`);
+      } else {
+        // Just opened: an outline in the stone's colour. Partway: shaded in it.
+        const ink = K.t == null ? 'hsl(38 16% 58%)' : fill;
+        let shade = '';
+        if (p.fill.level > 0) {
+          const tr = mulberry32(hashStr(p.id) || 3);
+          const pid = `rm-tx-${patterns.length}`;
+          patterns.push(texturePattern(pid, TEXTURES[Math.floor(tr() * TEXTURES.length)], tr, ink, p.fill.level));
+          shade = `<path class="rm-tx" d="${pathOf(face)}" fill="url(#${pid})"/>`;
+        }
+        tiles.push(open +
+          `<path d="${pathOf(face)}" fill="${PAPER}" stroke="rgba(30,22,12,0.4)" stroke-width="0.7" stroke-linejoin="round"${dash}/>` + shade +
+          `<path d="${pathOf(inset(face, 1.3))}" fill="none" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/>` + `</g>`);
+        dark = false;
       }
-      tiles.push(open +
-        `<path d="${pathOf(face)}" fill="${fill}" stroke="rgba(30,22,12,0.48)" stroke-width="0.7" stroke-linejoin="round"${dash}/>` + texture +
-        `<path d="${pathOf(inset(face, 1.2))}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.9" stroke-linejoin="round"/>` +
-        `</g>`);
       // The media icon, set into the stone where it fits.
       if (s.r >= 11) {
         const [x, y] = polyCentroid(face);
         const size = clamp(s.r * 0.78, 10, 17);
         const ink = dark ? 'rgba(255,250,240,0.78)' : 'rgba(40,30,18,0.5)';
+        // On a shaded stone the icon sits on a clean spot, or the strokes swallow it.
+        if (shaded) icons.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(size * 0.72).toFixed(1)}" fill="${PAPER}" opacity="0.9"/>`);
         icons.push(iconMarkup(p.mediaType, { x: x - size / 2, y: y - size / 2, size, color: ink, accent: ink, width: 1.9 }));
       }
     });

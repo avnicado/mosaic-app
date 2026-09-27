@@ -20,7 +20,7 @@ const fmtDate = (ts) => new Date(ts).toLocaleDateString(undefined, { month: 'sho
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
 // ---- Now -----------------------------------------------------------------------
-function Now({ thread, parent, sessions, openSession, onRestateInSession }) {
+function Now({ thread, parent, sessions, openSession, onRestateInSession, keptCount }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
@@ -95,6 +95,13 @@ function Now({ thread, parent, sessions, openSession, onRestateInSession }) {
               onClick={() => setShared(thread.id, !thread.shared)}>
               {thread.shared ? '◉ Shared — stop' : 'Share with others'}
             </button>
+            {keptCount > 0 && (
+              // One column (phones): Kept sits below the whole session, so this jumps to it.
+              <button className="btn link th-jump-kept"
+                onClick={() => document.getElementById('th-kept')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+                <Icon name="kept" size={12} /> Kept · {keptCount}
+              </button>
+            )}
           </div>
           {thread.articulations.length > 1 && !editing && (
             <p className="th-first">First held as <span className="serif">“{thread.articulations[0].text}”</span></p>
@@ -356,7 +363,7 @@ export default function ThreadPage({ id }) {
       <div className="th-layout">
         <div className="th-main">
           <div className="th-o-now">
-            <Now thread={thread} parent={parent} sessions={sessions} openSession={openSession} onRestateInSession={focusRestate} />
+            <Now thread={thread} parent={parent} sessions={sessions} openSession={openSession} onRestateInSession={focusRestate} keptCount={kept.length} />
           </div>
           <div className="th-o-session">
             {result && !openSession && <ResultCard result={result} onDismiss={() => setResult(null)} />}
@@ -376,7 +383,7 @@ export default function ThreadPage({ id }) {
           <div className="th-o-reading">
             <Reading thread={thread} busy={busy} collapsible={sessions.some((s) => s.closedAt)} />
           </div>
-          <div className="th-o-kept">
+          <div className="th-o-kept" id="th-kept">
             <Kept items={kept} />
           </div>
         </aside>

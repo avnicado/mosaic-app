@@ -83,7 +83,12 @@ export const voronoiCell = (site, others, region) => {
   for (let j = 0; j < others.length && cell.length > 2; j++) {
     const o = others[j];
     if (o === site) continue;
-    const mid = [(site[0] + o[0]) / 2, (site[1] + o[1]) / 2];
+    // Weighted (power diagram) when sites carry a radius `r`: the cut moves
+    // toward the smaller stone, so a big stone keeps a big cell.
+    const dx = o[0] - site[0], dy = o[1] - site[1];
+    const d2 = dx * dx + dy * dy || 1;
+    const t = clamp(0.5 + ((site.r || 0) ** 2 - (o.r || 0) ** 2) / (2 * d2), 0.15, 0.85);
+    const mid = [site[0] + dx * t, site[1] + dy * t];
     cell = clipHalfPlane(cell, mid, [o[0] - site[0], o[1] - site[1]]);
   }
   return cell;

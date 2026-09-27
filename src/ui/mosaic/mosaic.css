@@ -76,3 +76,4 @@
   .rm-canvas { min-width: 740px; }
   .rm-hint::before { content: "Scroll the floor sideways. "; }
 }
+.rm-swatch-wide { flex-basis: 66px; }
