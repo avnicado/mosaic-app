@@ -56,6 +56,18 @@ export const ADMISSIBLE_CRITERIA = [
 // simply not composed in — they are not "down-ranked", they are inadmissible.
 export const BRIDGING_FLOOR = 0.35;
 
+// Density: substance per minute of attention, NOT complexity or length (the
+// Mandala's radius axis — src/src/axes.js carries the same definition for the
+// Side-by-Side demo; this is the independent live-corpus copy). A simple,
+// well-made, detailed piece scores as high as a dense academic paper; a long
+// but padded piece scores low. Listicle padding, ragebait and headline-only
+// items score low; compact, load-bearing material scores high regardless of
+// how easy it is to read.
+export const DENSITY_RING_COUNT = 5;
+export function densityRing(density) {
+  return Math.min(DENSITY_RING_COUNT - 1, Math.floor(clamp01(density) * DENSITY_RING_COUNT));
+}
+
 // ------------------------------------------------------------
 // Perspective API — the primary bridging-score path.
 // ------------------------------------------------------------
@@ -174,6 +186,21 @@ export function heuristicBridging(item) {
   return clamp01(s);
 }
 
+// Deterministic 0..1 density with no network — the last-resort fallback for
+// the Mandala's radius axis. A coarse proxy only: real scoring is the LLM
+// path below (buildClassifyPrompt asks for it directly, in its own words).
+const DENSITY_MARKERS = ['study', 'data', 'evidence', 'method', 'analysis', 'paper', 'research', 'case study', 'field notes', 'teardown', 'postmortem', 'interview', 'transcript', 'notes on', 'a history of', 'how it works'];
+const LISTICLE_MARKERS = ['top 10', 'things you', 'ways to', 'reasons why', 'you won’t believe', 'best ', 'tips for', 'hacks'];
+export function heuristicDensity(item) {
+  const t = `${item.title || ''} ${item.excerpt || ''}`.toLowerCase();
+  let s = 0.4;
+  for (const m of DENSITY_MARKERS) if (t.includes(m)) s += 0.08;
+  for (const m of LISTICLE_MARKERS) if (t.includes(m)) s -= 0.15;
+  if ((item.excerpt || '').length > 200) s += 0.1; // some substance beyond a headline
+  if ((item.excerpt || '').length < 40) s -= 0.1; // headline-only, nothing to judge
+  return clamp01(s);
+}
+
 // ------------------------------------------------------------
 // Perspective path (bridging score only — it does not classify domain/move-type)
 // ------------------------------------------------------------
@@ -257,9 +284,11 @@ Return ONLY valid JSON:
   "domain": "pick the SINGLE closest from: ${DOMAINS.join(', ')}",
   "moveType": "which slot this best fills — one of: sharpen (a distinction inside a frame), complicate (a case/tension a framing flattens), bridge (same shape, distant field), ground (a concrete case/primary material)",
   "bridging": 0.0,
+  "density": 0.0,
   "why": "one sentence: what makes this item worth composing in, structurally (not that it's popular)"
 }
-"bridging" is 0.0-1.0: how constructive/curious/nuanced the item is (high) vs. ragebait/contentless (low).`;
+"bridging" is 0.0-1.0: how constructive/curious/nuanced the item is (high) vs. ragebait/contentless (low).
+"density" is 0.0-1.0: substance per minute of attention, NOT complexity or length. A short, simple, well-made, detailed piece scores as high as a dense academic paper; a long but padded piece scores low. Listicle padding, ragebait and headline-only items score low; compact, load-bearing material scores high regardless of how easy it is to read.`;
 }
 
 export async function classifyWithLLM(item, { classify }) {
@@ -272,6 +301,7 @@ export async function classifyWithLLM(item, { classify }) {
       domain: DOMAINS.includes(parsed.domain) ? parsed.domain : heuristicDomain(item),
       moveType: SLOTS.includes(parsed.moveType) ? parsed.moveType : heuristicMoveType(item),
       bridging: clamp01(Number(parsed.bridging)),
+      density: Number.isFinite(Number(parsed.density)) ? clamp01(Number(parsed.density)) : null,
       why: typeof parsed.why === 'string' ? parsed.why : '',
     };
   } catch {
@@ -306,13 +336,16 @@ export async function scoreItem(item, opts = {}) {
     bridging = heuristicBridging(item);
     scored_by = 'heuristic';
   }
+  // Density has no Perspective path (it isn't a Perspective attribute) — LLM
+  // when available, else the same deterministic heuristic fallback as bridging.
+  const density = typeof llm?.density === 'number' ? llm.density : heuristicDensity(item);
 
   return {
     ...item,
     domain,
     moveType,
     slot: moveType,
-    scores: { bridging: round2(bridging), engagement: round2(engagementScore(item)) },
+    scores: { bridging: round2(bridging), density: round2(density), engagement: round2(engagementScore(item)) },
     why: llm?.why || `${SLOT_BLURB[moveType]} — in ${domain}`,
     scored_by,
     perspectiveAttributes,

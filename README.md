@@ -29,8 +29,10 @@ machine; images go through a temp file and the Read tool). `LLM_BACKEND=claude`
 forces it; `LLM_FALLBACK=off` disables it. `/api/session` reports which is active.
 
 **People.** You're the owner (sign in with `APP_PASSWORD`; leave the name empty).
-Settings → People creates one-time invite links (7 days); up to `MAX_USERS`
-(default 5) others, each with a private record. Any thread can be shared
+Anyone can create an account from the sign-in screen (name + password, no
+email); set `OPEN_SIGNUP=off` to close it. Settings → People also creates
+one-time invite links (7 days). No cap on people unless `MAX_USERS` is set.
+Each person has a private record. Any thread can be shared
 read-only with the others from its page ("Share with others"). Locally without
 `APP_PASSWORD` there is no sign-in and you are the owner.
 

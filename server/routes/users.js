@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const [users, invites] = await Promise.all([listUsers(), listInvites()]);
-      res.status(200).json({ users: users.map(publicUser), invites: invites.map(({ code, createdAt, expiresAt }) => ({ code, createdAt, expiresAt })), max: MAX_MEMBERS });
+      res.status(200).json({ users: users.map(publicUser), invites: invites.map(({ code, createdAt, expiresAt }) => ({ code, createdAt, expiresAt })), max: Number.isFinite(MAX_MEMBERS) ? MAX_MEMBERS : null });
       return;
     }
     if (req.method === 'POST') {

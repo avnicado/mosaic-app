@@ -230,6 +230,11 @@ export function retryShelf() { corpus = null; set({ status: 'idle' }); return en
 const subscribe = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
 export const useShelf = () => useSyncExternalStore(subscribe, () => state);
 
+// The full scored pool behind the shelf (every admitted item, not just the
+// cards chosen for today's sections) — the Mandala reads from this directly,
+// since it composes its own one-pick-per-domain from the whole corpus.
+export const corpusItems = () => corpus?.items || [];
+
 // The Desk's three: the first card of each section, as the Promenade shows them.
 export function deskPicks(shelf) {
   if (!shelf) return [];

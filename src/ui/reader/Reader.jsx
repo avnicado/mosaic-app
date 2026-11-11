@@ -18,6 +18,9 @@ import { Icon, MediaChip } from '../icons.jsx';
 import { SlotTag, Spinner, hostOf } from '../kit.jsx';
 import { subscribeReader, getReader, closeReader } from './store.js';
 import '../thread/thread.css';
+import { REACTIONS } from '../../engine/quest.js';
+import { react } from '../../data/quests.js';
+import '../quest/quest.css';
 import './reader.css';
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -180,6 +183,18 @@ function ReaderPanel({ target }) {
 // ✦ / ○ / – and keep, without leaving the reader, and how much of it you've had.
 function ReaderFoot({ item }) {
   const had = progressText(item.progress);
+  if (item.questId) return (
+    <footer className="rd-foot">
+      {had && <span className="rd-had" title="Recorded while it was open in Mosaic">{had}</span>}
+      <span className="rd-foot-q">How did it land?</span>
+      <div className="qs-reacts rd-signals" role="group" aria-label="How did this land?">
+        {REACTIONS.map((r) => (
+          <button key={r.key} className={`qs-react r-${r.key} ${item.reaction === r.key ? 'on' : ''}`}
+            aria-pressed={item.reaction === r.key} onClick={() => react(item.id, r.key)}>{r.label}</button>
+        ))}
+      </div>
+    </footer>
+  );
   return (
     <footer className="rd-foot">
       {had && <span className="rd-had" title="Recorded while it was open in Mosaic">{had}</span>}

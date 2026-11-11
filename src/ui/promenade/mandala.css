@@ -1,0 +1,16 @@
+.mdl-wrap { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; margin: 18px 0 30px; }
+.mdl-svg { flex: 0 0 auto; }
+.mdl-grid { fill: none; stroke: var(--rule); stroke-width: 1; }
+.mdl-cell { stroke: var(--bg); stroke-width: 1; cursor: pointer; outline: none; }
+.mdl-cell.open { stroke: var(--rule); stroke-dasharray: 2 2; }
+.mdl-cell.cursor { stroke: var(--accent-soft); stroke-width: 1.5; fill-opacity: 1; }
+.mdl-cell.cursor.open { fill: rgba(143, 36, 24, 0.09); }
+.mdl-cell.pinned { stroke: var(--accent); stroke-width: 2; }
+.mdl-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; fill: var(--ink-faded); }
+.mdl-wedge.active .mdl-label { fill: var(--ink); }
+.mdl-home { fill: var(--panel); stroke: var(--accent); stroke-width: 1.5; }
+.mdl-home-label { font-family: var(--mono); font-size: 10px; fill: var(--ink-soft); text-anchor: middle; }
+.mdl-detail { flex: 1 1 280px; min-width: 260px; }
+.mdl-note { font-size: 13px; line-height: 1.5; margin: 6px 0 14px; }
+.mdl-pinned { font-size: 12px; margin: -4px 0 10px; }
+.mdl-seen-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }

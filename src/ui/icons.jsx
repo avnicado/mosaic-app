@@ -60,7 +60,9 @@ export const ICONS = {
   library:   ['M3 20.5h18M4.5 20.5V5h3.5v15.5M10 20.5V3.5h3.5v17', 'M15.2 20.2l2.6-15 3.3.6-2.6 15z'],
   settings:  [c(12, 12, 7) + 'M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7L7 17M17 7l1.7-1.7', c(12, 12, 2.6)],
   shared:    [c(9, 12, 5.5) + c(15, 12, 5.5), 'M12 7.6a5.5 5.5 0 0 1 0 8.8 5.5 5.5 0 0 1 0-8.8z'],
+  quest:     [c(12, 12, 8.5) + 'M12 2v2.2M12 19.8V22M2 12h2.2M19.8 12H22', 'M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z'],
   thread:    ['M4 19c3-9 6 3 9-6s4-6 7-8', c(4, 19, 1.6) + c(20, 5, 1.6)],
+  feedback:  ['M4 4.5h16v11H12.5L8 19.5v-4H4z', 'M8 8.5h8v1.8H8z'],
   signout:   ['M14 4h5v16h-5M10 8l-4 4 4 4M6 12h9', ''],
   mosaic:    ['', 'M3 4h7.5l-1 7H3zM12 3.5l8.5 1.5-1.5 6.5-8-1zM3 12.5h6.5l1.5 8H3zM11.5 11.8l8 1.2L21 20.5h-8.5z'],
 };
@@ -103,8 +105,8 @@ export function MediaChip({ type, url, label = false, size = 15 }) {
   );
 }
 
-// A record item (has a session) opens with its ✦ / keep controls in the reader.
-const readerTarget = (item) => (item.id && item.sessionId
+// A record item (has a session or a quest) opens with its ✦ / keep controls in the reader.
+const readerTarget = (item) => (item.id && (item.sessionId || item.questId)
   ? { itemId: item.id }
   : { url: item.url, title: item.title, source: item.source, mediaType: item.mediaType, why: item.why, preview: item.preview || item.excerpt });
 

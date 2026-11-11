@@ -4,6 +4,7 @@ import { useRecord } from '../../data/hooks.js';
 import { RATING_AXES } from '../kit.jsx';
 import './settings.css';
 import { isOwner } from '../../session.js';
+import { FeedbackInbox } from '../feedback/Feedback.jsx';
 
 const DAY = 864e5;
 const DURATIONS = [1, 3, 6, 12];
@@ -29,6 +30,7 @@ export default function Settings() {
       <h1>Settings</h1>
       <Sync />
       {isOwner() && <People />}
+      {isOwner() && <FeedbackInbox />}
       <Backup />
       <Ratings />
       <Pledge />
@@ -162,10 +164,11 @@ function People() {
   };
   const users = data?.users || [];
   const invites = data?.invites || [];
-  const room = data ? data.max - users.length - invites.length : 0;
+  // max is null when there is no limit.
+  const room = !data ? 0 : data.max == null ? Infinity : data.max - users.length - invites.length;
   return (
     <section className="section">
-      <div className="section-head"><h2>People</h2><span className="label">{data ? `${users.length} of ${data.max} · besides you` : ''}</span></div>
+      <div className="section-head"><h2>People</h2><span className="label">{data ? `${data.max == null ? users.length : `${users.length} of ${data.max}`} · besides you` : ''}</span></div>
       <p className="set-help">Everyone has their own private threads. A thread is only visible to the others if its holder turns on “Share with others” on it (read-only).</p>
       {error && <p className="error">{error}</p>}
       {users.length > 0 && (

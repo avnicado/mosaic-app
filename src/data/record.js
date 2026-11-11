@@ -9,7 +9,7 @@
 //             corrections:{rejected:[text], added:[{field:'absent'|'presuppositions', text}], note},
 //             status:'active'|'closed', synthesis, closedAt, parentId, spawnAnchor:{itemId,title,url},
 //             seed:{title,source,url,why,excerpt}|null, image:{observation,thumbnail}|null,
-//             createdAt, touchedAt }
+//             createdAt, touchedAt, returnOffer:{at, did:'opened'|'later'} (src/data/dormant.js) }
 //   session { id, threadId, openedAt, closedAt|null, articulationAtOpen, articulationAtClose,
 //             itemIds:[id], diff:{verdict,why,moves}|null, note }
 //   item    { id, threadId, sessionId, slot, title, source, url, mediaType, preview, why,
@@ -17,6 +17,12 @@
 //             signal:'moved'|'neutral'|'closed'|null, kept, openedAt, rating:{axis:0-4},
 //             notes:[{text, at}], replacedBy, createdAt,
 //             progress: how much you read/watched/listened (src/data/progress.js) }
+//   quest   { id, title, learner:{level, background, known:[], interests:[], avoid:[], prefers:[]},
+//             map:[{id, title, why, status:'open'|'exploring'|'done'|'set aside', threadId|null, at}],
+//             messages:[{id, role:'you'|'guide'|'event', text, at, itemIds?, find?, question?}],
+//             status:'active'|'closed', createdAt, touchedAt }
+//   A quest's items are ordinary item documents with questId (and branchId),
+//   threadId/sessionId null, level, and reaction:'landed'|'too-hard'|… (src/engine/quest.js).
 
 const P = 'm2:';
 export const DORMANT_MS = 30 * 24 * 3600 * 1000;
@@ -77,6 +83,10 @@ export function itemsFor(threadId) {
 export function sessionItems(session) {
   return (session?.itemIds || []).map(getItem).filter(Boolean);
 }
+export const getQuest = (id) => read(`quest:${id}`);
+export const allQuests = () => all('quest');
+export const listQuests = () => allQuests().sort((a, b) => (b.touchedAt || b.createdAt) - (a.touchedAt || a.createdAt));
+export const questItems = (questId) => allItems().filter((i) => i.questId === questId).sort((a, b) => a.createdAt - b.createdAt);
 export const keptItems = (threadId) => itemsFor(threadId).filter((i) => i.kept);
 export const childrenOf = (threadId) => allThreads().filter((t) => t.parentId === threadId);
 
@@ -92,6 +102,16 @@ export function patchThread(id, patch) {
 export function patchSession(id, patch) {
   const s = getSession(id); if (!s) return null;
   return putSession({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) });
+}
+export function putQuest(q) { write(`quest:${q.id}`, q); changed(); return q; }
+export function patchQuest(id, patch) {
+  const q = getQuest(id); if (!q) return null;
+  return putQuest({ ...q, ...(typeof patch === 'function' ? patch(q) : patch) });
+}
+export function deleteQuest(id) {
+  for (const i of questItems(id)) remove(`item:${i.id}`);
+  remove(`quest:${id}`);
+  changed();
 }
 export function patchItem(id, patch) {
   const i = getItem(id); if (!i) return null;
@@ -135,7 +155,7 @@ export const setUI = (patch) => { write('ui', { ...getUI(), ...patch }); };
 export function exportRecord() {
   return {
     format: 'mosaic-record', version: 2, exportedAt: new Date().toISOString(),
-    threads: allThreads(), sessions: allSessions(), items: allItems(),
+    threads: allThreads(), sessions: allSessions(), items: allItems(), quests: allQuests(),
     pledge: getPledge(), settings: read('settings'),
   };
 }
@@ -150,6 +170,7 @@ export function importRecord(rec) {
   for (const t of data.threads || []) if (newer(getThread(t.id), t)) { write(`thread:${t.id}`, t); counts.threads++; }
   for (const s of data.sessions || []) if (newer(getSession(s.id), s)) { write(`session:${s.id}`, s); counts.sessions++; }
   for (const i of data.items || []) if (!getItem(i.id)) { write(`item:${i.id}`, i); counts.items++; }
+  for (const q of data.quests || []) if (newer(getQuest(q.id), q)) { write(`quest:${q.id}`, q); counts.quests = (counts.quests || 0) + 1; }
   if (data.pledge && !getPledge()) write('pledge', data.pledge);
   changed();
   return counts;

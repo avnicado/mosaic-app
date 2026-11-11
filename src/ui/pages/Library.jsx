@@ -4,6 +4,7 @@ import { useRecord } from '../../data/hooks.js';
 import { go, threadPath } from '../router.js';
 import { SlotTag, hostOf, timeAgo } from '../kit.jsx';
 import ReadingMosaic from '../mosaic/ReadingMosaic.jsx';
+import CoralReef from '../coral/CoralReef.jsx';
 import { MediaChip, OpenButton, Icon, readerClick } from '../icons.jsx';
 import {
   snapshot, weekGrid, slotSignals, recurring, corrections, verdicts,
@@ -11,7 +12,10 @@ import {
 } from '../library/derive.js';
 import './library.css';
 
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+// Reef is switched off for now (2026-10-05). Set to true to show it again.
+const REEF_ENABLED = false;
+
+const plural =(n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 const openThread = (id) => go(threadPath(id));
 const ThreadLink = ({ t, className = '' }) => (
   <a className={`lib-tlink ${className}`} href={'#' + threadPath(t.id)}>{R.currentArticulation(t)}</a>
@@ -46,6 +50,7 @@ export default function Library() {
         {' '}A mirror of what you've done, for you only.
       </p>
       <nav className="lib-toc" aria-label="On this page">
+        {REEF_ENABLED && <a href="#/library" onClick={(e) => jump(e, 'lib-reef')}>Reef</a>}
         <a href="#/library" onClick={(e) => jump(e, 'lib-mosaic')}>Mosaic</a>
         <a href="#/library" onClick={(e) => jump(e, 'lib-threads')}>Threads</a>
         <a href="#/library" onClick={(e) => jump(e, 'lib-weeks')}>Weeks</a>
@@ -54,6 +59,7 @@ export default function Library() {
         {closed.length > 0 && <a href="#/library" onClick={(e) => jump(e, 'lib-closed')}>Closed</a>}
       </nav>
 
+      {REEF_ENABLED && <ReefSection threads={threads} sessions={sessions} items={items} />}
       <MosaicSection threads={threads} items={items} />
       <ThreadsSection threads={threads} sessions={sessions} />
       <WeeksSection rec={rec} />
@@ -67,6 +73,16 @@ export default function Library() {
 function jump(e, id) {
   e.preventDefault();
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---- 0. reef ---------------------------------------------------------------------
+function ReefSection({ threads, sessions, items }) {
+  return (
+    <section className="section" id="lib-reef">
+      <div className="section-head"><h2>Reef</h2><span className="label">where your questions moved</span></div>
+      <CoralReef threads={threads} sessions={sessions} items={items} />
+    </section>
+  );
 }
 
 // ---- 1. mosaic -------------------------------------------------------------------

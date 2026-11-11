@@ -10,7 +10,7 @@ import { useRecord, useBusy } from '../../data/hooks.js';
 import { SLOTS } from '../../engine/prompts.js';
 import { SlotTag, Spinner, timeAgo, hostOf } from '../kit.jsx';
 import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
-import { go, threadPath } from '../router.js';
+import { go, threadPath, questPath } from '../router.js';
 import ItemCard, { SkeletonCard, FailedCard, EmptySlotCard, NoteList } from '../thread/ItemCard.jsx';
 import Reading from '../thread/Reading.jsx';
 import Timeline, { Verdict, Moves } from '../thread/Timeline.jsx';
@@ -59,7 +59,10 @@ function Now({ thread, parent, sessions, openSession, onRestateInSession, keptCo
             {thread.seed.source ? <span className="th-anchor"> · {thread.seed.source}</span> : null}
           </div>
         )}
-        {!parent && !thread.seed && <div className="eyebrow">{thread.status === 'closed' ? 'Thread · closed' : 'Thread'}</div>}
+        {thread.questId && R.getQuest(thread.questId) && (
+          <div className="eyebrow th-lineage">◇ from the quest <a href={'#' + questPath(thread.questId)}>{R.getQuest(thread.questId).title}</a></div>
+        )}
+        {!parent && !thread.seed && !thread.questId && <div className="eyebrow">{thread.status === 'closed' ? 'Thread · closed' : 'Thread'}</div>}
       </div>
 
       <div className={`th-now-body ${thread.image?.thumbnail ? 'has-img' : ''}`}>

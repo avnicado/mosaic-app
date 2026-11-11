@@ -1,8 +1,9 @@
 // The Promenade: a finite daily shelf for when you hold nothing in particular.
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRoute } from '../router.js';
-import { useShelf, ensureShelf, refreshShelf, retryShelf, sectionTitle, sectionNote } from '../promenade/shelf.js';
+import { useShelf, ensureShelf, refreshShelf, retryShelf, sectionTitle, sectionNote, corpusItems } from '../promenade/shelf.js';
 import ShelfCard, { ShelfSkeleton } from '../promenade/ShelfCard.jsx';
+import Mandala from '../promenade/Mandala.jsx';
 
 const fmtDay = (iso) => {
   const d = new Date(iso);
@@ -16,6 +17,7 @@ const fmtTime = (iso) => {
 export default function Promenade() {
   const route = useRoute();
   const { status, shelf, meta, error, refreshes } = useShelf();
+  const [view, setView] = useState('shelf'); // 'shelf' | 'mandala'
   const dev = route.query.dev === '1' || new URLSearchParams(window.location.search).get('dev') === '1';
   const holdKey = route.query.hold || null;
   const topRef = useRef(null);
@@ -44,6 +46,12 @@ export default function Promenade() {
           If something catches, hold it and it becomes a thread.
         </p>
         {status === 'ready' && refreshes > 0 && <p className="muted pm-refreshed">A fresh shelf: none of these were on the one before.</p>}
+        {status === 'ready' && (
+          <div className="pm-view-toggle" role="tablist" aria-label="Promenade view">
+            <button className={`btn ${view === 'shelf' ? 'active' : ''}`} aria-pressed={view === 'shelf'} onClick={() => setView('shelf')}>Shelf</button>
+            <button className={`btn ${view === 'mandala' ? 'active' : ''}`} aria-pressed={view === 'mandala'} onClick={() => setView('mandala')}>Mandala</button>
+          </div>
+        )}
       </header>
 
       {(status === 'idle' || status === 'loading') && (
@@ -60,7 +68,19 @@ export default function Promenade() {
         </div>
       )}
 
-      {status === 'ready' && shelf && (
+      {status === 'ready' && shelf && view === 'mandala' && (
+        <>
+          {stale && <div className="notice pm-stale">Today’s collection isn’t reachable, so this is an older saved shelf.</div>}
+          <p className="muted pm-intro">
+            One wedge per domain, rings from shallow (center) to substantive (edge) — substance per minute, not
+            length or difficulty. Filled rings are what you've already held from here; the dashed ring is one
+            composed pick for the next depth to try.
+          </p>
+          <Mandala corpusItems={corpusItems()} />
+        </>
+      )}
+
+      {status === 'ready' && shelf && view === 'shelf' && (
         <>
           {stale && <div className="notice pm-stale">Today’s collection isn’t reachable, so this is an older saved shelf.</div>}
           {shelf.sections.filter((s) => s.cards.length).map((sec) => (

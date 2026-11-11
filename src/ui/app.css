@@ -41,6 +41,7 @@ input, textarea, select { font: inherit; color: var(--ink); }
 .brand { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 21px; text-decoration: none; padding: 2px 8px 10px; display: block; }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand-ic { color: var(--accent); --icon-accent: var(--accent); }
+.brand-alpha { font-family: var(--mono); font-style: normal; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); border: 1px solid var(--rule); border-radius: 2px; padding: 0 5px; line-height: 15px; margin-left: 2px; }
 .side-new { margin: 2px 4px 10px; }
 .side-link { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 4px; text-decoration: none; color: var(--ink-soft); font-size: 14px; }
 .side-link:hover { background: var(--highlight); color: var(--ink); }

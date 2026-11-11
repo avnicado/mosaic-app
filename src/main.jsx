@@ -14,6 +14,7 @@ const primary = { marginTop: 14, width: '100%', minHeight: 46, padding: '10px 12
 const title = { fontFamily: 'Fraunces, serif', fontWeight: 400, fontSize: 32, margin: '0 0 6px' };
 const sub = { color: '#8a7f72', fontSize: 14.5, margin: '0 0 8px', lineHeight: 1.5 };
 const err = { color: '#8f2418', fontSize: 14 };
+const link = { color: '#8f2418' };
 
 async function post(url, body) {
   const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
@@ -22,7 +23,7 @@ async function post(url, body) {
   return j;
 }
 
-function Login({ onDone, mode }) {
+function Login({ onDone, mode, signup, onSignup }) {
   const [name, setName] = useState('');
   const [pw, setPw] = useState('');
   const [error, setError] = useState(null);
@@ -44,6 +45,7 @@ function Login({ onDone, mode }) {
             <input style={field} type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Password" />
             <button type="submit" disabled={busy || (!pw && mode !== 'open')} style={primary}>{busy ? 'Signing in…' : 'Sign in'}</button>
             {error && <p style={err}>{error}</p>}
+            {signup && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>New here? <a href="#" onClick={(e) => { e.preventDefault(); onSignup(); }} style={link}>Create an account</a></p>}
           </>
         )}
       </form>
@@ -51,7 +53,8 @@ function Login({ onDone, mode }) {
   );
 }
 
-function Join({ code, valid, onDone }) {
+// code: a one-time invite. Without one this is open sign-up.
+function Join({ code, valid, onDone, onBack }) {
   const [name, setName] = useState('');
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -62,20 +65,20 @@ function Join({ code, valid, onDone }) {
     if (pw !== pw2) { setError("The passwords don't match."); return; }
     setBusy(true); setError(null);
     try {
-      await post('/api/join', { code, name, password: pw });
-      history.replaceState(null, '', location.pathname + location.hash);
+      await post('/api/join', code ? { code, name, password: pw } : { name, password: pw });
+      if (code) history.replaceState(null, '', location.pathname + location.hash);
       onDone();
     } catch (e2) { setError(e2.message); } finally { setBusy(false); }
   };
   return (
     <div style={shell}>
       <form onSubmit={submit} style={{ width: '100%', maxWidth: 360 }}>
-        <h1 style={title}>Join Mosaic</h1>
+        <h1 style={title}>{code ? 'Join Mosaic' : 'Create an account'}</h1>
         {!valid ? (
           <p style={err}>This invite link is no longer valid. Ask for a new one.</p>
         ) : (
           <>
-            <p style={sub}>You've been invited. Your threads will be private to you; you can choose to share a thread with the others later.</p>
+            <p style={sub}>{code ? "You've been invited. " : ''}Your threads will be private to you; you can choose to share a thread with the others later.</p>
             <input style={field} autoFocus autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
             <input style={field} type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Choose a password (8+ characters)" />
             <input style={field} type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="Password again" />
@@ -83,6 +86,7 @@ function Join({ code, valid, onDone }) {
             {error && <p style={err}>{error}</p>}
           </>
         )}
+        {onBack && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>Have an account? <a href="#" onClick={(e) => { e.preventDefault(); onBack(); }} style={link}>Sign in</a></p>}
       </form>
     </div>
   );
@@ -120,9 +124,9 @@ function Root() {
     } catch { /* offline: run on local data */ }
     setSessionInfo(session);
     if (invite && session.user?.role !== 'member') { setState({ phase: 'join', valid: session.inviteValid !== false }); return; }
-    if (!session.authed) { setState({ phase: 'login', mode: session.mode }); return; }
+    if (!session.authed) { setState({ phase: 'login', mode: session.mode, signup: !!session.signup && session.mode === 'password' }); return; }
     const r = await boot(session.user?.id || 'owner');
-    if (!r.ok) { setState({ phase: 'login', mode: session.mode }); return; }
+    if (!r.ok) { setState({ phase: 'login', mode: session.mode, signup: !!session.signup && session.mode === 'password' }); return; }
     setState({ phase: 'app' });
   };
 
@@ -136,7 +140,8 @@ function Root() {
   }, []);
 
   if (state.phase === 'join') return <Join code={invite} valid={state.valid} onDone={start} />;
-  if (state.phase === 'login') return <Login mode={state.mode} onDone={start} />;
+  if (state.phase === 'signup') return <Join valid onDone={start} onBack={() => setState({ ...state, phase: 'login' })} />;
+  if (state.phase === 'login') return <Login mode={state.mode} signup={state.signup} onSignup={() => setState({ ...state, phase: 'signup' })} onDone={start} />;
   if (state.phase !== 'app') return <div style={shell} />;
   return (
     <>

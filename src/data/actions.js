@@ -17,7 +17,7 @@ let busyVersion = 0;
 export const subscribeBusy = (fn) => { busyListeners.add(fn); return () => busyListeners.delete(fn); };
 export const getBusyVersion = () => busyVersion;
 export const getBusy = (threadId) => busy[threadId] || {};
-function setBusy(threadId, patch) {
+export function setBusy(threadId, patch) {
   busy[threadId] = { ...(busy[threadId] || {}), ...patch };
   busyVersion++;
   for (const fn of busyListeners) fn();

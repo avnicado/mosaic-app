@@ -4,8 +4,9 @@ import React, { useEffect } from 'react';
 import './desk.css';
 import * as R from '../../data/record.js';
 import { useRecord } from '../../data/hooks.js';
-import { threadPath } from '../router.js';
+import { threadPath, go } from '../router.js';
 import { timeAgo } from '../kit.jsx';
+import { returnOffer, answerReturnOffer } from '../../data/dormant.js';
 import { useShelf, ensureShelf, deskPicks, sectionTitle } from '../promenade/shelf.js';
 import ShelfCard, { ShelfSkeleton } from '../promenade/ShelfCard.jsx';
 
@@ -70,6 +71,7 @@ function useDesk() {
       threads: active.filter((t) => !openIds.has(t.id)).map(row),
       quiet: threads.filter((t) => R.isDormant(t)).map(row),
       pledge: R.getPledge(),
+      comeBack: returnOffer(threads, R.allSessions()),
     };
   });
 }
@@ -87,6 +89,8 @@ export default function Desk() {
       {!d.any ? <FirstRun /> : (
         <>
           {d.pledge && <PledgeStrip pledge={d.pledge} />}
+
+          {d.comeBack && <ComeBack offer={d.comeBack} />}
 
           {d.open.length > 0 && (
             <section className="section desk-section">
@@ -157,6 +161,26 @@ function ThreadRow({ r, quiet = false }) {
         </span>
       </a>
     </li>
+  );
+}
+
+// Offered once per quiet spell. Quiet is not wrong; this only asks.
+function ComeBack({ offer }) {
+  const { thread: t, real, quietSince } = offer;
+  const year = new Date(quietSince).getFullYear() === new Date().getFullYear() ? undefined : 'numeric';
+  return (
+    <aside className="desk-return" aria-label="A quiet thread">
+      <div className="label">A quiet thread</div>
+      <p className="desk-return-q">“{R.currentArticulation(t)}”</p>
+      <p className="desk-return-why muted">
+        Quiet since {fmtDate(quietSince, { year })}. That is not wrong.
+        {real ? ` It really moved ${real === 1 ? 'once' : `${real} times`} before.` : ''} Pick it up if it still pulls at you.
+      </p>
+      <div className="desk-return-actions">
+        <button className="btn small primary" onClick={() => { answerReturnOffer(t.id, 'opened'); go(threadPath(t.id)); }}>Open it</button>
+        <button className="btn small ghost" onClick={() => answerReturnOffer(t.id, 'later')}>Not now</button>
+      </div>
+    </aside>
   );
 }
 

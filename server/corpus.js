@@ -4,6 +4,7 @@
 // redeploy. Same sources, same scoring rules (src/scoring.js) either way.
 
 import { scoreItem, DOMAINS, SLOTS } from '../src/scoring.js';
+import { handleLLM } from './proxyCore.js';
 
 const TARGET = Number(process.env.CORPUS_TARGET || 260); // ~200-400 per spec
 const HN_COUNT = 90;
@@ -133,26 +134,25 @@ function hashString(s) {
   return Math.abs(h);
 }
 
-// ---- LLM classifier transport (Node-side, opt-in) ---------------------------
-// Only wired when MOSAIC_CLASSIFY=llm. Kept off by default: classifying hundreds
-// of items through Groq's free tier is slow and rate-limited, and the committed
-// corpus should be reproducible offline. When present, it calls Groq directly
-// (this is build-time server code, so the key stays server-side by definition).
+// ---- LLM classifier transport ------------------------------------------------
+// Goes through the SAME proxy every other LLM call on the site uses
+// (server/proxyCore.js: Groq primary, local `claude -p` as the configured
+// fallback) instead of a separate Groq-only key check — so corpus scoring
+// works wherever the rest of the site's LLM calls already work, with no
+// extra env flag to remember. In-process call (no HTTP hop): this module
+// already runs inside the same serverless function as /api/llm.
+// classifyWithLLM() in scoring.js already catches a throw here and falls
+// back to the deterministic heuristic per item, so a backend outage never
+// stops the corpus from building — it just scores heuristically that day.
 function makeClassifier() {
-  if (process.env.MOSAIC_CLASSIFY !== 'llm' || !process.env.GROQ_API_KEY) return null;
   return async (prompt) => {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-      body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
-        reasoning_effort: 'low',
-        max_completion_tokens: 300,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json?.error?.message || `Groq ${res.status}`);
+    const { status, json } = await handleLLM({
+      model: 'openai/gpt-oss-120b',
+      reasoning_effort: 'low',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: prompt }],
+    }, 'corpus-build');
+    if (status !== 200) throw new Error(json?.error?.message || `LLM proxy ${status}`);
     return json.choices?.[0]?.message?.content || '';
   };
 }
@@ -161,7 +161,7 @@ function makeClassifier() {
 export async function buildCorpus({ log = console.log, warn = console.warn } = {}) {
   const apiKey = process.env.PERSPECTIVE_API_KEY || null;
   const classify = makeClassifier();
-  log(`[corpus] scoring path: bridging=${apiKey ? 'Perspective' : 'heuristic'}, classify=${classify ? 'LLM' : 'heuristic'}`);
+  log(`[corpus] scoring path: bridging=${apiKey ? 'Perspective' : 'LLM proxy, falling back to heuristic per item'}; actual per-item provenance is logged below`);
 
   // ---- gather ----
   const raw = [];

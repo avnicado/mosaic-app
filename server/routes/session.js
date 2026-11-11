@@ -1,17 +1,17 @@
-// GET /api/session → { authed, user:{id,name,role}|null, mode, store, llm }
+// GET /api/session → { authed, user:{id,name,role}|null, mode, store, llm, signup }
 // mode: 'password' | 'open' (local dev, no APP_PASSWORD) | 'locked' (deployed without APP_PASSWORD)
 // store: 'redis' | 'file' (local dev) | 'none' (deployed without Upstash)
 
 import { currentUser, authMode } from '../auth.js';
 import { storeMode } from '../store.js';
 import { llmBackends } from '../proxyCore.js';
-import { publicUser, checkInvite } from '../users.js';
+import { publicUser, checkInvite, openSignup } from '../users.js';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');
   let user = null;
   try { user = await currentUser(req); } catch (e) { console.warn('[session]', e.message); }
-  const out = { authed: !!user, user: publicUser(user), mode: authMode(), store: storeMode(), llm: llmBackends() };
+  const out = { authed: !!user, user: publicUser(user), mode: authMode(), store: storeMode(), llm: llmBackends(), signup: openSignup() };
   // Let the sign-in screen know whether an invite link is still good.
   if (req.query?.invite) { try { out.inviteValid = !!(await checkInvite(req.query.invite)); } catch { out.inviteValid = false; } }
   res.status(200).json(out);

@@ -6,6 +6,7 @@
 //   m2:users             userId → user JSON        (server/users.js)
 //   m2:invites           code → invite JSON        (server/users.js)
 //   m2:shared            "<userId>:<threadId>" → shared-thread snapshot JSON
+//   m2:feedback          noteId → alpha feedback JSON  (server/feedback.js)
 //   m2-blob:<name>       single cached values (the daily Promenade corpus)
 //
 // Upstash env (Vercel Marketplace → Upstash): KV_REST_API_URL/KV_REST_API_TOKEN
