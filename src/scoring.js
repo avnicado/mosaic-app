@@ -282,12 +282,14 @@ Excerpt: ${(item.excerpt || '').slice(0, 400)}
 Return ONLY valid JSON:
 {
   "domain": "pick the SINGLE closest from: ${DOMAINS.join(', ')}",
+  "part": "the closest part of that domain, from its list below, or null if none fits",
   "moveType": "which slot this best fills — one of: sharpen (a distinction inside a frame), complicate (a case/tension a framing flattens), bridge (same shape, distant field), ground (a concrete case/primary material)",
   "bridging": 0.0,
   "density": 0.0,
   "why": "one sentence: what makes this item worth composing in, structurally (not that it's popular)"
 }
 "bridging" is 0.0-1.0: how constructive/curious/nuanced the item is (high) vs. ragebait/contentless (low).
+Parts per domain: ${DOMAINS.map((d) => `${d}: ${PARTS[d].join(' | ')}`).join('; ')}.
 "density" is 0.0-1.0: substance per minute of attention, NOT complexity or length. A short, simple, well-made, detailed piece scores as high as a dense academic paper; a long but padded piece scores low. Listicle padding, ragebait and headline-only items score low; compact, load-bearing material scores high regardless of how easy it is to read.`;
 }
 
@@ -299,6 +301,7 @@ export async function classifyWithLLM(item, { classify }) {
     if (!parsed) return null;
     return {
       domain: DOMAINS.includes(parsed.domain) ? parsed.domain : heuristicDomain(item),
+      part: typeof parsed.part === 'string' ? parsed.part : null,
       moveType: SLOTS.includes(parsed.moveType) ? parsed.moveType : heuristicMoveType(item),
       bridging: clamp01(Number(parsed.bridging)),
       density: Number.isFinite(Number(parsed.density)) ? clamp01(Number(parsed.density)) : null,
@@ -323,6 +326,10 @@ export async function scoreItem(item, opts = {}) {
 
   const domain = llm?.domain || heuristicDomain(item);
   const moveType = llm?.moveType || heuristicMoveType(item);
+  // A part only counts when it belongs to the chosen domain; otherwise the
+  // keyword fallback, which may honestly answer "none" (null).
+  const llmPart = llm?.part && (PARTS[domain] || []).includes(llm.part) ? llm.part : null;
+  const part = llmPart || heuristicPart(item, domain);
 
   let bridging, scored_by, perspectiveAttributes = null;
   if (persp) {
@@ -343,6 +350,8 @@ export async function scoreItem(item, opts = {}) {
   return {
     ...item,
     domain,
+    part,
+    part_by: llmPart ? 'llm' : part ? 'keywords' : null,
     moveType,
     slot: moveType,
     scores: { bridging: round2(bridging), density: round2(density), engagement: round2(engagementScore(item)) },
@@ -512,6 +521,237 @@ function takeDomainSpread(cands, n, used) {
     out.push(it); used.add(it.url); seenDomains.add(it.domain);
   }
   return out;
+}
+
+// ------------------------------------------------------------
+// Parts of a field — the Mandala's zoomed view (a field opened into four
+// wedges). Coarse and fixed, the same way DOMAINS is: four per field keeps
+// cells from going empty. An item's part comes from the LLM classifier at
+// corpus build when it answers with one of these, else from heuristicPart()'s
+// keywords, else null. A null part is honest: the item still belongs to its
+// whole field, it just isn't placed inside one part of it.
+// ------------------------------------------------------------
+export const PARTS = {
+  science: ['life', 'physics & matter', 'earth & space', 'how science works'],
+  technology: ['computing', 'software & the web', 'devices', 'infrastructure'],
+  'arts & culture': ['music', 'books & writing', 'film & image', 'design & buildings'],
+  'philosophy & ideas': ['identity & mind', 'time & change', 'ethics', 'knowledge'],
+  'society & politics': ['cities', 'law & governance', 'communities', 'work'],
+  'business & economics': ['markets', 'small business', 'money & value', 'public goods'],
+  'health & mind': ['the body', 'habits & attention', 'sleep & rest', 'care'],
+  history: ['everyday life', 'empires & roads', 'industry', 'letters & archives'],
+  'nature & environment': ['animals', 'plants & fungi', 'land & water', 'climate & rewilding'],
+  'sport & play': ['running & endurance', 'games & strategy', 'ball games', 'play'],
+  'craft & making': ['repair', 'tools', 'materials', 'workshops'],
+  'math & abstraction': ['statistics', 'geometry & maps', 'logic & infinity', 'puzzles & play'],
+};
+
+// Cue syntax: "word" matches the whole word (plural s allowed); "stem*" matches
+// any word starting with stem; a cue with a space matches that phrase.
+const PART_CUES = {
+  science: [
+    ['biolog*', 'cell', 'gene', 'genet*', 'genom*', 'dna', 'rna', 'protein', 'evolution*', 'organism', 'bacteri*', 'virus', 'microb*', 'enzyme', 'embryo*', 'fossil', 'dinosaur'],
+    ['physic*', 'quantum', 'particle', 'atom*', 'chemi*', 'molecul*', 'electron', 'photon', 'laser', 'fusion', 'superconduct*', 'material', 'crystal', 'magnet*', 'gravity'],
+    ['space', 'planet*', 'star', 'galax*', 'telescope', 'nasa', 'moon', 'mars', 'asteroid', 'comet', 'cosmo*', 'universe', 'black hole', 'geolog*', 'volcan*', 'earthquake', 'orbit*', 'rocket', 'satellite', 'solar'],
+    ['study', 'studies', 'research*', 'scientist', 'replicat*', 'peer review', 'experiment*', 'method', 'theory', 'hypothes*', 'measur*', 'evidence', 'paper'],
+  ],
+  technology: [
+    ['ai', 'llm', 'gpt*', 'claude', 'gemini', 'model', 'gpu', 'cpu', 'chip', 'compiler', 'algorithm*', 'machine learning', 'neural', 'inference', 'transformer', 'agent', 'processor', 'quantum computing', 'benchmark*'],
+    ['software', 'programming', 'programmer', 'code', 'coding', 'javascript', 'typescript', 'python', 'rust', 'golang', 'web', 'website', 'browser', 'app', 'open source', 'open-source', 'github', 'database', 'sql', 'api', 'framework', 'library', 'language', 'emacs', 'vim', 'git'],
+    ['phone', 'iphone', 'android', 'laptop', 'macbook', 'hardware', 'device', 'keyboard', 'camera', 'battery', 'batteries', 'robot*', 'car', 'tesla', 'drone', 'headphone', 'display', 'screen', 'raspberry pi', 'gadget'],
+    ['server', 'cloud', 'network*', 'internet', 'datacenter', 'data center', 'outage', 'security', 'vulnerab*', 'hack*', 'exploit', 'encrypt*', 'dns', 'linux', 'kernel', 'grid', 'cable', 'aws', 'backup', 'privacy', 'surveillance'],
+  ],
+  'arts & culture': [
+    ['music*', 'song*', 'album', 'band', 'concert', 'opera', 'jazz', 'composer', 'sound', 'orchestra', 'guitar', 'piano'],
+    ['book', 'novel*', 'poet*', 'poem', 'writer', 'writing', 'author', 'librar*', 'literat*', 'essay', 'fiction', 'publish*'],
+    ['film', 'movie', 'cinema', 'photo*', 'image', 'tv', 'television', 'animation', 'video', 'painting', 'painter', 'art', 'artist', 'museum', 'gallery', 'sculpt*', 'illustrat*', 'comic'],
+    ['design*', 'architect*', 'building', 'house', 'typograph*', 'font', 'interior', 'furniture', 'tower', 'bridge'],
+  ],
+  'philosophy & ideas': [
+    ['self', 'identity', 'conscious*', 'mind', 'free will', 'person', 'soul', 'emotion*', 'perception', 'experience'],
+    ['time', 'change', 'future', 'past', 'progress', 'death', 'mortal*', 'aging', 'memory', 'nostalgia'],
+    ['ethic*', 'moral*', 'justice', 'virtue', 'responsib*', 'fair*', 'duty', 'kindness', 'evil'],
+    ['knowledge', 'truth', 'belief*', 'epistem*', 'reason*', 'logic', 'doubt', 'certain*', 'understand*', 'wisdom', 'meaning'],
+  ],
+  'society & politics': [
+    ['city', 'cities', 'urban*', 'housing', 'transit', 'street*', 'neighborhood*', 'neighbourhood*', 'rent', 'zoning', 'homeless*', 'traffic'],
+    ['law', 'laws', 'court*', 'legal', 'judge', 'police', 'government*', 'policy', 'regulat*', 'election*', 'vote*', 'voting', 'congress', 'senate', 'lawsuit', 'trump', 'administration', 'ban', 'prison*'],
+    ['communit*', 'famil*', 'school*', 'educat*', 'church*', 'religio*', 'immigra*', 'migrant*', 'social', 'friend*', 'children', 'parents', 'teen*'],
+    ['work', 'worker*', 'job*', 'labor', 'labour', 'union*', 'employ*', 'wage*', 'career*', 'layoff*', 'hiring', 'remote work', 'office'],
+  ],
+  'business & economics': [
+    ['market*', 'stock*', 'invest*', 'trade', 'tariff*', 'price*', 'pricing', 'inflation', 'economy', 'gdp'],
+    ['startup*', 'founder*', 'business*', 'shop', 'compan*', 'entrepreneur*', 'customer*', 'saas', 'revenue', 'acquisition', 'acquire*'],
+    ['money', 'financ*', 'bank*', 'debt', 'crypto*', 'bitcoin', 'tax*', 'wealth', 'cost*', 'value', 'payment*', 'currency'],
+    ['public', 'subsid*', 'welfare', 'healthcare', 'health care', 'commons', 'grant*', 'funding', 'pension*'],
+  ],
+  'health & mind': [
+    ['body', 'cancer', 'disease*', 'heart', 'gut', 'muscle*', 'diet', 'nutrition', 'food', 'drug*', 'medic*', 'vaccin*', 'blood', 'obesity', 'brain'],
+    ['habit*', 'attention', 'focus', 'distract*', 'addict*', 'productiv*', 'screen time', 'social media', 'motivat*', 'willpower'],
+    ['sleep*', 'rest', 'dream*', 'tired*', 'fatigue', 'nap', 'naps', 'insomnia', 'circadian'],
+    ['care', 'caring', 'therap*', 'mental health', 'depress*', 'anxiety', 'doctor*', 'hospital*', 'nurse*', 'patient*', 'loneli*', 'grief'],
+  ],
+  history: [
+    ['everyday', 'daily life', 'ordinary', 'village*', 'household', 'clothing', 'kitchen', 'recipe*', 'home'],
+    ['empire*', 'war', 'wars', 'king*', 'queen*', 'roman*', 'rome', 'dynast*', 'conquest', 'road*', 'silk road', 'army', 'battle*', 'ancient', 'medieval', 'pharaoh*', 'viking*'],
+    ['industr*', 'factory', 'factories', 'railway*', 'railroad*', 'steam', 'mill', 'mills', 'mine', 'mines', 'mining', 'invent*', 'machine*', 'ship*', 'canal*'],
+    ['letter*', 'archive*', 'manuscript*', 'diary', 'diaries', 'document*', 'map', 'maps', 'record*', 'newspaper*', 'museum*', 'inscription*', 'scroll*'],
+  ],
+  'nature & environment': [
+    ['animal*', 'bird*', 'fish', 'insect*', 'whale*', 'wolf', 'wolves', 'dog*', 'cat', 'cats', 'bee', 'bees', 'species', 'wildlife', 'mammal*', 'octop*', 'shark*'],
+    ['plant*', 'tree*', 'forest*', 'fung*', 'mushroom*', 'flower*', 'seed*', 'garden*', 'moss', 'lichen*'],
+    ['river*', 'ocean*', 'sea', 'seas', 'lake*', 'water', 'soil*', 'land', 'mountain*', 'coast*', 'island*', 'desert*', 'glacier*', 'wetland*'],
+    ['climate', 'carbon', 'emission*', 'warming', 'rewild*', 'conservat*', 'extinct*', 'biodivers*', 'restor*', 'drought*', 'wildfire*', 'heatwave*', 'renewable*'],
+  ],
+  'sport & play': [
+    ['run', 'runs', 'runner*', 'running', 'marathon*', 'cycling', 'cyclist*', 'bike*', 'climb*', 'swim*', 'hike', 'hiking', 'endurance', 'ultra*', 'walking'],
+    ['chess', 'game', 'games', 'strateg*', 'poker', 'board game*', 'tournament*', 'speedrun*'],
+    ['football', 'soccer', 'basketball', 'baseball', 'tennis', 'cricket', 'rugby', 'golf', 'ball', 'nba', 'nfl'],
+    ['play', 'playing', 'toy', 'toys', 'fun', 'hobby', 'hobbies', 'lego', 'kids'],
+  ],
+  'craft & making': [
+    ['repair*', 'fix', 'fixing', 'restor*', 'maintenance', 'mend*', 'right to repair', 'refurbish*'],
+    ['tool', 'tools', 'knife', 'knives', 'saw', 'lathe', 'hammer*', 'cnc', '3d print*', 'printer', 'chisel*'],
+    ['wood*', 'metal*', 'steel', 'iron', 'clay', 'ceramic*', 'glass', 'textile*', 'fabric*', 'paper', 'leather', 'stone', 'yarn', 'bread'],
+    ['workshop*', 'studio*', 'maker*', 'craft*', 'handmade', 'diy', 'homebuilt', 'garage', 'build log'],
+  ],
+  'math & abstraction': [
+    ['statistic*', 'probabilit*', 'random*', 'average', 'bayes*', 'survey*', 'regression', 'distribution'],
+    ['geometr*', 'shape*', 'map', 'maps', 'topolog*', 'knot*', 'tiling*', 'polyhedr*', 'dimension*', 'surface*'],
+    ['logic*', 'infinit*', 'proof*', 'theorem*', 'set theory', 'godel', 'gödel', 'paradox*', 'axiom*', 'computab*'],
+    ['puzzle*', 'number*', 'prime*', 'riddle*', 'sudoku', 'combinator*', 'conjecture*', 'sequence*'],
+  ],
+};
+
+const cueRegex = (cue) => {
+  const esc = cue.replace(/\*$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return cue.endsWith('*') ? new RegExp(`\\b${esc}`, 'i') : new RegExp(`\\b${esc}s?\\b`, 'i');
+};
+const PART_RX = Object.fromEntries(Object.entries(PART_CUES).map(([d, lists]) => [d, lists.map((l) => l.map(cueRegex))]));
+
+// Deterministic keyword part: the part with the most cue hits in the title
+// (counted twice) and excerpt. Ties go to the part listed first. No hit → null.
+export function heuristicPart(item, domain = item.domain) {
+  const rx = PART_RX[domain];
+  if (!rx) return null;
+  const title = `${item.title || ''}`;
+  const rest = `${item.excerpt || ''}`;
+  let best = -1, bestHits = 0;
+  rx.forEach((list, i) => {
+    let hits = 0;
+    for (const r of list) { if (r.test(title)) hits += 2; else if (r.test(rest)) hits += 1; }
+    if (hits > bestHits) { best = i; bestHits = hits; }
+  });
+  return best === -1 ? null : PARTS[domain][best];
+}
+
+// ------------------------------------------------------------
+// The lean — what the reader chose on the Mandala, never inferred:
+//   { fields: [domain…≤3], parts: { domain: [part…] }, ring: 0..4|null,
+//     mood: slot|null, hunch: string }
+// Everything optional. composeLeanShelf() fills a finite shelf from the lit
+// area of the Mandala only. It is the same §11 machinery as composeShelf: the
+// bridging floor admits, the lean filters, withinSlotQuality orders inside it,
+// engagement only breaks ties, and per-field / per-move caps keep any one
+// thing from filling the shelf. Nothing learns from the lean.
+// ------------------------------------------------------------
+export const LEAN_SHELF_SIZE = 5;
+export const emptyLean = () => ({ fields: [], parts: {}, ring: null, mood: null, hunch: '' });
+
+const HUNCH_STOP = new Set(['something', 'about', 'thing', 'things', 'that', 'with', 'what', 'when', 'where', 'there', 'this', 'from', 'into', 'some', 'kind', 'like', 'stuff', 'over', 'they', 'them', 'just', 'how', 'why', 'and', 'the', 'out', 'for', 'are', 'was', 'its', 'not', 'you', 'your', 'more', 'less', 'much', 'very', 'really']);
+export const stemWord = (w) => w.toLowerCase().replace(/[^a-z]/g, '').replace(/ies$/, 'y').replace(/(ing|ed|es|s)$/, '');
+export function hunchStems(hunch) {
+  const words = (hunch || '').toLowerCase().split(/[^a-z']+/).filter((w) => w && !HUNCH_STOP.has(w));
+  return [...new Set(words.map(stemWord).filter((w) => w.length > 2))];
+}
+function wordsOf(item) {
+  const text = `${item.title || ''} ${item.excerpt || ''} ${item.part || ''}`;
+  return new Set(text.split(/[^A-Za-z]+/).map(stemWord).filter((w) => w.length > 2));
+}
+export function nearHunch(item, stems) {
+  if (!stems.length) return false;
+  const w = item._words || (item._words = wordsOf(item));
+  return stems.some((s) => w.has(s));
+}
+
+export const itemRing = (item) => densityRing(item.scores?.density ?? 0);
+export const leanParts = (lean, domain) => lean.parts?.[domain] || [];
+export const inLeanBand = (lean, ring) => lean.ring == null || Math.abs(ring - lean.ring) <= 1;
+export function inLeanArea(item, lean) {
+  if (lean.fields.length && !lean.fields.includes(item.domain)) return false;
+  const ps = leanParts(lean, item.domain);
+  if (ps.length && !ps.includes(item.part)) return false;
+  return inLeanBand(lean, itemRing(item));
+}
+export const hasLean = (lean) => !!(lean && (lean.fields.length || lean.ring != null || lean.mood || (lean.hunch || '').trim()));
+
+// pool: scored items (each with domain, part, slot, scores.density).
+// held: Set of urls already held. exclude: Set of urls set out earlier this
+// visit under this lean (Recompose).
+// → { picks: [{ ...item, elsewhere, nearHunch }], areaCount, left }
+export function composeLeanShelf(pool, lean, { held = new Set(), exclude = new Set(), size = LEAN_SHELF_SIZE, now = Date.now(), ratingFor = null } = {}) {
+  const admitted = pool.filter((it) => (it.scores?.bridging ?? 0) >= BRIDGING_FLOOR);
+  const stems = hunchStems(lean.hunch);
+  const fresh = (it) => !held.has(it.url) && !exclude.has(it.url);
+  // The lean's own terms first (depth fit, mood, hunch); quality inside them.
+  const fit = (it) => {
+    const r = itemRing(it);
+    return (lean.ring == null ? 0 : r === lean.ring ? 1 : 0.4)
+      + (lean.mood && it.slot === lean.mood ? 1 : 0)
+      + (nearHunch(it, stems) ? 1.2 : 0);
+  };
+  const order = (a, b) => (fit(b) - fit(a))
+    || (withinSlotQuality(b, ratingFor) - withinSlotQuality(a, ratingFor))
+    || (engagementScore(b, now) - engagementScore(a, now)); // tie-break only
+
+  const area = admitted.filter((it) => inLeanArea(it, lean) && !held.has(it.url));
+  const cands = area.filter(fresh).sort(order);
+  const picks = [];
+  const picked = new Set();
+  const perField = new Map(), perMove = new Map();
+  const fieldCap = lean.fields.length ? Math.ceil(size / lean.fields.length) : 2;
+  const take = (it, elsewhere) => {
+    picks.push({ ...it, elsewhere, nearHunch: !elsewhere && nearHunch(it, stems) });
+    picked.add(it.url);
+    perField.set(it.domain, (perField.get(it.domain) || 0) + 1);
+    perMove.set(it.slot, (perMove.get(it.slot) || 0) + 1);
+  };
+
+  // "Surprise me from elsewhere" (the bridge mood) with fields chosen: up to
+  // two bridge items from outside those fields, same depth band, no two from
+  // the same field. Labelled as outside the lean on the card.
+  if (lean.mood === 'bridge' && lean.fields.length) {
+    const far = admitted
+      .filter((it) => !lean.fields.includes(it.domain) && it.slot === 'bridge' && inLeanBand(lean, itemRing(it)) && fresh(it))
+      .sort(order);
+    const usedField = new Set();
+    for (const it of far) {
+      if (picks.length >= 2) break;
+      if (usedField.has(it.domain)) continue;
+      usedField.add(it.domain); take(it, true);
+    }
+  }
+  for (const it of cands) {
+    if (picks.length >= size) break;
+    if ((perField.get(it.domain) || 0) >= fieldCap) continue;
+    const moveCap = lean.mood ? (it.slot === lean.mood ? 3 : 2) : 2;
+    if ((perMove.get(it.slot) || 0) >= moveCap) continue;
+    take(it, false);
+  }
+  // Relax the move cap before leaving a place empty; never relax the area.
+  for (const it of cands) {
+    if (picks.length >= size) break;
+    if (picked.has(it.url) || (perField.get(it.domain) || 0) >= fieldCap) continue;
+    take(it, false);
+  }
+  // With fields chosen, the per-field cap can strand a slot when one field is
+  // thin; fill from the rest of the lit area rather than pad from outside it.
+  for (const it of cands) {
+    if (picks.length >= size) break;
+    if (!picked.has(it.url)) take(it, false);
+  }
+  const left = area.filter((it) => fresh(it) && !picked.has(it.url)).length;
+  return { picks, areaCount: area.length, left };
 }
 
 // ------------------------------------------------------------

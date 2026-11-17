@@ -1,108 +1,119 @@
-// The Mandala: a radial view of the Promenade's corpus, alongside the shelf.
-// Sector (angle) = domain. Ring (radius) = density (substance per minute —
-// scoring.js's densityRing(), NOT length or complexity). A domain's wedge is
-// filled from the center out by what you've already held. Every ring you
-// haven't filled yet carries its own composed, unheld pick, read straight
-// off the mandala (hover the ring) — not routed through the shelf.
+// The Mandala's geometry and data: where today's items and what you've held
+// sit on the chart. Sector (angle) = field, or a part of one field when the
+// Mandala is opened into it. Ring (radius) = density (substance per minute —
+// scoring.js's densityRing(), NOT length or complexity).
 //
-// The corpus is NOT cumulative — server/corpus.js rebuilds it fresh from live
-// feeds roughly daily (server/routes/corpus.js, MAX_AGE_MS), so anything you
-// held even a couple of days ago has usually already rotated out of today's
-// pool entirely. A held item is still "yours" regardless, so when it isn't
-// in the current pool we score it on the spot from the words you already
-// have for it (title/excerpt/source — the same deterministic heuristics
-// scoring.js uses as its own no-network fallback), just to place it on the
-// chart. That score is never persisted and never re-used for composition.
+// The Mandala is where you lean (see Mandala.jsx): tapping a cell chooses a
+// field and a depth, and the shelf composes from the lit area only
+// (scoring.js's composeLeanShelf). It stays inside KERNEL §11 the way the shelf
+// does: the lean is chosen and visible, it only filters and orders inside the
+// lit area, and nothing learns from it.
 //
-// This stays inside KERNEL §11 / Invariant I the same way the shelf does:
-//   - composed, never ranked: a ring's pick is chosen by the same within-slot
-//     criteria scoring.js already uses (bridging/density fit, then
-//     engagement as a pure tie-break), never a cross-ring or cross-domain sort.
-//   - legible: every cell's reason is its position (domain × density ring)
-//     plus, for its pick, the same `why` the corpus already carries.
-//   - finite: at most one recommended pick per empty cell — never a stream,
-//     and the chart itself bounds the total (domains × 5 rings).
-//   - private: which cells are "seen" comes from the reader's own held
-//     record, never shown to anyone else.
+// The corpus is NOT cumulative — server/corpus.js rebuilds it daily — so
+// something you held a few days ago has usually rotated out of today's pool.
+// It is still yours, so when it isn't in the pool we place it from the words
+// you already have for it (the same deterministic heuristics scoring.js falls
+// back to), only to fill its cell. That placement is never saved or composed.
 
 import {
-  BRIDGING_FLOOR, DENSITY_RING_COUNT, densityRing,
-  engagementScore, withinSlotQuality, heuristicDomain, heuristicDensity,
+  BRIDGING_FLOOR, DENSITY_RING_COUNT, densityRing, DOMAINS, PARTS,
+  heuristicDomain, heuristicDensity, heuristicPart,
 } from '../../scoring.js';
 
 export { DENSITY_RING_COUNT };
 
-function pickFor(items, held, ratingFor, now) {
-  const candidates = items.filter((it) => !held.has(it.url));
-  candidates.sort((a, b) => {
-    const qA = withinSlotQuality(a, ratingFor), qB = withinSlotQuality(b, ratingFor);
-    if (Math.abs(qA - qB) > 0.001) return qB - qA;
-    return engagementScore(b, now) - engagementScore(a, now); // tie-break only
-  });
-  return candidates[0] || null;
+export const RING_BLURB = ['barely scratched', 'a light read', 'some substance', 'demanding', 'as dense as it gets'];
+export const SHORT = {
+  science: 'science', technology: 'technology', 'arts & culture': 'arts', 'philosophy & ideas': 'philosophy',
+  'society & politics': 'society', 'business & economics': 'economics', 'health & mind': 'mind', history: 'history',
+  'nature & environment': 'nature', 'sport & play': 'sport & play', 'craft & making': 'craft', 'math & abstraction': 'maths',
+};
+
+// heldRecords: [{ url, title, source, excerpt }] → [{ url, title, domain, part, ring }]
+export function placeHeld(corpusItems, heldRecords) {
+  const byUrl = new Map(corpusItems.filter((it) => it.url).map((it) => [it.url, it]));
+  const out = [];
+  const seen = new Set();
+  for (const rec of heldRecords) {
+    if (!rec.url || seen.has(rec.url)) continue;
+    seen.add(rec.url);
+    const it = byUrl.get(rec.url);
+    if (it) {
+      out.push({ url: rec.url, title: it.title, domain: it.domain, part: it.part ?? null, ring: densityRing(it.scores?.density ?? 0) });
+    } else {
+      const domain = heuristicDomain(rec);
+      out.push({ url: rec.url, title: rec.title || rec.url, domain, part: heuristicPart(rec, domain), ring: densityRing(heuristicDensity(rec)), synthesized: true });
+    }
+  }
+  return out;
 }
 
-// heldRecords: [{ url, title, source, excerpt }] — a thread's seed, or an
-// item found inside a session. url is required; everything else is best-effort.
-// → [{ domain, total, frontier, rings: [{ seenCount, seenItems, pick }] }]
-export function buildMandala(corpusItems, heldRecords, { ratingFor = null, now = Date.now() } = {}) {
-  const byUrl = new Map(corpusItems.filter((it) => it.url).map((it) => [it.url, it]));
-  const admitted = corpusItems.filter((it) => (it.scores?.bridging ?? 0) >= BRIDGING_FLOOR);
-  const heldUrls = new Set(heldRecords.map((r) => r.url).filter(Boolean));
+export const admittedOf = (items) => items.filter((it) => (it.scores?.bridging ?? 0) >= BRIDGING_FLOOR);
 
-  // Resolve every held record to a { domain, density, title, url, source }
-  // place-on-the-chart entry: from today's pool when it's still there
-  // (real, LLM-or-heuristic-scored density), synthesized from its own stored
-  // words otherwise. Dedupe by url — a thread's seed and a later item can
-  // repeat the same url.
-  const seenEntries = [];
-  const seenSeenUrls = new Set();
-  for (const rec of heldRecords) {
-    if (!rec.url || seenSeenUrls.has(rec.url)) continue;
-    seenSeenUrls.add(rec.url);
-    const fromPool = byUrl.get(rec.url);
-    seenEntries.push(fromPool
-      ? { domain: fromPool.domain || 'other', density: fromPool.scores?.density ?? 0, title: fromPool.title, url: rec.url }
-      : { domain: heuristicDomain(rec), density: heuristicDensity(rec), title: rec.title || rec.url, url: rec.url, synthesized: true });
+// ---- geometry -----------------------------------------------------------------------
+export const SIZE = 640;
+export const C = SIZE / 2;
+export const INNER = 38;
+export const MAX_R = 226;
+export const RT = (MAX_R - INNER) / DENSITY_RING_COUNT;
+
+export const polar = (r, a) => [C + r * Math.cos(a), C + r * Math.sin(a)];
+export function wedgePath(rIn, rOut, a0, a1) {
+  const [sx, sy] = polar(rOut, a0), [ex, ey] = polar(rOut, a1), [ix, iy] = polar(rIn, a1), [jx, jy] = polar(rIn, a0);
+  const big = a1 - a0 > Math.PI ? 1 : 0;
+  return `M${sx} ${sy}A${rOut} ${rOut} 0 ${big} 1 ${ex} ${ey}L${ix} ${iy}A${rIn} ${rIn} 0 ${big} 0 ${jx} ${jy}Z`;
+}
+
+// The slices for a view: every field, or one field's parts (zoom = domain).
+// An item with no part sits in no part wedge; the zoomed view says how many.
+export function slicesFor(zoom) {
+  if (!zoom) return DOMAINS.map((d) => ({ domain: d, part: null, label: SHORT[d] }));
+  return PARTS[zoom].map((p) => ({ domain: zoom, part: p, label: p }));
+}
+
+export function viewGeometry(zoom) {
+  const slices = slicesFor(zoom);
+  const sweep = (Math.PI * 2) / slices.length;
+  const a0Of = (i) => -Math.PI / 2 + sweep * i + (zoom ? -sweep / 2 : 0);
+  const indexOf = (it) => {
+    if (!zoom) return DOMAINS.indexOf(it.domain);
+    if (it.domain !== zoom || !it.part) return -1;
+    return PARTS[zoom].indexOf(it.part);
+  };
+  return { slices, sweep, a0Of, indexOf };
+}
+
+// Dots: one per item, spread along its cell's arc in up to three rows. A busy
+// cell (Hacker News fills technology) packs tighter rather than spilling over.
+export function layoutDots(items, geo, zoom) {
+  const byCell = new Map();
+  for (const it of items) {
+    const si = geo.indexOf(it);
+    if (si < 0) continue;
+    const k = si * 10 + densityRing(it.scores?.density ?? 0);
+    if (!byCell.has(k)) byCell.set(k, []);
+    byCell.get(k).push(it);
   }
-
-  const byDomain = new Map();
-  for (const it of admitted) {
-    const d = it.domain || 'other';
-    if (!byDomain.has(d)) byDomain.set(d, []);
-    byDomain.get(d).push(it);
-  }
-  // Make sure a domain you've explored still gets a wedge even if today's
-  // pool happens to carry nothing admissible in it right now.
-  for (const e of seenEntries) if (!byDomain.has(e.domain)) byDomain.set(e.domain, []);
-
-  const domains = [];
-  for (const [domain, items] of byDomain) {
-    const buckets = Array.from({ length: DENSITY_RING_COUNT }, () => []);
-    for (const it of items) buckets[densityRing(it.scores?.density ?? 0)].push(it);
-
-    const seenBuckets = Array.from({ length: DENSITY_RING_COUNT }, () => []);
-    for (const e of seenEntries) if (e.domain === domain) seenBuckets[densityRing(e.density)].push(e);
-
-    let deepestSeen = -1;
-    const rings = buckets.map((bucket, r) => {
-      const seenItems = seenBuckets[r];
-      if (seenItems.length && r > deepestSeen) deepestSeen = r;
-      // A ring with nothing seen yet carries one composed pick — read directly
-      // off the mandala (no click-through to the shelf required).
-      const pick = seenItems.length ? null : pickFor(bucket, heldUrls, ratingFor, now);
-      return { seenCount: seenItems.length, seenItems, pick };
+  const dotR = zoom ? 6 : 4;
+  const pos = new Map();
+  for (const [k, list] of byCell) {
+    const si = Math.floor(k / 10), r = k % 10;
+    const a0 = geo.a0Of(si);
+    const span = geo.sweep * 0.8;
+    const rMid = INNER + RT * (r + 0.5);
+    const arc = span * rMid;
+    const perRow = Math.max(1, Math.floor(arc / (dotR * 2.6)));
+    const rows = Math.min(3, Math.ceil(list.length / perRow));
+    const inRow = Math.ceil(list.length / rows);
+    list.forEach((it, i) => {
+      const row = Math.floor(i / inRow);
+      const col = i % inRow;
+      const nThis = Math.min(inRow, list.length - row * inRow);
+      const frac = (col + 1) / (nThis + 1);
+      const a = a0 + geo.sweep * 0.1 + span * frac;
+      const rr = rows === 1 ? rMid : rMid + (row - (rows - 1) / 2) * Math.min(RT / rows, dotR * 2.4);
+      pos.set(it.url, { x: polar(rr, a)[0], y: polar(rr, a)[1], si, r });
     });
-
-    // Frontier: the shallowest ring with nothing seen, or one past the
-    // deepest seen ring if every shallower ring already has something —
-    // "the next place to go", read off the reader's own record. Used only
-    // as the panel's initial focus before the reader hovers anything.
-    let frontier = rings.findIndex((r) => r.seenCount === 0);
-    if (frontier === -1) frontier = Math.min(DENSITY_RING_COUNT - 1, deepestSeen + 1);
-
-    domains.push({ domain, total: items.length, rings, frontier });
   }
-
-  return domains.sort((a, b) => b.total - a.total);
+  return { pos, dotR };
 }

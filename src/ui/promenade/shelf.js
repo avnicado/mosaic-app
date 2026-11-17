@@ -7,7 +7,10 @@
 // rotates out the URLs already shelved this visit and composes from the rest.
 
 import { useSyncExternalStore } from 'react';
-import { composePromenadeShelf, heuristicDomain, DOMAINS, SLOT_BLURB as SCORING_BLURB } from '../../scoring.js';
+import {
+  composePromenadeShelf, composeLeanShelf, heuristicDomain, heuristicPart, heuristicDensity,
+  emptyLean, hasLean, PARTS, DOMAINS, SLOT_BLURB as SCORING_BLURB,
+} from '../../scoring.js';
 import * as R from '../../data/record.js';
 
 // ---- open questions (editorial) ------------------------------------------------
@@ -152,6 +155,23 @@ const today = () => new Date().toDateString();
 let corpus = null; // { meta, items, from, day }
 let corpusPromise = null;
 
+// Corpora built before parts and density existed (and the committed
+// /corpus.json fallback) lack them. Fill them in the same deterministic way the
+// corpus build falls back to, and say so (part_by / density_by), so a guess is
+// never shown as the classifier's answer.
+function prepare(it) {
+  const out = { ...it };
+  if (out.part === undefined || (out.part && !(PARTS[out.domain] || []).includes(out.part))) {
+    out.part = heuristicPart(out);
+    out.part_by = out.part ? 'keywords' : null;
+  }
+  if (typeof out.scores?.density !== 'number') {
+    out.scores = { ...out.scores, density: heuristicDensity(out) };
+    out.density_by = 'heuristic';
+  }
+  return out;
+}
+
 async function fetchCorpus() {
   const errors = [];
   for (const url of ['/api/corpus', '/corpus.json']) {
@@ -160,15 +180,39 @@ async function fetchCorpus() {
       if (!res.ok) throw new Error(`${url} answered ${res.status}`);
       const json = await res.json();
       if (!Array.isArray(json.items) || !json.items.length) throw new Error(`${url} was empty`);
-      return { meta: json.meta || {}, items: json.items, from: url, day: today() };
+      return { meta: json.meta || {}, items: json.items.map(prepare), from: url, day: today() };
     } catch (e) { errors.push(e.message); }
   }
   throw new Error(errors.join('; '));
 }
 
 // ---- the visit's shelf (shared store) ---------------------------------------------
-// state: { status:'idle'|'loading'|'ready'|'error', shelf, meta, error, refreshes }
-let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0 };
+// state: { status:'idle'|'loading'|'ready'|'error', shelf, meta, error, refreshes,
+//          lean, leanShelf }
+// shelf is the open shelf (Near / Far / Open questions) the Desk reads from;
+// leanShelf is the five-card shelf for the reader's lean, or null with no lean.
+const LEAN_KEY = 'mosaic.promenade.lean';
+function loadLean() {
+  try {
+    const l = JSON.parse(localStorage.getItem(LEAN_KEY) || 'null');
+    if (!l || !Array.isArray(l.fields)) return emptyLean();
+    const fields = l.fields.filter((d) => DOMAINS.includes(d)).slice(0, 3);
+    const parts = {};
+    for (const d of fields) {
+      const ps = (l.parts?.[d] || []).filter((p) => PARTS[d].includes(p));
+      if (ps.length) parts[d] = ps;
+    }
+    return {
+      fields, parts,
+      ring: Number.isInteger(l.ring) && l.ring >= 0 && l.ring <= 4 ? l.ring : null,
+      mood: ['sharpen', 'complicate', 'bridge', 'ground'].includes(l.mood) ? l.mood : null,
+      hunch: typeof l.hunch === 'string' ? l.hunch.slice(0, 80) : '',
+    };
+  } catch { return emptyLean(); }
+}
+function saveLean(lean) { try { localStorage.setItem(LEAN_KEY, JSON.stringify(lean)); } catch {} }
+
+let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), leanShelf: null };
 const listeners = new Set();
 const set = (patch) => { state = { ...state, ...patch }; listeners.forEach((f) => f()); };
 const seen = new Set();
@@ -201,6 +245,54 @@ function compose(nonce) {
   return shelf;
 }
 
+// ---- the lean shelf ----------------------------------------------------------------
+// Urls the reader already holds: a thread's seed, or an item found in a session.
+export function heldUrls() {
+  const out = new Set();
+  for (const t of R.allThreads()) if (t.seed?.url) out.add(t.seed.url);
+  for (const i of R.allItems()) if (i.url) out.add(i.url);
+  return out;
+}
+// Cards set out under this lean this visit, so Recompose gives the next few
+// from the same lit area. A different lean starts its own list.
+const leanSeen = new Map();
+const leanKey = (lean) => JSON.stringify([lean.fields, lean.fields.map((d) => lean.parts?.[d] || []), lean.ring, lean.mood, (lean.hunch || '').trim().toLowerCase()]);
+
+function composeLean(lean) {
+  if (!corpus || !hasLean(lean)) return null;
+  const key = leanKey(lean);
+  const exclude = leanSeen.get(key) || new Set();
+  const gen = Date.parse(corpus.meta?.generatedAt || '');
+  return composeLeanShelf(corpus.items, lean, {
+    held: heldUrls(),
+    exclude,
+    now: Number.isFinite(gen) ? gen : Date.now(),
+    ratingFor: R.getSettings().ratings ? makeRatingFor() : null,
+  });
+}
+
+export function setLean(next) {
+  const lean = typeof next === 'function' ? next(state.lean) : next;
+  saveLean(lean);
+  set({ lean, leanShelf: composeLean(lean) });
+}
+export function clearLean() { setLean(emptyLean()); }
+
+// Recompose: everything on the shelf now counts as seen under this lean.
+export function recomposeLean() {
+  const shelf = state.leanShelf;
+  if (!shelf) return;
+  const key = leanKey(state.lean);
+  const seenHere = leanSeen.get(key) || new Set();
+  shelf.picks.forEach((p) => p.url && seenHere.add(p.url));
+  leanSeen.set(key, seenHere);
+  set({ leanShelf: composeLean(state.lean) });
+}
+// Start this lean over: forget what it set out this visit.
+export function restartLean() { leanSeen.delete(leanKey(state.lean)); set({ leanShelf: composeLean(state.lean) }); }
+// Re-read held state (after holding a card) without moving the shelf.
+export function leanSeenCount() { return (leanSeen.get(leanKey(state.lean)) || new Set()).size; }
+
 export async function ensureShelf() {
   if (state.status === 'loading') return;
   if (state.status === 'ready' && corpus?.day === today()) return;
@@ -211,7 +303,7 @@ export async function ensureShelf() {
       corpus = await corpusPromise;
       seen.clear();
     }
-    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0 });
+    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0, leanShelf: composeLean(state.lean) });
   } catch (e) {
     set({ status: 'error', error: e.message || String(e) });
   } finally {

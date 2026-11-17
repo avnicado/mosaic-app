@@ -17,9 +17,12 @@ function useHeldBy(card) {
   }, [card.url, card.title]);
 }
 
-export default function ShelfCard({ card, compact = false, dev = false, startHolding = false }) {
+// num: the card's number on the Mandala. reason: why the lean put it here,
+// shown before the card's own why. hot/onHot link the card to its dot.
+export default function ShelfCard({ card, compact = false, dev = false, startHolding = false, num = null, reason = '', hot = false, onHot = null }) {
   const excerpt = cleanExcerpt(card.excerpt);
-  const why = card.editorial ? card.why : realWhy(card);
+  const ownWhy = card.editorial ? card.why : realWhy(card);
+  const why = [reason, ownWhy].filter(Boolean).join(' ');
   const heldBy = useHeldBy(card);
   const [holding, setHolding] = useState(startHolding);
   const host = card.url ? hostOf(card.url) : '';
@@ -28,12 +31,15 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
   const source = card.editorial ? '' : [card.source, host && !hostSaysSource ? host : ''].filter(Boolean).join(' · ');
 
   return (
-    <article className={`pm-card ${compact ? 'compact' : ''} ${card.editorial ? 'editorial' : ''}`}>
+    <article className={`pm-card ${compact ? 'compact' : ''} ${card.editorial ? 'editorial' : ''} ${hot ? 'hot' : ''}`}
+      onMouseEnter={onHot ? () => onHot(card.url) : undefined} onMouseLeave={onHot ? () => onHot(null) : undefined}>
       <div className="pm-card-top">
+        {num != null && <span className="pm-num" aria-label={`Number ${num} on the Mandala`}>{num}</span>}
         <SlotTag slot={card.slot} />
         {card.url && <MediaChip type={card.mediaType} url={card.url} size={13} />}
-        <span className="pm-domain">{card.domain}</span>
+        <span className="pm-domain" title={card.part ? `${card.domain} › ${card.part}` : card.domain}>{card.domain}{card.part && !compact ? ` › ${card.part}` : ''}</span>
       </div>
+      {card.elsewhere && <div className="pm-elsewhere">From outside your lean</div>}
       <h3 className="pm-title">
         {card.url
           ? <a href={card.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(card)}>{card.title}</a>
@@ -43,7 +49,7 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
       {excerpt && <p className="pm-excerpt">{excerpt}</p>}
       {why && <p className="pm-why"><span className="label">why here</span> {why}</p>}
       {dev && card.scores && (
-        <div className="pm-dev">bridging {card.scores.bridging} · engagement {card.scores.engagement} · {card.scored_by}{card.tieBrokenByEngagement ? ' · tie-broken' : ''}</div>
+        <div className="pm-dev">bridging {card.scores.bridging} · density {card.scores.density}{card.density_by ? ` (${card.density_by})` : ''} · engagement {card.scores.engagement} · {card.scored_by}{card.part_by ? ` · part by ${card.part_by}` : ''}{card.tieBrokenByEngagement ? ' · tie-broken' : ''}</div>
       )}
       <div className="pm-foot">
         {card.url && <OpenButton item={card} compact />}

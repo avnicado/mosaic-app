@@ -149,7 +149,7 @@ function makeClassifier() {
     const { status, json } = await handleLLM({
       model: 'openai/gpt-oss-120b',
       reasoning_effort: 'low',
-      max_tokens: 300,
+      max_tokens: 400, // room for the part field as well as the reasoning
       messages: [{ role: 'user', content: prompt }],
     }, 'corpus-build');
     if (status !== 200) throw new Error(json?.error?.message || `LLM proxy ${status}`);

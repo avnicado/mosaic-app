@@ -44,6 +44,7 @@ read-only with the others from its page ("Share with others"). Locally without
 | `src/data/` | The record (`record.js`: threads / sessions / items as documents), `actions.js` (engine applied to the record, every step persisted), `hooks.js`. |
 | `src/sync.js` | Mirrors every `m2:*` localStorage key to `/api/store`; pulls at boot; retries offline writes. |
 | `src/ui/` | Sidebar shell, router, pages: Desk, Thread, New thread, Promenade, Library, Settings. |
+| `src/ui/promenade/` | The Promenade. The Mandala is where you lean (fields, parts, depth, a mood from the four moves, a hunch), all optional; `scoring.js`'s `composeLeanShelf` sets out five cards from the lit area only. With no lean the shelf is the open one (Near / Far / Open questions) the Desk reads. `node scripts/lean-smoke.mjs` checks the lean rules. |
 | `api/[route].js`, `server/routes/`, `server/` | Groq proxy (allowlisted models), Tavily search, link checks, record store (Upstash or file), single-password auth, daily Promenade corpus. |
 
 ## Deploy
