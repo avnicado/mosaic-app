@@ -118,7 +118,7 @@ async function pullRSS({ url, source, hint }, cap = 20) {
   return items;
 }
 
-function modelEngagement(seed, ts) {
+export function modelEngagement(seed, ts) {
   const h = hashString(seed);
   const ageDays = Math.max(0, (Date.now() - (ts || Date.now())) / 8.64e7);
   const freshness = Math.max(0.2, 1 - ageDays / 21);
@@ -128,7 +128,7 @@ function modelEngagement(seed, ts) {
   };
 }
 
-function hashString(s) {
+export function hashString(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
   return Math.abs(h);
@@ -144,14 +144,14 @@ function hashString(s) {
 // classifyWithLLM() in scoring.js already catches a throw here and falls
 // back to the deterministic heuristic per item, so a backend outage never
 // stops the corpus from building — it just scores heuristically that day.
-function makeClassifier() {
+export function makeClassifier(caller = 'corpus-build') {
   return async (prompt) => {
     const { status, json } = await handleLLM({
       model: 'openai/gpt-oss-120b',
       reasoning_effort: 'low',
       max_tokens: 400, // room for the part field as well as the reasoning
       messages: [{ role: 'user', content: prompt }],
-    }, 'corpus-build');
+    }, caller);
     if (status !== 200) throw new Error(json?.error?.message || `LLM proxy ${status}`);
     return json.choices?.[0]?.message?.content || '';
   };

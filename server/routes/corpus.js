@@ -1,4 +1,5 @@
-// GET /api/corpus → the Promenade corpus ({meta, items}), refreshed daily.
+// GET /api/corpus → the Promenade corpus ({meta, items}), refreshed daily,
+// plus any items a live search added to it for a thin lean (meta.found).
 //
 // Served from a cached copy; rebuilt (≈10s: Hacker News + RSS, scored by
 // src/scoring.js) when the cache is missing or older than MAX_AGE, or when
@@ -10,6 +11,7 @@ import crypto from 'node:crypto';
 import { requireAuth } from '../auth.js';
 import { getBlob, setBlob } from '../store.js';
 import { buildCorpus } from '../corpus.js';
+import { readExtras, mergeExtras } from '../further.js';
 
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
@@ -47,6 +49,11 @@ export default async function handler(req, res) {
       }
     }
   }
+  // Items a live search added to this day's pool for a thin lean
+  // (server/further.js) ride along, so the next person gets them at once.
+  let extras = [];
+  try { extras = await readExtras(corpus.meta?.generatedAt); } catch (e) { console.warn('[corpus] extras read failed:', e.message); }
+  const items = extras.length ? mergeExtras(corpus.items, extras) : corpus.items;
   res.setHeader('cache-control', 'private, no-store');
-  res.status(200).json(corpus);
+  res.status(200).json({ ...corpus, meta: { ...corpus.meta, found: items.length - corpus.items.length }, items });
 }

@@ -197,6 +197,41 @@ export async function handleSearch(body, ip) {
   }
 }
 
+// Raw Tavily call for server-side callers (the Promenade's "looking further",
+// server/further.js), which keep their own limits. Same key, same verbatim
+// URLs. → [{ title, url, snippet, score, published }]; throws on failure.
+export async function tavilySearch(query, { maxResults = 8, excludeDomains = [], timeoutMs = 10_000 } = {}) {
+  if (!hasSearchKey()) throw Object.assign(new Error('TAVILY_API_KEY is not configured on the server.'), { type: 'no_search_key' });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(TAVILY_URL, {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.TAVILY_API_KEY}` },
+      body: JSON.stringify({
+        query: String(query).slice(0, 400),
+        max_results: Math.min(Math.max(Number(maxResults) || 8, 1), 10),
+        search_depth: 'basic',
+        include_answer: false,
+        include_raw_content: false,
+        ...(excludeDomains.length ? { exclude_domains: excludeDomains } : {}),
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.detail?.error || data?.detail || data?.error || `Tavily error ${res.status}`);
+    return (data.results || []).map((r) => ({
+      title: String(r.title || ''),
+      url: String(r.url || ''),
+      snippet: String(r.content || '').slice(0, 600),
+      score: Number(r.score) || 0,
+      published: r.published_date || null,
+    })).filter((r) => r.url);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // --- URL liveness check (shared by api/checkurl.js and the dev server) ------
 // A feed item whose link 404s is worse than no item: the marginalia invariant
 // promises the reader can inspect the source. LLM-produced URLs (especially

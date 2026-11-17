@@ -107,3 +107,4 @@
 .pm-thin p { margin: 0; font-size: 14px; color: var(--ink-soft); }
 
 @media (prefers-reduced-motion: reduce) { .ln-svg.zooming, .ln-svg.unzooming { animation: none; } .ln-cell, .ln-dot { transition: none; } }
+.pm-looking { display: flex; align-items: center; gap: 8px; }

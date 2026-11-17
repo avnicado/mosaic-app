@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "engine-smoke": "node scripts/engine-smoke.mjs"
+    "engine-smoke": "node scripts/engine-smoke.mjs",
+    "further-smoke": "node scripts/further-smoke.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

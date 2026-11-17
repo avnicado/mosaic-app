@@ -5,6 +5,7 @@
 import checkurl from '../server/routes/checkurl.js';
 import corpus from '../server/routes/corpus.js';
 import feedback from '../server/routes/feedback.js';
+import further from '../server/routes/further.js';
 import health from '../server/routes/health.js';
 import join from '../server/routes/join.js';
 import llm from '../server/routes/llm.js';
@@ -17,7 +18,7 @@ import shared from '../server/routes/shared.js';
 import store from '../server/routes/store.js';
 import users from '../server/routes/users.js';
 
-export const ROUTES = { checkurl, corpus, feedback, health, join, llm, login, logout, read, search, session, shared, store, users };
+export const ROUTES = { checkurl, corpus, feedback, further, health, join, llm, login, logout, read, search, session, shared, store, users };
 
 export default async function handler(req, res) {
   const name = String(req.query?.route || '');

@@ -9,9 +9,10 @@
 import { useSyncExternalStore } from 'react';
 import {
   composePromenadeShelf, composeLeanShelf, heuristicDomain, heuristicPart, heuristicDensity,
-  emptyLean, hasLean, PARTS, DOMAINS, SLOT_BLURB as SCORING_BLURB,
+  emptyLean, hasLean, cleanLean, PARTS, DOMAINS, LEAN_SHELF_SIZE, SLOT_BLURB as SCORING_BLURB,
 } from '../../scoring.js';
 import * as R from '../../data/record.js';
+import { apiFetch } from '../../engine/llm.js';
 
 // ---- open questions (editorial) ------------------------------------------------
 // Ported from the old app's EDITORIAL_LIVE. They link nowhere; holding one
@@ -188,31 +189,16 @@ async function fetchCorpus() {
 
 // ---- the visit's shelf (shared store) ---------------------------------------------
 // state: { status:'idle'|'loading'|'ready'|'error', shelf, meta, error, refreshes,
-//          lean, leanShelf }
+//          lean, leanShelf, furtherTick }
 // shelf is the open shelf (Near / Far / Open questions) the Desk reads from;
 // leanShelf is the five-card shelf for the reader's lean, or null with no lean.
 const LEAN_KEY = 'mosaic.promenade.lean';
 function loadLean() {
-  try {
-    const l = JSON.parse(localStorage.getItem(LEAN_KEY) || 'null');
-    if (!l || !Array.isArray(l.fields)) return emptyLean();
-    const fields = l.fields.filter((d) => DOMAINS.includes(d)).slice(0, 3);
-    const parts = {};
-    for (const d of fields) {
-      const ps = (l.parts?.[d] || []).filter((p) => PARTS[d].includes(p));
-      if (ps.length) parts[d] = ps;
-    }
-    return {
-      fields, parts,
-      ring: Number.isInteger(l.ring) && l.ring >= 0 && l.ring <= 4 ? l.ring : null,
-      mood: ['sharpen', 'complicate', 'bridge', 'ground'].includes(l.mood) ? l.mood : null,
-      hunch: typeof l.hunch === 'string' ? l.hunch.slice(0, 80) : '',
-    };
-  } catch { return emptyLean(); }
+  try { return cleanLean(JSON.parse(localStorage.getItem(LEAN_KEY) || 'null')); } catch { return emptyLean(); }
 }
 function saveLean(lean) { try { localStorage.setItem(LEAN_KEY, JSON.stringify(lean)); } catch {} }
 
-let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), leanShelf: null };
+let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), leanShelf: null, furtherTick: 0 };
 const listeners = new Set();
 const set = (patch) => { state = { ...state, ...patch }; listeners.forEach((f) => f()); };
 const seen = new Set();
@@ -275,6 +261,7 @@ export function setLean(next) {
   const lean = typeof next === 'function' ? next(state.lean) : next;
   saveLean(lean);
   set({ lean, leanShelf: composeLean(lean) });
+  maybeLookFurther();
 }
 export function clearLean() { setLean(emptyLean()); }
 
@@ -289,7 +276,70 @@ export function recomposeLean() {
   set({ leanShelf: composeLean(state.lean) });
 }
 // Start this lean over: forget what it set out this visit.
-export function restartLean() { leanSeen.delete(leanKey(state.lean)); set({ leanShelf: composeLean(state.lean) }); }
+export function restartLean() { leanSeen.delete(leanKey(state.lean)); set({ leanShelf: composeLean(state.lean) }); maybeLookFurther(); }
+
+// ---- looking further ------------------------------------------------------------------
+// The day's pool is what Mosaic collected this morning. When a lean finds
+// fewer than a shelf's worth there, ask the server to search the web for it
+// (/api/further: real search results, scored by the same scorer, added to the
+// day's pool for everyone), then recompose. Once per lean per visit; the
+// server also remembers a lean it already searched today and answers from
+// the store. Waits a moment first, so tapping through wedges doesn't search
+// every step on the way.
+const FURTHER_WAIT_MS = 1500;
+const looked = new Map(); // leanKey → { status:'waiting'|'looking'|'done'|'error', found, message }
+let furtherTimer = null, waitingKey = null;
+const searchableLean = (lean) => !!(lean.fields.length || (lean.hunch || '').trim());
+
+function maybeLookFurther() {
+  clearTimeout(furtherTimer);
+  if (waitingKey && looked.get(waitingKey)?.status === 'waiting') looked.delete(waitingKey);
+  waitingKey = null;
+  const lean = state.lean, shelf = state.leanShelf;
+  if (!corpus || !shelf || !hasLean(lean) || !searchableLean(lean)) return;
+  if (shelf.areaCount >= LEAN_SHELF_SIZE) return; // enough here; Recompose and "start over" cover the rest
+  const key = leanKey(lean);
+  if (looked.has(key)) return;
+  looked.set(key, { status: 'waiting' });
+  waitingKey = key;
+  set({ furtherTick: state.furtherTick + 1 });
+  furtherTimer = setTimeout(() => { waitingKey = null; lookFurther(lean, key); }, FURTHER_WAIT_MS);
+}
+
+function mergeFound(found) {
+  const have = new Set(corpus.items.map((it) => it.url));
+  const fresh = found.filter((it) => it?.url && !have.has(it.url)).map(prepare);
+  if (fresh.length) corpus = { ...corpus, items: [...corpus.items, ...fresh] };
+  return fresh.length;
+}
+
+async function lookFurther(lean, key) {
+  looked.set(key, { status: 'looking' });
+  set({ furtherTick: state.furtherTick + 1 });
+  let entry;
+  try {
+    const res = await apiFetch('/api/further', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lean }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const type = data?.error?.type || '';
+      const message = res.status === 401 ? 'You’re signed out, so Mosaic couldn’t look further.'
+        : res.status === 429 ? (data?.error?.message || 'Too many searches just now.')
+          : 'Mosaic couldn’t look further just now.';
+      throw Object.assign(new Error(message), { type });
+    }
+    if (corpus) mergeFound(data.items || []);
+    entry = { status: 'done', found: (data.items || []).length, searched: !!data.searched };
+  } catch (e) {
+    entry = { status: 'error', message: e.message || 'Mosaic couldn’t look further just now.', type: e.type || '' };
+  }
+  looked.set(key, entry);
+  set({ furtherTick: state.furtherTick + 1, leanShelf: composeLean(state.lean) });
+}
+
+// → this lean's looking-further state, or null.
+export function furtherFor(lean) { return looked.get(leanKey(lean)) || null; }
 // Re-read held state (after holding a card) without moving the shelf.
 export function leanSeenCount() { return (leanSeen.get(leanKey(state.lean)) || new Set()).size; }
 
@@ -304,6 +354,7 @@ export async function ensureShelf() {
       seen.clear();
     }
     set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0, leanShelf: composeLean(state.lean) });
+    maybeLookFurther();
   } catch (e) {
     set({ status: 'error', error: e.message || String(e) });
   } finally {

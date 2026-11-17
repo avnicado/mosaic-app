@@ -7,6 +7,9 @@
 //   m2:invites           code → invite JSON        (server/users.js)
 //   m2:shared            "<userId>:<threadId>" → shared-thread snapshot JSON
 //   m2:feedback          noteId → alpha feedback JSON  (server/feedback.js)
+//   m2:corpus-extra:<generatedAt>  url-hash → item found by a live search for a
+//                        thin lean, added to that day's pool (server/further.js)
+//   m2:further           looking-further counters (per person, per day)
 //   m2-blob:<name>       single cached values (the daily Promenade corpus)
 //
 // Upstash env (Vercel Marketplace → Upstash): KV_REST_API_URL/KV_REST_API_TOKEN
@@ -91,19 +94,39 @@ export async function hashGet(hash, field) {
   throw noStore();
 }
 
-export async function hashUpdate(hash, { set = {}, del = [] }) {
+// ttlSeconds (optional): let the whole hash expire that long after this write
+// (Redis only; local dev files are kept).
+export async function hashUpdate(hash, { set = {}, del = [], ttlSeconds = 0 }) {
   const keys = Object.keys(set);
   const mode = storeMode();
   if (mode === 'redis') {
     const cmds = [];
     if (keys.length) cmds.push(['HSET', hash, ...keys.flatMap((k) => [k, set[k]])]);
     if (del.length) cmds.push(['HDEL', hash, ...del]);
+    if (cmds.length && ttlSeconds > 0) cmds.push(['EXPIRE', hash, String(Math.round(ttlSeconds))]);
     if (cmds.length) await redis(cmds);
     return;
   }
   if (mode === 'file') {
     await updateFile(hash, (data) => { for (const k of keys) data[k] = set[k]; for (const k of del) delete data[k]; });
     return;
+  }
+  throw noStore();
+}
+
+// Atomic counter in a hash field → the new value.
+export async function hashIncr(hash, field, by = 1, ttlSeconds = 0) {
+  const mode = storeMode();
+  if (mode === 'redis') {
+    const cmds = [['HINCRBY', hash, field, String(by)]];
+    if (ttlSeconds > 0) cmds.push(['EXPIRE', hash, String(Math.round(ttlSeconds))]);
+    const [v] = await redis(cmds);
+    return Number(v) || 0;
+  }
+  if (mode === 'file') {
+    let out = 0;
+    await updateFile(hash, (data) => { out = (Number(data[field]) || 0) + by; data[field] = String(out); });
+    return out;
   }
   throw noStore();
 }

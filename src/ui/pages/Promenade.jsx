@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRoute } from '../router.js';
 import {
   useShelf, ensureShelf, refreshShelf, retryShelf, sectionTitle, sectionNote, corpusItems,
-  setLean, clearLean, recomposeLean, restartLean, leanSeenCount,
+  setLean, clearLean, recomposeLean, restartLean, leanSeenCount, furtherFor,
 } from '../promenade/shelf.js';
 import ShelfCard, { ShelfSkeleton } from '../promenade/ShelfCard.jsx';
 import Mandala, { MOVES } from '../promenade/Mandala.jsx';
@@ -32,7 +32,7 @@ function leanReason(card) {
     ? `From ${where}, outside your fields: ${MOVES.bridge.why}`
     : `${cap(RING_BLURB[itemRing(card)])}, ${MOVES[card.slot]?.why || 'in your lean'}`;
   if (card.nearHunch) s += ', near your hunch';
-  return s + '.';
+  return s + '.' + (card.found_by === 'search' ? ' Found today by looking further.' : '');
 }
 
 // A neighbour on the Mandala for a thin lean: the next wedge either side.
@@ -179,6 +179,8 @@ function LeanShelf({ shelf, lean, cardCell }) {
   if (seen) widen.push(['Start this lean over', restartLean]);
   if (!widen.length) widen.push(['Leave it open', clearLean]);
 
+  const further = furtherFor(lean);
+  const looking = !!further && (further.status === 'waiting' || further.status === 'looking');
   const lead = seen
     ? `${n === 0 ? 'Nothing is' : `Only ${n} ${n === 1 ? 'thing is' : 'things are'}`} left here that you haven’t seen this visit.`
     : n === 0 ? 'Nothing sits in this part of the Mandala today.' : `Only ${n} ${n === 1 ? 'thing sits' : 'things sit'} in this part of the Mandala today.`;
@@ -195,7 +197,15 @@ function LeanShelf({ shelf, lean, cardCell }) {
 
       {n < LEAN_SHELF_SIZE ? (
         <div className="pm-thin">
-          <p>{lead} Rather than pad the shelf with things outside your lean, widen it:</p>
+          {looking ? (
+            <p className="pm-looking"><span className="spinner" aria-hidden /> {lead} Looking further afield for more that fits…</p>
+          ) : (
+            <>
+              {further?.status === 'done' && !seen && <p>Mosaic also looked further afield for this lean today{further.found ? ` and found ${further.found} more` : ', and nothing more turned up'}.</p>}
+              {further?.status === 'error' && <p>{further.message}</p>}
+              <p>{lead} Rather than pad the shelf with things outside your lean, widen it:</p>
+            </>
+          )}
           <div className="ln-row">
             {widen.map(([label, fn]) => <button key={label} type="button" className="ln-chip" onClick={fn}>{label}</button>)}
           </div>

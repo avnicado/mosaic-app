@@ -683,6 +683,23 @@ export function inLeanArea(item, lean) {
   if (ps.length && !ps.includes(item.part)) return false;
   return inLeanBand(lean, itemRing(item));
 }
+// A lean from outside (localStorage, a request body) → a valid lean, or the
+// empty lean. Unknown fields, parts, rings and moods are dropped.
+export function cleanLean(l) {
+  if (!l || typeof l !== 'object' || !Array.isArray(l.fields)) return emptyLean();
+  const fields = [...new Set(l.fields.filter((d) => DOMAINS.includes(d)))].slice(0, 3);
+  const parts = {};
+  for (const d of fields) {
+    const ps = [...new Set((Array.isArray(l.parts?.[d]) ? l.parts[d] : []).filter((p) => PARTS[d].includes(p)))];
+    if (ps.length) parts[d] = ps;
+  }
+  return {
+    fields, parts,
+    ring: Number.isInteger(l.ring) && l.ring >= 0 && l.ring < DENSITY_RING_COUNT ? l.ring : null,
+    mood: SLOTS.includes(l.mood) ? l.mood : null,
+    hunch: typeof l.hunch === 'string' ? l.hunch.replace(/\s+/g, ' ').trim().slice(0, 80) : '',
+  };
+}
 export const hasLean = (lean) => !!(lean && (lean.fields.length || lean.ring != null || lean.mood || (lean.hunch || '').trim()));
 
 // pool: scored items (each with domain, part, slot, scores.density).
