@@ -7,11 +7,11 @@
 // across every field. Each item is a dot coloured by its move; the shelf's
 // cards are numbered on their dots. Filled cells are what you've held.
 // See mandala.js for placement and scoring.js's composeLeanShelf for the shelf.
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { PARTS, emptyLean, hunchStems, nearHunch, inLeanArea, inLeanBand, leanParts, itemRing } from '../../scoring.js';
 import {
   SIZE, C, INNER, MAX_R, RT, DENSITY_RING_COUNT, RING_BLURB,
-  polar, wedgePath, viewGeometry, layoutDots, admittedOf,
+  polar, wedgePath, arcPath, viewGeometry, layoutDots, admittedOf,
 } from './mandala.js';
 import './mandala.css';
 
@@ -31,6 +31,27 @@ const METER_CAPTION = [
 ];
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// On a phone the Mandala runs edge to edge and its labels follow the rim, so
+// the chart can fill the width instead of leaving room for flat labels at the
+// sides. Desktop keeps the flat labels.
+const PHONE = '(max-width: 600px)';
+function usePhone() {
+  const query = () => typeof matchMedia !== 'undefined' && matchMedia(PHONE).matches;
+  const [phone, setPhone] = useState(query);
+  useEffect(() => {
+    if (typeof matchMedia === 'undefined') return undefined;
+    const m = matchMedia(PHONE);
+    const on = () => setPhone(m.matches);
+    on();
+    m.addEventListener?.('change', on);
+    return () => m.removeEventListener?.('change', on);
+  }, []);
+  return phone;
+}
+// The rim band that holds a phone's labels (and is their tap target).
+const PHONE_HALF = MAX_R + 42, RIM_IN = MAX_R + 3, RIM_OUT = PHONE_HALF - 1;
+
 export const andList = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
 
 // ---- lean edits (pure) --------------------------------------------------------------
@@ -63,6 +84,8 @@ export function leanStatement(lean) {
 }
 
 export default function Mandala({ items, lean, setLean, held, numbered, hot, setHot }) {
+  const phone = usePhone();
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const [zoom, setZoom] = useState(null);
   const [anim, setAnim] = useState('');
   const [hunchText, setHunchText] = useState(lean.hunch || '');
@@ -72,7 +95,7 @@ export default function Mandala({ items, lean, setLean, held, numbered, hot, set
   useEffect(() => { if (zoom && !lean.fields.includes(zoom)) setZoom(null); }, [lean.fields, zoom]);
 
   const pool = useMemo(() => admittedOf(items), [items]);
-  const geo = useMemo(() => viewGeometry(zoom), [zoom]);
+  const geo = useMemo(() => viewGeometry(zoom, phone), [zoom, phone]);
   const { pos, dotR } = useMemo(() => layoutDots(pool, geo, zoom), [pool, geo, zoom]);
   const stems = useMemo(() => hunchStems(lean.hunch), [lean.hunch]);
   const heldUrls = useMemo(() => new Set(held.map((h) => h.url)), [held]);
@@ -136,8 +159,8 @@ export default function Mandala({ items, lean, setLean, held, numbered, hot, set
 
         <svg
           key={zoom || 'all'}
-          className={`ln-svg ${zoom ? 'zoomed' : ''} ${anim}`}
-          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          className={`ln-svg ${zoom ? 'zoomed' : ''} ${phone ? 'phone' : ''} ${anim}`}
+          viewBox={phone ? `${C - PHONE_HALF} ${C - PHONE_HALF} ${PHONE_HALF * 2} ${PHONE_HALF * 2}` : `0 0 ${SIZE} ${SIZE}`}
           role="group"
           aria-label={zoom ? `Inside ${zoom}: four parts by five depths` : 'Mandala: twelve fields by five depths'}
         >
@@ -173,22 +196,35 @@ export default function Mandala({ items, lean, setLean, held, numbered, hot, set
             {geo.slices.map((s, i) => {
               const a0 = geo.a0Of(i), a1 = a0 + geo.sweep - 0.008;
               const mid = (a0 + a1) / 2;
-              const [lx, ly] = polar(MAX_R + 18, mid);
-              const anchor = Math.cos(mid) > 0.2 ? 'start' : Math.cos(mid) < -0.2 ? 'end' : 'middle';
               const on = s.part === null ? lean.fields.includes(s.domain) : leanParts(lean, s.domain).includes(s.part);
               const np = s.part === null ? leanParts(lean, s.domain).length : 0;
-              const w = (s.label.length + 3) * (zoom ? 8 : 7.2) + 10;
-              const bx = anchor === 'start' ? lx - 5 : anchor === 'end' ? lx - w + 5 : lx - w / 2;
-              return (
+              const words = <>{s.label}{np ? <tspan className="n">{phone ? '›' : ' ›'}{np}</tspan> : null}</>;
+              const g = (body) => (
                 <g key={s.label} tabIndex={0} role="button" aria-pressed={on}
                   aria-label={s.part === null ? `${s.domain}${np ? `, ${np} parts chosen` : ''}` : `${s.part}, part of ${s.domain}`}
-                  onClick={() => tapLabel(s)} onKeyDown={onKey(() => tapLabel(s))} className="ln-label-g">
-                  <rect x={bx} y={ly - 11} width={w} height={22} rx={3} className="ln-label-hit" />
-                  <text x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle" className={`ln-label ${on ? 'on' : ''}`}>
-                    {s.label}{np ? <tspan className="n"> ›{np}</tspan> : null}
-                  </text>
-                </g>
+                  onClick={() => tapLabel(s)} onKeyDown={onKey(() => tapLabel(s))} className="ln-label-g">{body}</g>
               );
+              if (phone) {
+                // Text follows the rim, upright on both halves: the lower half
+                // runs the arc backwards and sits its baseline further out.
+                const lower = Math.sin(mid) > 0.05;
+                const id = `${uid}-rim-${i}`;
+                return g(<>
+                  <path d={wedgePath(RIM_IN, RIM_OUT, a0, a1)} className="ln-label-hit" />
+                  <path id={id} d={lower ? arcPath(MAX_R + 28, a1, a0) : arcPath(MAX_R + 15, a0, a1)} className="ln-rim-path" />
+                  <text className={`ln-label ${on ? 'on' : ''}`}>
+                    <textPath href={`#${id}`} xlinkHref={`#${id}`} startOffset="50%" textAnchor="middle">{words}</textPath>
+                  </text>
+                </>);
+              }
+              const [lx, ly] = polar(MAX_R + 18, mid);
+              const anchor = Math.cos(mid) > 0.2 ? 'start' : Math.cos(mid) < -0.2 ? 'end' : 'middle';
+              const w = (s.label.length + 3) * (zoom ? 8 : 7.2) + 10;
+              const bx = anchor === 'start' ? lx - 5 : anchor === 'end' ? lx - w + 5 : lx - w / 2;
+              return g(<>
+                <rect x={bx} y={ly - 11} width={w} height={22} rx={3} className="ln-label-hit" />
+                <text x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle" className={`ln-label ${on ? 'on' : ''}`}>{words}</text>
+              </>);
             })}
           </g>
           <g>
@@ -220,7 +256,7 @@ export default function Mandala({ items, lean, setLean, held, numbered, hot, set
               if (!p) return null;
               return (
                 <g key={n.url} className={`ln-pick ${hot === n.url ? 'hot' : ''}`}>
-                  <circle cx={p.x} cy={p.y} r={zoom ? 10 : 8.5} />
+                  <circle cx={p.x} cy={p.y} r={phone ? (zoom ? 12 : 10.5) : zoom ? 10 : 8.5} />
                   <text x={p.x} y={p.y}>{n.num}</text>
                 </g>
               );
@@ -258,7 +294,7 @@ export default function Mandala({ items, lean, setLean, held, numbered, hot, set
       </div>
 
       <div className="ln-panel">
-        <div>
+        <div className="ln-now">
           <div className="label">Your lean</div>
           <p className="ln-statement">
             {leanStatement(lean)}

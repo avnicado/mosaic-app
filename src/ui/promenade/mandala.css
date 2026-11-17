@@ -27,14 +27,15 @@
 .ln-cell.field { fill: var(--field); }
 .ln-cell.band { fill: var(--lit-soft); }
 .ln-cell.target { fill: var(--lit); }
-.ln-cell:hover { stroke: var(--accent-soft); stroke-width: 1.5; }
+@media (hover: hover) { .ln-cell:hover { stroke: var(--accent-soft); stroke-width: 1.5; } }
 .ln-held { fill: var(--held); pointer-events: none; }
 .ln-label { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.03em; fill: var(--ink-faded); cursor: pointer; }
 .zoomed .ln-label { font-size: 13px; }
 .ln-label.on { fill: var(--ink); font-weight: 500; }
 .ln-label tspan.n { fill: var(--accent); }
 .ln-label-hit { fill: transparent; cursor: pointer; }
-.ln-label-g:hover .ln-label { fill: var(--accent); }
+@media (hover: hover) { .ln-label-g:hover .ln-label { fill: var(--accent); } }
+.ln-rim-path { fill: none; stroke: none; pointer-events: none; }
 
 .ln-dot { stroke: var(--bg); stroke-width: 1; opacity: .24; transition: opacity .25s ease; cursor: pointer; fill: var(--ink-faded); }
 .ln-dot.sharpen { fill: var(--sharpen); }
@@ -66,7 +67,7 @@
 .ln-small { font-size: 12.5px; margin: 0; }
 
 .ln-chip { border: 1px solid var(--rule); background: var(--panel); border-radius: 3px; padding: 4px 9px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; line-height: 1.3; color: var(--ink-soft); }
-.ln-chip:hover { border-color: var(--accent-soft); color: var(--ink); }
+@media (hover: hover) { .ln-chip:hover { border-color: var(--accent-soft); color: var(--ink); } }
 .ln-chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .ln-chip .sw { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-faded); flex: none; }
 .ln-chip.sharpen .sw { background: var(--sharpen); }
@@ -108,3 +109,41 @@
 
 @media (prefers-reduced-motion: reduce) { .ln-svg.zooming, .ln-svg.unzooming { animation: none; } .ln-cell, .ln-dot { transition: none; } }
 .pm-looking { display: flex; align-items: center; gap: 8px; }
+
+/* ---- Phones ----------------------------------------------------------------
+   The Mandala runs edge to edge with its labels on the rim (Mandala.jsx's
+   usePhone, same 600px breakpoint), what your lean says sits right under the
+   chart so a tap shows what it did, and everything you tap is at least 44px. */
+@media (max-width: 600px) {
+  .pm-page { overflow-x: clip; }
+  .ln { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+  .ln-mandala, .ln-panel { display: contents; }
+  .ln-crumbs { order: 1; min-height: 44px; font-size: 12px; }
+  .ln-crumbs button { min-height: 44px; padding: 0 10px 0 0; font-size: 12px; }
+  .ln-svg { order: 2; width: min(calc(100% + 24px), 470px); max-width: none; margin-top: -4px; align-self: center; }
+  .ln-legend { order: 3; justify-content: center; gap: 6px 12px; }
+  .ln-now { order: 4; }
+  .ln-go { order: 5; }
+  .ln-hint { order: 6; }
+  .ln-ctl { order: 7; }
+  .ln-count { order: 8; }
+
+  .ln-svg.phone .ln-label { font-size: 16px; letter-spacing: 0; }
+  .ln-svg.phone.zoomed .ln-label { font-size: 18px; }
+  .ln-svg.phone .ln-label tspan.n { font-size: 13px; }
+  .ln-svg.phone .ln-pick text { font-size: 13px; }
+  .ln-svg.phone .ln-home-label { font-size: 13px; }
+
+  .ln-statement { font-size: 20px; }
+  .ln-row { gap: 8px; }
+  .ln-chip { min-height: 44px; padding: 8px 12px; font-size: 14px; }
+  .ln-fchip { font-size: 14px; }
+  .ln-fchip button { min-height: 44px; padding: 8px 10px; }
+  .ln-fchip .x { min-width: 44px; font-size: 14px; }
+  .ln-hunch { min-height: 44px; }
+
+  .pm-lean-grid { grid-template-columns: minmax(0, 1fr); }
+  .pm-page .section-head .btn.link { padding: 10px 2px; }
+  .pm-card .btn.small { min-height: 40px; padding: 6px 14px; font-size: 13.5px; }
+  .pm-card .open-btn.compact { min-height: 40px; padding: 6px 12px 6px 10px; font-size: 13px; }
+}

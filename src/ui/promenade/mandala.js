@@ -58,6 +58,12 @@ export const MAX_R = 226;
 export const RT = (MAX_R - INNER) / DENSITY_RING_COUNT;
 
 export const polar = (r, a) => [C + r * Math.cos(a), C + r * Math.sin(a)];
+// A plain arc from angle a0 to a1 (clockwise when a1 > a0), for text to follow.
+export function arcPath(r, a0, a1) {
+  const [sx, sy] = polar(r, a0), [ex, ey] = polar(r, a1);
+  const big = Math.abs(a1 - a0) > Math.PI ? 1 : 0;
+  return `M${sx} ${sy}A${r} ${r} 0 ${big} ${a1 > a0 ? 1 : 0} ${ex} ${ey}`;
+}
 export function wedgePath(rIn, rOut, a0, a1) {
   const [sx, sy] = polar(rOut, a0), [ex, ey] = polar(rOut, a1), [ix, iy] = polar(rIn, a1), [jx, jy] = polar(rIn, a0);
   const big = a1 - a0 > Math.PI ? 1 : 0;
@@ -71,10 +77,13 @@ export function slicesFor(zoom) {
   return PARTS[zoom].map((p) => ({ domain: zoom, part: p, label: p }));
 }
 
-export function viewGeometry(zoom) {
+// phone: on a narrow screen the labels follow the rim (see Mandala.jsx), so a
+// field's four parts sit on the diagonals, where curved text reads easily,
+// rather than with one part straight up.
+export function viewGeometry(zoom, phone = false) {
   const slices = slicesFor(zoom);
   const sweep = (Math.PI * 2) / slices.length;
-  const a0Of = (i) => -Math.PI / 2 + sweep * i + (zoom ? -sweep / 2 : 0);
+  const a0Of = (i) => -Math.PI / 2 + sweep * i + (zoom && !phone ? -sweep / 2 : 0);
   const indexOf = (it) => {
     if (!zoom) return DOMAINS.indexOf(it.domain);
     if (it.domain !== zoom || !it.part) return -1;
