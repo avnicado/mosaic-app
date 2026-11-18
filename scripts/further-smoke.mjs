@@ -65,7 +65,12 @@ globalThis.fetch = async (url, init = {}) => {
   throw new Error(`unexpected fetch in test: ${u}`);
 };
 
-const { lookFurther, buildQueries, junkReason, safeResultUrl, searchable, readExtras, mergeExtras, normUrl, USER_PER_HOUR, SCORE_MAX } = await import('../server/further.js');
+const { lookFurther: lookFurtherReal, buildQueries, junkReason, safeResultUrl, searchable, readExtras, mergeExtras, normUrl, USER_PER_HOUR, SCORE_MAX } = await import('../server/further.js');
+// Lengths: the real measurer fetches result pages; here a stub stands in, so
+// the test still proves nothing else is fetched. It measures every other find.
+const measured = [];
+const stubMeasure = async (items) => { items.forEach((it, i) => { measured.push(it.url); if (i % 2 === 0) { it.minutes = 7 + i; it.length_by = 'page'; } }); return items.length; };
+const lookFurther = (u, l, o = {}) => lookFurtherReal(u, l, { measure: stubMeasure, ...o });
 const { setBlob } = await import('../server/store.js');
 const { cleanLean, emptyLean, composeLeanShelf, inLeanArea, LEAN_SHELF_SIZE } = await import('../src/scoring.js');
 const { ROUTES } = await import('../api/[route].js');
@@ -129,6 +134,7 @@ const urls = r1.items.map((i) => i.url);
 check('good finds are kept, junk and repeats are not', r1.added >= 3 && urls.every((u) => /example-journal\.org\/essays\//.test(u)) && new Set(urls.map(normUrl)).size === urls.length && !urls.some((u) => /rage|already-here/.test(u)), JSON.stringify(urls));
 check('ragebait falls below the bridging floor', r1.skipped['below-floor'] >= 1 && !urls.some((u) => u.includes('rage')), JSON.stringify(r1.skipped));
 check('each find is scored, placed and labelled', r1.items.every((i) => i.domain === 'craft & making' && i.part === 'repair' && i.scored_by === 'llm' && i.found_by === 'search' && i.engagementModeled && typeof i.scores.density === 'number' && !('_hint' in i)));
+check('every find has a length, measured or estimated', r1.items.every((i) => i.minutes > 0 && ['page', 'estimate'].includes(i.length_by)) && r1.items.some((i) => i.length_by === 'page') && measured.length > 0, JSON.stringify(r1.items.map((i) => [i.minutes, i.length_by])));
 check('the finds fit the lean', r1.fit === r1.added && r1.items.every((i) => inLeanArea(i, repairLean)));
 console.log(`     wait with stubbed latencies (Tavily 0.3s, Groq 0.4s): ${(r1.ms / 1000).toFixed(1)}s; ${r1.calls.search} searches, ${r1.calls.llm} Groq calls`);
 

@@ -683,6 +683,25 @@ export function inLeanArea(item, lean) {
   if (ps.length && !ps.includes(item.part)) return false;
   return inLeanBand(lean, itemRing(item));
 }
+// The tiled Mandala's lean: a piece is lit when it sits in the field and parts
+// you stepped into, at exactly the depth you chose, in the mood you chose.
+// Everything else stays in place, greyed.
+export function fitsLean(item, lean) {
+  if (lean.fields.length && !lean.fields.includes(item.domain)) return false;
+  const ps = leanParts(lean, item.domain);
+  if (ps.length && !ps.includes(item.part)) return false;
+  if (lean.ring != null && itemRing(item) !== lean.ring) return false;
+  if (lean.mood && item.slot !== lean.mood) return false;
+  return true;
+}
+// How many pieces a lean lights that you don't hold yet: admitted, fitting the
+// lean, and mentioning the hunch when there is one. Under a shelf's worth,
+// the Promenade looks further afield.
+export function leanRoom(pool, lean, held = new Set()) {
+  const stems = hunchStems(lean.hunch);
+  return pool.filter((it) => (it.scores?.bridging ?? 0) >= BRIDGING_FLOOR && !held.has(it.url)
+    && fitsLean(it, lean) && (!stems.length || nearHunch(it, stems))).length;
+}
 // A lean from outside (localStorage, a request body) → a valid lean, or the
 // empty lean. Unknown fields, parts, rings and moods are dropped.
 export function cleanLean(l) {

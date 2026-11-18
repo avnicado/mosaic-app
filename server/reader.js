@@ -27,7 +27,7 @@ function privateIp(ip) {
   return v === '::1' || v === '::' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe80');
 }
 
-async function assertPublic(url) {
+export async function assertPublic(url) {
   const u = new URL(url);
   if (!/^https?:$/.test(u.protocol)) throw Object.assign(new Error('Only web pages can be read here.'), { status: 400 });
   if (u.username || u.password) throw Object.assign(new Error('That link can’t be read here.'), { status: 400 });

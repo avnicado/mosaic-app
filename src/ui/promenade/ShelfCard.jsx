@@ -8,6 +8,7 @@ import { holdItem } from '../../data/actions.js';
 import { useRecord } from '../../data/hooks.js';
 import * as R from '../../data/record.js';
 import { cleanExcerpt, realWhy, holdPlaceholder } from './shelf.js';
+import { lengthText } from '../../length.js';
 
 // The thread this card already seeded, if any.
 function useHeldBy(card) {
@@ -19,7 +20,7 @@ function useHeldBy(card) {
 
 // num: the card's number on the Mandala. reason: why the lean put it here,
 // shown before the card's own why. hot/onHot link the card to its dot.
-export default function ShelfCard({ card, compact = false, dev = false, startHolding = false, num = null, reason = '', hot = false, onHot = null }) {
+export default function ShelfCard({ card, compact = false, dev = false, startHolding = false, num = null, reason = '', hot = false, onHot = null, children = null }) {
   const excerpt = cleanExcerpt(card.excerpt);
   const ownWhy = card.editorial ? card.why : realWhy(card);
   const why = [reason, ownWhy].filter(Boolean).join(' ');
@@ -28,7 +29,7 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
   const host = card.url ? hostOf(card.url) : '';
   const squash = (x) => (x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const hostSaysSource = host && squash(card.source).length >= 4 && squash(host).includes(squash(card.source).replace(/magazine$/, '').slice(0, 8));
-  const source = card.editorial ? '' : [card.source, host && !hostSaysSource ? host : ''].filter(Boolean).join(' · ');
+  const source = card.editorial ? '' : [card.source, host && !hostSaysSource ? host : '', lengthText(card)].filter(Boolean).join(' · ');
 
   return (
     <article className={`pm-card ${compact ? 'compact' : ''} ${card.editorial ? 'editorial' : ''} ${hot ? 'hot' : ''}`}
@@ -62,6 +63,7 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
         ) : (
           <HoldComposer card={{ ...card, excerpt }} onCancel={() => setHolding(false)} />
         )}
+        {children}
       </div>
     </article>
   );

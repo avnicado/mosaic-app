@@ -8,11 +8,12 @@
 
 import { useSyncExternalStore } from 'react';
 import {
-  composePromenadeShelf, composeLeanShelf, heuristicDomain, heuristicPart, heuristicDensity,
-  emptyLean, hasLean, cleanLean, PARTS, DOMAINS, LEAN_SHELF_SIZE, SLOT_BLURB as SCORING_BLURB,
+  composePromenadeShelf, heuristicDomain, heuristicPart, heuristicDensity,
+  emptyLean, hasLean, cleanLean, leanRoom, PARTS, DOMAINS, LEAN_SHELF_SIZE, SLOT_BLURB as SCORING_BLURB,
 } from '../../scoring.js';
 import * as R from '../../data/record.js';
 import { apiFetch } from '../../engine/llm.js';
+import { withLength } from '../../length.js';
 
 // ---- open questions (editorial) ------------------------------------------------
 // Ported from the old app's EDITORIAL_LIVE. They link nowhere; holding one
@@ -160,8 +161,9 @@ let corpusPromise = null;
 // /corpus.json fallback) lack them. Fill them in the same deterministic way the
 // corpus build falls back to, and say so (part_by / density_by), so a guess is
 // never shown as the classifier's answer.
+// Lengths likewise: a pool collected before lengths existed gets estimates.
 function prepare(it) {
-  const out = { ...it };
+  const out = withLength(it);
   if (out.part === undefined || (out.part && !(PARTS[out.domain] || []).includes(out.part))) {
     out.part = heuristicPart(out);
     out.part_by = out.part ? 'keywords' : null;
@@ -189,16 +191,22 @@ async function fetchCorpus() {
 
 // ---- the visit's shelf (shared store) ---------------------------------------------
 // state: { status:'idle'|'loading'|'ready'|'error', shelf, meta, error, refreshes,
-//          lean, leanShelf, furtherTick }
+//          lean, furtherTick }
 // shelf is the open shelf (Near / Far / Open questions) the Desk reads from;
-// leanShelf is the five-card shelf for the reader's lean, or null with no lean.
+// lean is where the reader leans on the tiled Mandala (src/ui/promenade/Mandala.jsx).
 const LEAN_KEY = 'mosaic.promenade.lean';
 function loadLean() {
-  try { return cleanLean(JSON.parse(localStorage.getItem(LEAN_KEY) || 'null')); } catch { return emptyLean(); }
+  // The tiled Mandala steps into one field at a time; an older lean of
+  // several fields keeps its first.
+  try {
+    const l = cleanLean(JSON.parse(localStorage.getItem(LEAN_KEY) || 'null'));
+    const fields = l.fields.slice(0, 1);
+    return { ...l, fields, parts: fields[0] && l.parts[fields[0]] ? { [fields[0]]: l.parts[fields[0]] } : {} };
+  } catch { return emptyLean(); }
 }
 function saveLean(lean) { try { localStorage.setItem(LEAN_KEY, JSON.stringify(lean)); } catch {} }
 
-let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), leanShelf: null, furtherTick: 0 };
+let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), furtherTick: 0 };
 const listeners = new Set();
 const set = (patch) => { state = { ...state, ...patch }; listeners.forEach((f) => f()); };
 const seen = new Set();
@@ -239,44 +247,15 @@ export function heldUrls() {
   for (const i of R.allItems()) if (i.url) out.add(i.url);
   return out;
 }
-// Cards set out under this lean this visit, so Recompose gives the next few
-// from the same lit area. A different lean starts its own list.
-const leanSeen = new Map();
 const leanKey = (lean) => JSON.stringify([lean.fields, lean.fields.map((d) => lean.parts?.[d] || []), lean.ring, lean.mood, (lean.hunch || '').trim().toLowerCase()]);
-
-function composeLean(lean) {
-  if (!corpus || !hasLean(lean)) return null;
-  const key = leanKey(lean);
-  const exclude = leanSeen.get(key) || new Set();
-  const gen = Date.parse(corpus.meta?.generatedAt || '');
-  return composeLeanShelf(corpus.items, lean, {
-    held: heldUrls(),
-    exclude,
-    now: Number.isFinite(gen) ? gen : Date.now(),
-    ratingFor: R.getSettings().ratings ? makeRatingFor() : null,
-  });
-}
 
 export function setLean(next) {
   const lean = typeof next === 'function' ? next(state.lean) : next;
   saveLean(lean);
-  set({ lean, leanShelf: composeLean(lean) });
+  set({ lean });
   maybeLookFurther();
 }
 export function clearLean() { setLean(emptyLean()); }
-
-// Recompose: everything on the shelf now counts as seen under this lean.
-export function recomposeLean() {
-  const shelf = state.leanShelf;
-  if (!shelf) return;
-  const key = leanKey(state.lean);
-  const seenHere = leanSeen.get(key) || new Set();
-  shelf.picks.forEach((p) => p.url && seenHere.add(p.url));
-  leanSeen.set(key, seenHere);
-  set({ leanShelf: composeLean(state.lean) });
-}
-// Start this lean over: forget what it set out this visit.
-export function restartLean() { leanSeen.delete(leanKey(state.lean)); set({ leanShelf: composeLean(state.lean) }); maybeLookFurther(); }
 
 // ---- looking further ------------------------------------------------------------------
 // The day's pool is what Mosaic collected this morning. When a lean finds
@@ -295,9 +274,9 @@ function maybeLookFurther() {
   clearTimeout(furtherTimer);
   if (waitingKey && looked.get(waitingKey)?.status === 'waiting') looked.delete(waitingKey);
   waitingKey = null;
-  const lean = state.lean, shelf = state.leanShelf;
-  if (!corpus || !shelf || !hasLean(lean) || !searchableLean(lean)) return;
-  if (shelf.areaCount >= LEAN_SHELF_SIZE) return; // enough here; Recompose and "start over" cover the rest
+  const lean = state.lean;
+  if (!corpus || !hasLean(lean) || !searchableLean(lean)) return;
+  if (leanRoom(corpus.items, lean, heldUrls()) >= LEAN_SHELF_SIZE) return; // enough lit here
   const key = leanKey(lean);
   if (looked.has(key)) return;
   looked.set(key, { status: 'waiting' });
@@ -335,13 +314,11 @@ async function lookFurther(lean, key) {
     entry = { status: 'error', message: e.message || 'Mosaic couldn’t look further just now.', type: e.type || '' };
   }
   looked.set(key, entry);
-  set({ furtherTick: state.furtherTick + 1, leanShelf: composeLean(state.lean) });
+  set({ furtherTick: state.furtherTick + 1 });
 }
 
 // → this lean's looking-further state, or null.
 export function furtherFor(lean) { return looked.get(leanKey(lean)) || null; }
-// Re-read held state (after holding a card) without moving the shelf.
-export function leanSeenCount() { return (leanSeen.get(leanKey(state.lean)) || new Set()).size; }
 
 export async function ensureShelf() {
   if (state.status === 'loading') return;
@@ -353,7 +330,7 @@ export async function ensureShelf() {
       corpus = await corpusPromise;
       seen.clear();
     }
-    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0, leanShelf: composeLean(state.lean) });
+    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0 });
     maybeLookFurther();
   } catch (e) {
     set({ status: 'error', error: e.message || String(e) });

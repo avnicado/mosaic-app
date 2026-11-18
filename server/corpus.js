@@ -5,6 +5,8 @@
 
 import { scoreItem, DOMAINS, SLOTS } from '../src/scoring.js';
 import { handleLLM } from './proxyCore.js';
+import { lengthFromFeedHtml, measureMany } from './length.js';
+import { withLength } from '../src/length.js';
 
 const TARGET = Number(process.env.CORPUS_TARGET || 260); // ~200-400 per spec
 const HN_COUNT = 90;
@@ -96,6 +98,8 @@ async function pullRSS({ url, source, hint }, cap = 20) {
     if (!title || !link) continue;
     const desc = stripTags(firstTag(b, isAtom ? 'summary' : 'description')
       || firstTag(b, 'content') || firstTag(b, 'content:encoded'));
+    // A feed that carries the whole piece tells us its length for free.
+    const full = lengthFromFeedHtml(firstTag(b, 'content:encoded') || (isAtom ? firstTag(b, 'content') : ''));
     const dateStr = firstTag(b, 'pubDate') || firstTag(b, 'updated') || firstTag(b, 'published');
     const ts = dateStr ? Date.parse(dateStr) : Date.now();
     const id = `rss-${hashString(link)}`;
@@ -112,6 +116,7 @@ async function pullRSS({ url, source, hint }, cap = 20) {
       // deterministic hash + recency. Flagged so the page can disclose it.
       engagement: modelEngagement(id, ts),
       engagementModeled: true,
+      ...(full || {}),
       _hint: hint,
     });
   }
@@ -196,6 +201,11 @@ export async function buildCorpus({ log = console.log, warn = console.warn } = {
     throw new Error(`Only ${pool.length} items gathered — network likely blocked.`);
   }
 
+  // ---- lengths: measure the pages the feeds didn't cover, alongside scoring,
+  // inside a fixed budget so it never holds the build up for long. What
+  // isn't measured gets an estimate (src/length.js), marked as one.
+  const measuring = measureMany(pool, { budgetMs: Number(process.env.CORPUS_LENGTH_BUDGET_MS || 9000) }).catch(() => 0);
+
   // ---- score every item ONCE through the shared module ----
   log(`[corpus] scoring ${pool.length} items…`);
   const scored = [];
@@ -210,6 +220,16 @@ export async function buildCorpus({ log = console.log, warn = console.warn } = {
     scored.push(s);
     if ((i + 1) % 25 === 0) log(`[corpus]   …${i + 1}/${pool.length}`);
   }
+
+  const measured = await measuring;
+  const lengthBy = {};
+  scored.forEach((s, i) => {
+    const raw = pool[i];
+    if (raw.minutes && !s.minutes) { s.minutes = raw.minutes; s.length_by = raw.length_by; }
+    Object.assign(s, withLength(s));
+    lengthBy[s.length_by] = (lengthBy[s.length_by] || 0) + 1;
+  });
+  log(`[corpus] lengths: ${measured} pages measured`, lengthBy);
 
   const domainCounts = {};
   const slotCounts = {};
@@ -230,6 +250,7 @@ export async function buildCorpus({ log = console.log, warn = console.warn } = {
       scoring: {
         bridgingFloor: 0.35,
         provenance,
+        lengths: lengthBy,
         perspectiveAttributesUsed: [...perspAttrsUsed],
         note:
           'Bridging scores come from Perspective when a key is present, else the LLM classifier, else a deterministic heuristic (scored_by records which per item). ' +

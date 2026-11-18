@@ -4,9 +4,9 @@
 // person leaning there gets them without a new search.
 //
 // Retrieve → score, never generate: every URL is a real search result, passed
-// through verbatim (server/proxyCore.js tavilySearch). Nothing is fetched from
-// the result pages themselves; a page is only opened later, through the
-// reader's own guarded fetch (server/reader.js).
+// through verbatim (server/proxyCore.js tavilySearch). The only fetch of a
+// result page is to measure its length (server/length.js, through the
+// reader's own guarded fetch: public addresses, size cap, short timeout).
 //
 // Cost per thin lean, at most: SEARCH_QUERIES Tavily searches (basic, 1 credit
 // each) and SCORE_MAX Groq calls (one classifier call per candidate). A lean
@@ -30,6 +30,8 @@ import {
 import { tavilySearch, hasSearchKey } from './proxyCore.js';
 import { makeClassifier, modelEngagement, hashString } from './corpus.js';
 import { getBlob, hashGet, hashGetAll, hashUpdate, hashIncr } from './store.js';
+import { measureMany } from './length.js';
+import { withLength } from '../src/length.js';
 
 export const SEARCH_QUERIES = 3;      // Tavily searches per thin lean
 export const RESULTS_PER_QUERY = 8;
@@ -38,6 +40,7 @@ const SCORE_CONCURRENCY = 5;
 const LLM_TIMEOUT_MS = 12_000;
 const SEARCH_TIMEOUT_MS = 10_000;
 const DEADLINE_MS = 40_000;           // the function may run 60s (vercel.json)
+const LENGTH_BUDGET_MS = 8_000;       // measuring found pages, alongside scoring
 export const EXTRAS_MAX = 300;        // items added to one day's pool, at most
 const EXTRAS_TTL_S = 3 * 24 * 3600;
 export const USER_PER_HOUR = Number(process.env.FURTHER_PER_HOUR || 6);
@@ -273,7 +276,7 @@ async function scoreOne(raw, target, { classify, apiKey, deadline }) {
 // → { items, added, fit, searched, calls:{search, llm}, skipped, ms }
 // items: what this lean found (new now, or found by an earlier search of the
 // same lean against today's pool). Throws {status, type, message} errors.
-export async function lookFurther(user, rawLean, { now = Date.now(), search = tavilySearch, classify = makeClassifier('promenade-further') } = {}) {
+export async function lookFurther(user, rawLean, { now = Date.now(), search = tavilySearch, classify = makeClassifier('promenade-further'), measure = measureMany } = {}) {
   const t0 = Date.now();
   const deadline = t0 + DEADLINE_MS;
   const lean = cleanLean(rawLean);
@@ -332,7 +335,12 @@ export async function lookFurther(user, rawLean, { now = Date.now(), search = ta
 
   // Score with the corpus's scorer.
   const apiKey = process.env.PERSPECTIVE_API_KEY || null;
-  const scored = await mapLimit(cands, SCORE_CONCURRENCY, ({ r, target }) => scoreOne(toItem(r, target, now), target, { classify, apiKey, deadline }));
+  const raws = cands.map(({ r, target }) => toItem(r, target, now));
+  // Their lengths, measured alongside the scoring (tiles are sized by them).
+  const measuring = measure(raws, { budgetMs: Math.max(0, Math.min(LENGTH_BUDGET_MS, deadline - Date.now() - 2000)) }).catch(() => 0);
+  const scored = await mapLimit(cands, SCORE_CONCURRENCY, ({ target }, i) => scoreOne(raws[i], target, { classify, apiKey, deadline }));
+  await measuring;
+  scored.forEach((s, i) => { if (raws[i].minutes) { s.item.minutes = raws[i].minutes; s.item.length_by = raws[i].length_by; } Object.assign(s.item, withLength(s.item)); });
   const llmCalls = scored.filter((s) => s.llm).length;
   const good = scored.map((s) => s.item).filter((it) => {
     if ((it.scores?.bridging ?? 0) < BRIDGING_FLOOR) { skipped['below-floor'] = (skipped['below-floor'] || 0) + 1; return false; }
