@@ -12,3 +12,6 @@ vite.config.js.timestamp-*.mjs
 .agents
 .claude
 skills-lock.json
+
+# feed-eval raw runs (reports are regenerated)
+scripts/feed-eval/runs/

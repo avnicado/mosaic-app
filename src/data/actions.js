@@ -5,7 +5,7 @@
 
 import * as R from './record.js';
 import { readThread, analyzeImage, judgeMovement, effectHistory, applyCorrections, tasteProfile } from '../engine/thread.js';
-import { fillSlot } from '../engine/feed.js';
+import { fillSlot, repeatsMaker, avoidList } from '../engine/feed.js';
 import { tagItems, vocabulary } from '../engine/tags.js';
 import { SLOTS } from '../engine/prompts.js';
 
@@ -187,12 +187,23 @@ export async function fillMissing(threadId) {
       if (!got.url || !R.sessionItems(R.getSession(s.id)).some((o) => o.id !== item.id && o.url === got.url)) done(slot);
       return item;
     }));
-    // Two parallel slots can land on the same URL: refill the later one, now excluding everything shown.
+    // Parallel slots can land on the same URL, or on the same person, channel or
+    // site (they never see each other). Refill the later one, naming what the
+    // others hold. A repeated URL is always replaced; a repeated maker is only
+    // replaced when the refill succeeds.
     const seen = new Set();
+    const kept = [];
+    const question = buildContext(threadId).question;
     for (const item of results) {
-      if (!item.url || !seen.has(item.url)) { if (item.url) seen.add(item.url); continue; }
-      R.patchItem(item.id, { duplicate: true });
-      save(item.slot, await fillSlot(item.slot, buildContext(threadId), shownUrls(threadId)));
+      const dupUrl = !!item.url && seen.has(item.url);
+      const dupMaker = !dupUrl && repeatsMaker(item, kept, question);
+      if (!dupUrl && !dupMaker) { if (item.url) { seen.add(item.url); kept.push(item); } continue; }
+      const again = await fillSlot(item.slot, buildContext(threadId), [...shownUrls(threadId), ...seen], { avoid: avoidList(kept) });
+      if (dupUrl || !again.failed) {
+        R.patchItem(item.id, { duplicate: true });
+        const fresh = save(item.slot, again);
+        if (fresh.url) { seen.add(fresh.url); kept.push(fresh); }
+      } else { seen.add(item.url); kept.push(item); }
       done(item.slot);
     }
   } catch (e) {
