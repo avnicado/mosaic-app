@@ -1,0 +1,89 @@
+/* The views mandala (admin only for now). Prefix: vp- (panel), vm- (mandala).
+   On Mosaic's parchment: a muted teal for the first answer, a coral for the
+   second, warm grey for in between; grout is the page colour. */
+.vp, .vm { --ans-a: #4f8079; --ans-b: #c4604c; --ans-mid: #cfc4b0; --grout: var(--bg); }
+
+.vp { margin-top: 22px; }
+.vp-quiet { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--ink-soft); }
+.vp-note { flex: 1 1 260px; }
+.vp-admin { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); border: 1px solid var(--rule); border-radius: 2px; padding: 0 5px; line-height: 15px; }
+.vp-head { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--rule-soft); padding-bottom: 8px; }
+.vp-title { font-size: 22px; }
+.vp-why { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; margin: 12px 0 4px; max-width: 70ch; }
+.vp-settled { font-size: 13px; color: var(--ink-soft); margin: 14px 0 0; }
+.vp-settled .label, .vm-facts .label, .vm-piece .label { margin-right: 6px; }
+.vp-foot { margin-top: 10px; }
+
+.vm { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 12px 28px; align-items: start; margin-top: 10px; }
+.vm-stage { min-width: 0; }
+.vm-svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.vm-svg :focus { outline: none; }
+.vm-svg .vm-slice:focus-visible .vm-cell { filter: brightness(1.08); }
+.vm-ground { fill: var(--rule-soft); }
+.vm-slice { cursor: pointer; }
+.vm-cell { stroke: var(--grout); stroke-width: 2px; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: opacity .2s ease; }
+.vm-cell.ans-a, .vm-dot.ans-a { fill: var(--ans-a); background: var(--ans-a); }
+.vm-cell.ans-b, .vm-dot.ans-b { fill: var(--ans-b); background: var(--ans-b); }
+.vm-cell.ans-mid, .vm-dot.ans-mid { fill: var(--ans-mid); background: var(--ans-mid); }
+@media (hover: hover) { .vm-slice:hover .vm-cell { filter: brightness(1.07) saturate(1.06); } }
+.vm-seam { stroke: var(--grout); stroke-width: 4px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.vm-away { fill: none; stroke: var(--ink); stroke-width: 1.6px; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; pointer-events: none; opacity: .75; }
+.vm-sel { fill: none; stroke: var(--ink); stroke-width: 2.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
+.vm-ring-n { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: #fffaf0; stroke: rgba(26, 22, 18, .35); stroke-width: 2.5px; paint-order: stroke; dominant-baseline: central; pointer-events: none; }
+.vm-hub circle { fill: var(--panel); stroke: var(--rule); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.vm-hub text { font-family: var(--mono); font-size: 10px; fill: var(--ink-soft); text-anchor: middle; dominant-baseline: central; }
+.vm-label { cursor: pointer; }
+.vm-label circle { fill: var(--panel); stroke: var(--rule); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.vm-label.on circle { fill: var(--ink); stroke: var(--ink); }
+.vm-badge { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); text-anchor: middle; dominant-baseline: central; }
+.vm-label.on .vm-badge { fill: #fffaf0; }
+
+.vm-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.vm-pick { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px 4px 5px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel); cursor: pointer; font-size: 13px; color: var(--ink-soft); text-align: left; }
+.vm-pick.on { border-color: var(--ink); color: var(--ink); }
+.vm-pick.away { border-style: dashed; }
+.vm-pick-n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--rule-soft); font-family: var(--mono); font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
+.vm-pick.on .vm-pick-n, .vm-pick-n.big { background: var(--ink); color: #fffaf0; }
+.vm-pick-n.big { width: 26px; height: 26px; font-size: 12px; }
+
+.vm-side { min-width: 0; }
+.vm-cruxes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.vm-cruxes li { padding-bottom: 9px; border-bottom: 1px solid var(--rule-soft); }
+.vm-crux-head { display: flex; gap: 8px; align-items: baseline; }
+.vm-ring-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.vm-kind { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faded); }
+.vm-crux-q { font-family: var(--serif); font-size: 15px; line-height: 1.35; margin: 2px 0 4px; }
+.vm-crux-ans { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--ink-soft); }
+.vm-crux-ans span { display: inline-flex; align-items: center; gap: 6px; }
+.vm-crux-lean { font-size: 12px; color: var(--accent); margin-top: 3px; }
+.vm-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.vm-key { font-size: 12px; color: var(--ink-faded); margin: 8px 0 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.vm-detail { grid-column: 1 / -1; background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 16px 18px; }
+.vm-detail-head { display: flex; align-items: center; gap: 10px; }
+.vm-detail-head h3 { font-size: 19px; font-weight: 450; }
+.vm-summary { font-family: var(--serif); font-size: 15px; line-height: 1.45; color: var(--ink-soft); margin: 8px 0 10px; }
+.vm-answers { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.vm-answers li { display: grid; grid-template-columns: 10px minmax(90px, 160px) minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 13.5px; }
+.vm-answers .vm-dot { transform: translateY(1px); }
+.vm-a-label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faded); }
+.vm-facts p { font-size: 13.5px; margin: 6px 0; line-height: 1.45; }
+.vm-awaynote { border-left: 2px dashed var(--ink-faded); padding-left: 8px; }
+.vm-small { font-size: 12.5px; margin: 8px 0 0; }
+.vm-piece { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); text-decoration: none; }
+.vm-piece:hover { border-color: var(--accent); }
+.vm-piece-title { font-family: var(--serif); font-size: 15px; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere; }
+.vm-piece:hover .vm-piece-title { color: var(--accent); }
+.vm-piece-src { font-size: 12px; color: var(--ink-faded); }
+
+@media (max-width: 860px) {
+  .vm { grid-template-columns: minmax(0, 1fr); }
+  .vm-stage { max-width: 420px; margin: 0 auto; width: 100%; }
+}
+@media (max-width: 600px) {
+  .vm-detail { padding: 14px 14px; }
+  .vm-answers li { grid-template-columns: 10px minmax(0, 1fr); }
+  .vm-answers .vm-a-label { grid-column: 2; }
+  .vm-answers .vm-a-text { grid-column: 2; margin-top: -4px; }
+  .vp-title { font-size: 20px; }
+}

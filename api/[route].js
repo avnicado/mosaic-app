@@ -17,8 +17,9 @@ import session from '../server/routes/session.js';
 import shared from '../server/routes/shared.js';
 import store from '../server/routes/store.js';
 import users from '../server/routes/users.js';
+import views from '../server/routes/views.js';
 
-export const ROUTES = { checkurl, corpus, feedback, further, health, join, llm, login, logout, read, search, session, shared, store, users };
+export const ROUTES = { checkurl, corpus, feedback, further, health, join, llm, login, logout, read, search, session, shared, store, users, views };
 
 export default async function handler(req, res) {
   const name = String(req.query?.route || '');

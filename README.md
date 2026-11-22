@@ -45,6 +45,7 @@ read-only with the others from its page ("Share with others"). Locally without
 | `src/sync.js` | Mirrors every `m2:*` localStorage key to `/api/store`; pulls at boot; retries offline writes. |
 | `src/ui/` | Sidebar shell, router, pages: Desk, Thread, New thread, Promenade, Library, Settings. |
 | `src/ui/promenade/` | The Promenade. The Mandala is where you lean (fields, parts, depth, a mood from the four moves, a hunch), all optional; `scoring.js`'s `composeLeanShelf` sets out five cards from the lit area only. With no lean the shelf is the open one (Near / Far / Open questions) the Desk reads. `node scripts/lean-smoke.mjs` checks the lean rules. |
+| `src/ui/views/`, `src/engine/views.js`, `server/views.js` | The views mandala, **admin (owner) only** for now. On a contested question it maps the views by their cruxes (specific claims they answer differently, not values they all claim): slices are views, rings are cruxes, cells are answers. A new wording is checked once, after its feed; older threads have a "Show the views" button. At most 2 Groq calls and one Tavily search per view per question, cached in the store; `/api/views` refuses anyone but the owner. `node scripts/views-smoke.mjs` checks it with stubs. |
 | `api/[route].js`, `server/routes/`, `server/` | Groq proxy (allowlisted models), Tavily search, link checks, record store (Upstash or file), single-password auth, daily Promenade corpus. |
 
 ## Deploy
