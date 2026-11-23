@@ -130,7 +130,9 @@ function ViewCard({ map, view, focus, onFocus }) {
       <p className="vd-card-sum">{view.summary}</p>
       {view.who && <p className="vd-card-who"><span>Held by</span> {view.who}</p>}
       <ul className="vd-card-facts">
-        {close && n > 0 && <li><span>Closest to</span> {close.name}: same answer on {close.same} of {n}</li>}
+        {close && n > 0 && (close.same > 0
+          ? <li><span>Closest to</span> {close.name}: same answer on {close.same} of {n}</li>
+          : <li><span>Stands apart</span> No other view shares any of its answers.</li>)}
         {view.changeMind && <li><span>What would change its mind</span> {view.changeMind}</li>}
       </ul>
       {view.sources.length > 0 ? (

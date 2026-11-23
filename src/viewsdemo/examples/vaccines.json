@@ -24,7 +24,7 @@
      "author": "Anders Hviid et al.",
      "date": "2019-04",
      "url": "https://pubmed.ncbi.nlm.nih.gov/30831578/",
-     "quote": "The study strongly supports that MMR vaccination does not increase the risk for autism."
+     "quote": "The study strongly supports that MMR vaccination does not increase the risk for autism"
     }
    ]
   },
@@ -66,7 +66,7 @@
      "author": "",
      "date": "2026-11",
      "url": "https://www.axios.com/2026/11/14/us-loses-measles-elimination-status",
-     "quote": "sustained transmission of the highly contagious virus for longer than 12 months."
+     "quote": "sustained transmission of the highly contagious virus for longer than 12 months"
     }
    ]
   }
@@ -129,7 +129,7 @@
    "name": "Fewer shots, more choice",
    "short": "Fewer shots",
    "summary": "The US recommends more shots than any peer nation, so a slimmer schedule like Denmark's, with more left to parents and doctors, would rebuild trust while still protecting children from the most serious diseases.",
-   "who": "HHS Secretary Robert F. Kennedy Jr. and CDC leadership, President Trump's August 2026 executive order, and the MAHA movement. A federal judge blocked the January 2026 schedule cut in March 2026.",
+   "who": "HHS Secretary Robert F. Kennedy Jr. and CDC leadership, President Trump's August 2026 executive order, and the MAHA movement. A federal judge put the January 2026 schedule cut on hold in March 2026; the government is appealing.",
    "changeMind": "Rigorous US data showing that dropping routine shots such as hepatitis B at birth leads to more infections, hospital stays or deaths in children.",
    "sources": [
     {
@@ -138,7 +138,7 @@
      "author": "",
      "date": "2026-01",
      "url": "https://www.cdc.gov/media/releases/2026/2026-cdc-acts-on-presidential-memorandum-to-update-childhood-immunization-schedule.html",
-     "quote": "This framework empowers parents and physicians to make individualized decisions based on risk."
+     "quote": "This framework empowers parents and physicians to make individualized decisions based on risk"
     },
     {
      "title": "Delivering Gold Standard Childhood Vaccine Recommendations for Americans",
@@ -146,7 +146,7 @@
      "author": "",
      "date": "2026-08",
      "url": "https://www.whitehouse.gov/presidential-actions/2026/08/delivering-gold-standard-childhood-vaccine-recommendations-for-americans/",
-     "quote": "Federal programs and funding should support maximal parental choice over childhood vaccines."
+     "quote": "Federal programs and funding should support maximal parental choice over childhood vaccines"
     }
    ]
   },
@@ -194,7 +194,7 @@
    "question": "Should every newborn get the hepatitis B shot at birth?",
    "left": "Yes, every baby",
    "right": "Let parents decide",
-   "why": "The birth dose protects babies whose mother's infection was missed. Kennedy's advisers voted in 2025 to stop recommending it for every newborn; a court set that vote aside in 2026.",
+   "why": "The birth dose protects babies whose mother's infection was missed. Kennedy's advisers voted in December 2025 to stop recommending it for every newborn; a federal judge put that vote on hold in March 2026, and the government is appealing.",
    "positions": {
     "keep-full-schedule": "left",
     "persuade-not-pressure": "mid",
@@ -206,7 +206,7 @@
    "question": "Is Denmark's shorter schedule a good model for the US?",
    "left": "No, US is different",
    "right": "Yes, follow Denmark",
-   "why": "HHS pointed to Denmark when it cut the routine childhood list from 17 diseases to 11 in January 2026.",
+   "why": "HHS pointed to Denmark, which vaccinates children against far fewer diseases, when it cut the US routine childhood list in January 2026.",
    "positions": {
     "keep-full-schedule": "left",
     "persuade-not-pressure": "left",
