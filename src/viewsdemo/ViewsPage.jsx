@@ -162,7 +162,7 @@ function CaseBody({ map, view, onRing }) {
               <button type="button" className="vd-its-n" onClick={onRing ? () => onRing(k) : undefined} tabIndex={onRing ? 0 : -1}
                 aria-label={`Question ${k + 1}: ${c.question}`} title={c.question}>{k + 1}</button>
               <i className={`vd-sw ${pos === 'left' ? 'solid' : pos === 'right' ? 'pale' : 'striped'}`} aria-hidden="true" />
-              <span>{answerText(c, pos)}</span>
+              <span className="vd-its-a"><span className="vd-its-q">{c.question}</span>{answerText(c, pos)}</span>
             </li>
           );
         })}
