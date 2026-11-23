@@ -5,10 +5,10 @@
 //
 // For a new wording it maps the question by itself once the reading is done;
 // for an older thread there's a button. A ready example opens at once.
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { isOwner } from '../../session.js';
 import { useBusy } from '../../data/hooks.js';
-import { currentViewsMap, wantsViewsMap, requestViewsMap, setViewsMapOpen } from '../../data/views.js';
+import { currentViewsMap, wantsViewsMap, requestViewsMap, setViewsMapOpen, ringItemsFor, requestRingItems } from '../../data/views.js';
 import { Result, Working } from '../../viewsdemo/ViewsPage.jsx';
 import '../../viewsdemo/viewsdemo.css';
 import './views.css';
@@ -18,6 +18,9 @@ export default function ThreadViews({ thread }) {
   const busy = useBusy(thread.id);
   const v = currentViewsMap(thread);
   const working = busy.viewsMap;
+  // A ring with too few checked articles looks for items about its question.
+  const loadRing = useCallback((k, opts) => requestRingItems(thread.id, k, opts), [thread.id]);
+  const ringItems = (k) => ringItemsFor(thread, k);
   const otherWork = busy.reading || busy.judging || (busy.filling && busy.filling.size > 0);
 
   // The automatic check: a new wording, once, after the reading and the feed.
@@ -60,7 +63,7 @@ export default function ThreadViews({ thread }) {
         </div>
         {open && (
           <>
-            <div className="vd-embed"><Result map={v.map} embedded /></div>
+            <div className="vd-embed"><Result map={v.map} embedded ringItems={ringItems} onRingItems={loadRing} /></div>
             <div className="vp-foot">
               <span className="th-hint">{v.map.live
                 ? 'Mapped by AI from live web search. It only links pages it found and opened. It doesn’t pick a side, so read the sources themselves.'
