@@ -8,8 +8,10 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import DemoMandala, { answerText, anchorPoint } from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
 import { closestTo, SOURCE_COUNT, hostOf } from '../engine/viewsDemo.js';
+import { Icon } from '../ui/icons.jsx';
 
-const COLORS = ['#1f6f6a', '#b4432c', '#4b4f9e', '#9a6a12'];
+// Mosaic's own palette: its teal, coral, slate blue and ochre.
+const COLORS = ['#4f8079', '#b84a3c', '#3d5875', '#8a6a1f'];
 const colorOf = (map, id) => COLORS[Math.max(0, map.views.findIndex((v) => v.id === id)) % COLORS.length];
 
 function readUrl() {
@@ -594,7 +596,7 @@ export default function ViewsPage() {
   return (
     <div className="vd">
       <header className="vd-bar">
-        <p className="vd-bar-brand"><span className="vd-brand">Mosaic</span> <span className="vd-brand-sub">Views</span></p>
+        <p className="vd-bar-brand"><span className="vd-brand"><Icon name="mosaic" size={20} className="vd-brand-ic" />Mosaic<span className="vd-brand-sub">Views</span></span></p>
         <p className="vd-bar-tag">Every side of a question, who holds it, and their sources. Never a verdict.</p>
       </header>
 
