@@ -4,6 +4,7 @@
 // articles by people who hold it. It never rules on the question. Ready-made examples load instantly;
 // a typed question is mapped live by /api/views-demo when it's switched on.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import DemoMandala from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
 import { closestTo, SOURCE_COUNT, hostOf } from '../engine/viewsDemo.js';
 
@@ -124,7 +125,7 @@ function Splits({ map, focus, onFocus }) {
   return (
     <section className="vd-block" aria-labelledby="vd-splits-h">
       <h2 id="vd-splits-h">Where they split</h2>
-      <p className="vd-block-sub">The views don’t just “disagree”. They answer a few specific questions differently, and these are those questions.</p>
+      <p className="vd-block-sub">The same questions as the rings above, one at a time, with each view placed at its answer.</p>
       <div className="vd-howto">
         <p className="vd-howto-title">How to read it</p>
         <ul>
@@ -229,6 +230,7 @@ function Result({ map }) {
       {mapped && (
         <>
           <Overview map={map} focus={focus} onFocus={setFocus} />
+          <DemoMandala map={map} focus={focus} onFocus={setFocus} colorOf={colorOf} />
           <Wording map={map} focus={focus} onFocus={setFocus} />
           <Splits map={map} focus={focus} onFocus={setFocus} />
           <section className="vd-block" aria-labelledby="vd-views-h">
