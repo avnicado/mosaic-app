@@ -218,7 +218,7 @@ function Result({ map }) {
     <div className="vd-result">
       <p className="vd-kicker">{map.live ? 'Mapped just now' : 'Ready example'}</p>
       <h1 className="vd-q">{map.question}</h1>
-      {map.headline && <p className="vd-headline">{map.headline}</p>}
+      {map.headline && map.status === 'mapped' && <p className="vd-headline">{map.headline}</p>}
       {mapped && (
         <ul className="vd-stats" aria-label="At a glance">
           <li><b>{map.views.length}</b> main views</li>
@@ -242,7 +242,9 @@ function Result({ map }) {
         </>
       )}
       {map.status === 'none' && (
-        <p className="vd-empty">This doesn’t look like something people hold public views on, so there are no sides to map.</p>
+        <p className="vd-empty">{map.thin
+          ? 'People do disagree on this, but I couldn’t find enough articles from each side to show it properly. Try wording it another way, or open a ready example.'
+          : 'This doesn’t look like something people hold public views on, so there are no sides to map.'}</p>
       )}
     </div>
   );

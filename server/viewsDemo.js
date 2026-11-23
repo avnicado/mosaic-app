@@ -153,23 +153,29 @@ export async function mapLive(question, {
   }
 
   // Views must stand on real pieces: keep only sourced views, when enough are.
+  // If the sourced views alone no longer disagree on anything, keep them all.
+  const cruxesFor = (vs) => {
+    const ids = new Set(vs.map((v) => v.id));
+    return map.cruxes
+      .map((c) => ({ ...c, positions: Object.fromEntries(Object.entries(c.positions).filter(([id]) => ids.has(id))) }))
+      .filter((c) => Object.values(c.positions).includes('left') && Object.values(c.positions).includes('right'));
+  };
   let views = map.views;
   const sourced = views.filter((v) => v.reasons.length);
-  if (sourced.length >= 2) views = sourced;
+  if (sourced.length >= 2 && cruxesFor(sourced).length) views = sourced;
   views = views.map(({ search: _s, ...v }) => v);
   const keep = new Set(views.map((v) => v.id));
-  const cruxes = map.cruxes
-    .map((c) => ({ ...c, positions: Object.fromEntries(Object.entries(c.positions).filter(([id]) => keep.has(id))) }))
-    .filter((c) => Object.values(c.positions).includes('left') && Object.values(c.positions).includes('right'));
+  const cruxes = cruxesFor(views);
 
   let status = map.status;
-  if (status === 'mapped' && (views.length < 2 || !cruxes.length)) status = 'none';
+  let thin = false;
+  if (status === 'mapped' && (views.length < 2 || !cruxes.length)) { status = 'none'; thin = true; }
   const out = {
     ...map, status,
     views: status === 'mapped' ? views : [], cruxes: status === 'mapped' ? cruxes : [],
     wording: { ...map.wording, leansAwayFrom: map.wording.leansAwayFrom.filter((id) => keep.has(id)) },
-    question: q, at: now, live: true,
+    question: q, at: now, live: true, ...(thin ? { thin: true } : {}),
   };
-  await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: CACHE_TTL_S }).catch((e) => console.warn('[views-demo] cache write failed:', e.message));
+  if (!thin) await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: CACHE_TTL_S }).catch((e) => console.warn('[views-demo] cache write failed:', e.message));
   return out;
 }
