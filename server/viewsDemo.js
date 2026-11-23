@@ -277,7 +277,7 @@ export async function ringSides(input, {
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r3:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r4:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -292,10 +292,12 @@ export async function ringSides(input, {
   if (used > RING_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough rings have been looked up today. Try again tomorrow.');
 
   const deadline = now + DEADLINE_MS;
-  const [a, b] = await searchAll([
+  // Content farms re-post others' articles under a "(2026)"-style title.
+  const copied = (r) => /\((19|20)\d\d\)\s*$/.test(String(r.title || '').trim()) && !/\.(gov|edu)$/.test(hostOf(r.url));
+  const [a, b] = (await searchAll([
     { search: `${crux.question} ${crux.left}. ${holders('left') || q}`.slice(0, 380) },
     { search: `${crux.question} ${crux.right}. ${holders('right') || q}`.slice(0, 380) },
-  ], search);
+  ], search)).map((rs) => rs.filter((r) => !copied(r)));
   // Both answers' results side by side in one list, each page once.
   const seen = new Set();
   const results = [];
@@ -306,7 +308,7 @@ export async function ringSides(input, {
   }
   const reading = [];
   if (results.length) {
-    const out = await groqJSON({ system: `${RING_PICK_SYSTEM}\n\nNever pick a page from a site that has nothing to do with the topic and only copies other outlets' articles.`, prompt: ringPickPrompt([{ crux, results }]), maxTokens: 1000, deadline, llm });
+    const out = await groqJSON({ system: `${RING_PICK_SYSTEM}\n\nNever pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick.`, prompt: ringPickPrompt([{ crux, results }]), maxTokens: 1000, deadline, llm });
     for (const p of Array.isArray(out?.picks) ? out.picks : []) {
       const r = results[Number(p?.result) - 1];
       const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
