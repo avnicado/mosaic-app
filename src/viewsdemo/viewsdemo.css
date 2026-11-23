@@ -76,7 +76,9 @@ a { color: inherit; }
 .vd-ov.dim { opacity: .5; }
 .vd-ov-swatch { flex: none; width: 6px; border-radius: 3px; background: var(--c); }
 .vd-ov-body { min-width: 0; flex: 1; }
-.vd-ov-name { font-family: var(--vd-serif); font-weight: 500; font-size: 19px; line-height: 1.2; margin: 0 0 4px; color: var(--c); }
+.vd-ov-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 4px; }
+.vd-ov-name { font-family: var(--vd-serif); font-weight: 500; font-size: 19px; line-height: 1.2; margin: 0; color: var(--c); }
+.vd-tag.static { cursor: default; background: var(--c); }
 .vd-ov-sum { margin: 0 0 6px; font-size: 15px; }
 .vd-ov-who { margin: 0 0 8px; font-size: 13.5px; color: var(--vd-soft); }
 .vd-ov-who span { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--vd-faded); margin-right: 4px; }

@@ -65,8 +65,8 @@ function Wording({ map, focus, onFocus }) {
 
 const nameList = (vs) => vs.map((v) => v.name).reduce((acc, n, i, arr) => acc + (i === 0 ? '' : i === arr.length - 1 ? ' and ' : ', ') + n, '');
 const shortWho = (who) => {
-  const first = String(who || '').split(/;\s/)[0];
-  return first.length > 120 ? `${first.slice(0, 117).replace(/[\s,]+\S*$/, '')}…` : first;
+  const w = String(who || '');
+  return w.length > 150 ? `${w.slice(0, 147).replace(/[\s,;]+\S*$/, '')}…` : w;
 };
 
 // Every view in a line, at the top: what it says, who holds it, and a clear
@@ -83,7 +83,10 @@ function Overview({ map, focus, onFocus }) {
             <li key={v.id} className={`vd-ov ${on ? 'on' : ''} ${focus && !on ? 'dim' : ''}`} style={{ '--c': colorOf(map, v.id) }}>
               <span className="vd-ov-swatch" aria-hidden="true" />
               <div className="vd-ov-body">
-                <h3 className="vd-ov-name">{v.name}</h3>
+                <div className="vd-ov-head">
+                  <h3 className="vd-ov-name">{v.name}</h3>
+                  <span className="vd-tag small static" title="How this view is tagged in the questions below">{v.short || v.name}</span>
+                </div>
                 <p className="vd-ov-sum">{v.summary}</p>
                 {v.who && <p className="vd-ov-who"><span>Held by</span> {shortWho(v.who)}</p>}
                 <div className="vd-ov-actions">
@@ -126,7 +129,7 @@ function Splits({ map, focus, onFocus }) {
         <p className="vd-howto-title">How to read it</p>
         <ul>
           <li>Each box is <b>one question</b> the views answer differently.</li>
-          <li>The line runs between <b>two opposite answers</b>, one at each end. Each coloured tag is a view, placed at its answer. A tag in the middle means “it depends”.</li>
+          <li>The line runs between <b>two opposite answers</b>, one at each end. Each coloured tag is one of the views above, by its short name, placed at its answer. A tag in the middle means “it depends”.</li>
           <li>Tags on the <b>same side agree</b> on that question. Tags at <b>opposite ends</b> are where the real disagreement is.</li>
         </ul>
         {first && sideOf(first, 'left').length > 0 && sideOf(first, 'right').length > 0 && (
