@@ -452,7 +452,10 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
   const wideScreen = useWide();
   const wide = embedded ? false : wideScreen;
   const chartRef = useRef(null);
-  useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [map]);
+  // Start fresh for another map, not when the same map is saved again (a
+  // thread re-reads it whenever anything on the thread changes).
+  const mapKey = `${map.question}|${map.views.map((v) => v.id).join(',')}|${map.cruxes.map((c) => c.question).join('|')}`;
+  useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [mapKey]);
   const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
   const ringOpen = show === 'ring' && ring != null;
   const viewOpen = show === 'view' && !!focus;
