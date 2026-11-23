@@ -21,10 +21,10 @@
   --vd-sans: 'Instrument Sans', -apple-system, 'Segoe UI', sans-serif;
   --vd-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--vd-bg); color: var(--vd-ink); font-family: var(--vd-sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-button { font: inherit; color: inherit; cursor: pointer; }
-a { color: inherit; }
+/* Page-wide rules (body, *) live in page.css, so this file is safe to load
+   inside the app too (the views on a thread, src/ui/views/ThreadViews.jsx). */
+.vd button, .vd-embed button { font: inherit; color: inherit; cursor: pointer; }
+.vd a, .vd-embed a { color: inherit; }
 
 .vd { max-width: 1340px; margin: 0 auto; padding: 10px 16px 40px; }
 .vd-brand { font-family: var(--vd-serif); font-size: 22px; }
@@ -445,3 +445,15 @@ a { color: inherit; }
 .vd-more summary:hover { color: var(--vd-accent); }
 .vd-foot { font-size: 13px; }
 .vd-detail.sheet { border-radius: 6px 6px 0 0; }
+
+/* ---- inside the app: the views on a thread's page ----
+   The thread's column is narrower than the page, so it always takes the
+   one-column layout (chart, then the views and questions as tabs), whatever
+   the screen width. */
+.vd-embed { color: var(--vd-ink); font-family: var(--vd-sans); font-size: 15px; line-height: 1.55; }
+.vd-embed .vd-result { margin-top: 0; }
+.vd-embed .vd-stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "chart" "tabs"; }
+.vd-embed .vd-q { font-size: 24px; }
+.vd-embed .vd-vl-row { background: var(--vd-panel); }
+.vd-embed .vd-mm-svg { max-height: none; }
+.vd-embed .vd-detail.sheet { max-width: 680px; margin: 0 auto; }

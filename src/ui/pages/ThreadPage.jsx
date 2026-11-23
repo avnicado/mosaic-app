@@ -15,7 +15,7 @@ import ItemCard, { SkeletonCard, FailedCard, EmptySlotCard, NoteList } from '../
 import Reading from '../thread/Reading.jsx';
 import Timeline, { Verdict, Moves } from '../thread/Timeline.jsx';
 import { setShared } from '../../data/sharing.js';
-import ViewsPanel from '../views/ViewsPanel.jsx';
+import ThreadViews from '../views/ThreadViews.jsx';
 
 const fmtDate = (ts) => new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: new Date(ts).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
@@ -368,7 +368,7 @@ export default function ThreadPage({ id }) {
         <div className="th-main">
           <div className="th-o-now">
             <Now thread={thread} parent={parent} sessions={sessions} openSession={openSession} onRestateInSession={focusRestate} keptCount={kept.length} />
-            <ViewsPanel thread={thread} />
+            <ThreadViews thread={thread} />
           </div>
           <div className="th-o-session">
             {result && !openSession && <ResultCard result={result} onDismiss={() => setResult(null)} />}

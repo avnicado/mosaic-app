@@ -346,7 +346,9 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
       const p = new DOMPoint(ax, ay).matrixTransform(m); // where the tile is, on screen
       const cr = col.getBoundingClientRect();
       const vw = document.documentElement.clientWidth, vh = window.innerHeight;
-      box.style.width = wide ? '' : `${vw - 24}px`; // the page's own width, so a scrollbar never pushes it wider
+      // Narrow: as wide as the chart's column (a few px past it), never past
+      // the page's own width, so a scrollbar never pushes it wider.
+      box.style.width = wide ? '' : `${Math.min(vw - 24, cr.width + 8)}px`;
       const W = box.offsetWidth, H = box.offsetHeight;
       if (wide) {
         // Just outside the mandala's rim, so the tile stays in view, with a
@@ -361,7 +363,7 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
         setPos({ side, left: left - cr.left, top: top - cr.top, a,
           line: { x1: p.x - cr.left, y1: p.y - cr.top, x2: tipX - cr.left, y2: top + a - cr.top } });
       } else {
-        const left = 12;
+        const left = clamp(cr.left - 4, 12, vw - 12 - W);
         setPos({ side: 'below', left: left - cr.left, top: p.y + 14 - cr.top, a: clamp(p.x - left, 22, W - 22) });
       }
     };
@@ -406,12 +408,15 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
   );
 }
 
-function Result({ map }) {
+// embedded: shown inside the app on a thread's page, under the thread's own
+// question, so it skips repeating the question and keeps the one-column layout.
+export function Result({ map, embedded = false }) {
   const [focus, setFocus] = useState(null);
   const [ring, setRing] = useState(null);
   const [show, setShow] = useState(null); // 'view' or 'ring': what the panel or sheet shows
   const [tab, setTab] = useState('views');
-  const wide = useWide();
+  const wideScreen = useWide();
+  const wide = embedded ? false : wideScreen;
   const chartRef = useRef(null);
   useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [map]);
   const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
@@ -460,7 +465,7 @@ function Result({ map }) {
       <div className="vd-stage">
         <div className="vd-stage-head">
           <p className="vd-kicker">{map.live ? 'Mapped just now' : 'Ready example'} · {map.views.length} views · {map.cruxes.length} questions they split on{sources > 0 ? ` · ${sources} sources, each opened and checked` : ''}</p>
-          <h1 className="vd-q">{map.question}</h1>
+          {!embedded && <h1 className="vd-q">{map.question}</h1>}
           {map.headline && <p className="vd-headline">{map.headline}</p>}
         </div>
 
@@ -532,7 +537,7 @@ function Result({ map }) {
 
 const STEPS = ['Finding the main views and who holds them', 'Working out the points they split on', 'Searching for articles by people who hold each view', 'Opening every link to check it'];
 
-function Working() {
+export function Working() {
   const [i, setI] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setI((n) => Math.min(n + 1, STEPS.length - 1)), 6000);

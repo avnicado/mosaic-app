@@ -1,0 +1,3 @@
+/* The standalone views page (/views) only: page-wide rules. */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--vd-bg); color: var(--vd-ink); font-family: var(--vd-sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }

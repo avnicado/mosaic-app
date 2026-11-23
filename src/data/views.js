@@ -11,6 +11,7 @@
 import * as R from './record.js';
 import { getBusy, setBusy } from './actions.js';
 import { apiFetch } from '../engine/llm.js';
+import { exampleFor, EXAMPLES } from '../viewsdemo/examples.js';
 
 export const VIEWS_SINCE = Date.parse('2026-11-22T00:00:00Z');
 
@@ -52,3 +53,51 @@ export async function requestViews(threadId, { force = false } = {}) {
 
 export const setViewsOpen = (threadId, open) =>
   R.patchThread(threadId, (t) => (t.views ? { views: { ...t.views, open } } : {}));
+
+// ---- the new views (Nov 2026): the views page's map, shown on the thread ----
+// Kept on the thread as `viewsMap`, tied to the wording it was made for, like
+// `views` above. A ready example (src/viewsdemo/examples.js) is shown at once
+// and only its id is stored; any other question is mapped by /api/views-demo
+// (server/viewsDemo.js), which maps any question people hold public views on,
+// a scientific one included, and says 'none' only when there are no sides.
+
+export function currentViewsMap(thread) {
+  const text = R.currentArticulation(thread);
+  const v = thread?.viewsMap;
+  const ex = exampleFor(text);
+  if (ex) return { text, status: 'mapped', map: ex, open: v?.text === text ? v.open : undefined };
+  if (!v || v.text !== text) return null;
+  if (v.exampleId) return { ...v, map: EXAMPLES.find((e) => e.id === v.exampleId) || null };
+  return v;
+}
+
+export function wantsViewsMap(thread) {
+  if (!thread || thread.status === 'closed') return false;
+  const w = lastWording(thread);
+  return !!(w && (w.at || 0) >= VIEWS_SINCE && !currentViewsMap(thread));
+}
+
+export async function requestViewsMap(threadId) {
+  const t = R.getThread(threadId);
+  if (!t || getBusy(threadId).viewsMap) return;
+  const text = R.currentArticulation(t);
+  setBusy(threadId, { viewsMap: true });
+  try {
+    const res = await apiFetch('/api/views-demo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: text }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error?.message || `Views error (${res.status})`);
+    const { cached, ...map } = data;
+    R.patchThread(threadId, { viewsMap: { text, status: map.status, map, open: map.status === 'mapped', at: Date.now() } });
+  } catch (e) {
+    R.patchThread(threadId, { viewsMap: { text, error: (e?.message || String(e)).slice(0, 200), at: Date.now() } });
+  } finally {
+    setBusy(threadId, { viewsMap: null });
+  }
+}
+
+export const setViewsMapOpen = (threadId, open) =>
+  R.patchThread(threadId, (t) => ({ viewsMap: { ...(t.viewsMap?.text === R.currentArticulation(t) ? t.viewsMap : { text: R.currentArticulation(t) }), open } }));
