@@ -3,49 +3,50 @@
 // ready-made examples (src/viewsdemo/examples.js, researched and link-checked
 // by hand) and a typed question mapped live (server/viewsDemo.js):
 //
-//   { status: 'mapped' | 'settled' | 'none',
-//     question, headline,
-//     settled:  [{ text, sources: [SOURCE] }]            what the evidence settles
-//     views:    [{ id, name, short, summary, who, changeMind, sources: [SOURCE] }]
+//   { status: 'mapped' | 'none',
+//     question, headline,                                  headline names the views, never a verdict
+//     views:    [{ id, name, short, summary, who, changeMind,
+//                  reasons: [{ text, sources: [SOURCE] }],  the view's own reasons, each with where it's argued
+//                  sources: [SOURCE] }]                     more reading from people who hold it
 //     cruxes:   [{ question, left, right, why, positions: { [viewId]: 'left'|'right'|'mid' } }]
 //     wording:  { assumes, leansAwayFrom: [viewId] }     what the question takes for granted
 //     nearby:   [string]                                 questions that ARE argued, for 'none'
 //   }
 //   SOURCE = { title, outlet, author, date, url, quote }
 //
-// Settled science is never shown as one side of a debate: it goes in
-// `settled`, and the views are only the live disagreements around it.
+// The page never rules on a question. Every question, a scientific one
+// included, is shown as the views on it, each with its reasons and sources,
+// and who holds it, so the reader judges for themselves.
 // Pure (prompts, validation, arithmetic); no I/O here.
 
 export const POSITIONS = ['left', 'right', 'mid'];
-export const MAX_VIEWS = 4, MAX_CRUXES = 4, MAX_SETTLED = 3;
+export const MAX_VIEWS = 4, MAX_CRUXES = 4, MAX_REASONS = 3;
 
 // ---- prompts for a typed question ------------------------------------------------
-export const MAP_SYSTEM = `You map public disagreement for a reader who knows nothing about the topic. Given a question, you separate what the evidence SETTLES from where informed people REALLY disagree today, and you name the specific points they split on.
+export const MAP_SYSTEM = `You map the main views people hold on a question, for a reader who knows nothing about the topic. You never answer the question yourself and never say which view is right: you show the views, what each one argues, who holds it, and the specific points they split on, so the reader can judge.
 
 Rules:
-- SETTLED: facts with strong consensus evidence (major scientific or health bodies, large studies, official records). Never present settled science as one side of a debate, and never turn denial of a settled fact into a "view".
-- Even when the core of a question is settled (e.g. "Do vaccines work?"), there is usually live, real disagreement NEAR it: policy, rules, specific cases, trade-offs, costs, who should decide, trust in institutions. Map that. Say plainly in the headline which part is settled and where the argument actually is.
-- VIEWS: 3 or 4 positions that real organisations and people hold today. Name each in 2-4 everyday words by its position ("Require them for school", "Build much more nuclear"), never by party or tribe. "short" is a 1-2 word tag. The summary is one sentence, fair, as its own holders would put it.
+- VIEWS: 3 or 4 positions that real organisations and people hold today. Cover the range, from the mainstream position of major institutions to the strongest dissenting ones; on a scientific question, the view of the major scientific or health bodies is one view, described as theirs. Name each view in 2-4 everyday words by its position ("Keep every routine shot", "Build much more nuclear"), never by party or tribe. "short" is a 1-2 word tag. The summary is one sentence, fair, as its own holders would put it. "who" names the organisations and people who hold it, plainly, so the reader can see how widely it is held.
+- NEUTRAL VOICE: describe each view in its holders' terms. No "rightly", "wrongly", "misinformation", "debunked", "the evidence shows" or any ruling in your own voice. The headline names the views and where they split, not an answer.
 - CRUXES: 3 or 4 specific, concrete questions the views answer differently (what would happen, what caused it, which evidence holds up, which good gives way). Never "do you care about X". Each is a short plain question a 12-year-old can read, with a left and a right answer of 2-5 words. Every crux must split the views: at least one view left and one right. A view may sit "mid" (in between, or it depends).
-- WORDING: if the question's wording takes something for granted, say what in one sentence, and list the views that reject it. Otherwise null and [].
-- SEARCH: for each view, a web search (5-10 words) likely to find an op-ed, essay, report or position statement written by someone who HOLDS it. For each settled fact, a web search likely to find a major authority or large study stating it.
-- STATUS: "mapped" if there are live disagreements; "settled" if the core is settled and you find no live public disagreement near it; "none" for a personal, practical or trivia question with no public sides (then give "nearby": 2-3 contested questions close to it, if any).
+- WORDING: if the question's wording takes something for granted, say what in one neutral sentence, and list the views that reject it. Otherwise null and [].
+- SEARCH: for each view, a web search (5-10 words) likely to find an op-ed, essay, report or position statement written by someone who HOLDS it.
+- STATUS: "mapped" for any question people hold different public views on, including scientific and health questions. "none" only for a personal, practical or trivia question with no public sides (then give "nearby": 2-3 questions close to it that people do hold different views on, if any).
 
 Output ONLY valid JSON:
-{"status":"mapped|settled|none","headline":"one plain sentence","settled":[{"text":"one plain sentence","search":"..."}],"views":[{"id":"kebab-id","name":"2-4 words","short":"1-2 words","summary":"...","who":"named organisations or people who hold it","changeMind":"the specific evidence or event that would move this view","search":"..."}],"cruxes":[{"question":"...","left":"...","right":"...","why":"one plain sentence","positions":{"<view id>":"left|right|mid"}}],"wording":{"assumes":null,"leansAwayFrom":[]},"nearby":[]}
-Keep 0-3 settled facts. Be concise.`;
+{"status":"mapped|none","headline":"one plain sentence","views":[{"id":"kebab-id","name":"2-4 words","short":"1-2 words","summary":"...","who":"named organisations or people who hold it","changeMind":"the specific evidence or event that would move this view","search":"..."}],"cruxes":[{"question":"...","left":"...","right":"...","why":"one plain sentence","positions":{"<view id>":"left|right|mid"}}],"wording":{"assumes":null,"leansAwayFrom":[]},"nearby":[]}
+Be concise.`;
 
 export const mapPrompt = (question) => `The question: "${String(question).trim()}"`;
 
-export const PICK_SYSTEM = `You match claims to real web pages found by search. You get numbered groups; each group is either a VIEW (pick up to 2 results written by someone who HOLDS and ARGUES that view: an op-ed, essay, advocacy page, position statement, report or paper making its case; never a neutral explainer or a piece arguing another side) or a FACT (pick 1 result from a major authority, large study or official body that states it). If nothing qualifies, pick none. Never invent a result. For each pick give the outlet or organisation, and a quote of at most 20 words copied exactly from the result text that shows it fits.
+export const PICK_SYSTEM = `You match views to real web pages found by search. You get numbered groups, one per VIEW. For each, pick up to 2 results written by someone who HOLDS and ARGUES that view: an op-ed, essay, advocacy page, position statement, report or paper making its case. Never a neutral explainer, and never a piece arguing another side. If nothing qualifies, pick none. Never invent a result. For each pick give: the outlet or organisation; "reason", one plain sentence (at most 30 words) saying what that page argues for the view, using only what the result text says, in the holder's terms and never as your own ruling; and "quote", at most 20 words copied exactly from the result text that shows it.
 
-Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"outlet":"...","quote":"..."}]}`;
+Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"outlet":"...","reason":"...","quote":"..."}]}`;
 
 export function pickPrompt(groups) {
   return groups.map((g, i) => {
     const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
-    return `Group ${i + 1} — ${g.kind === 'view' ? 'VIEW' : 'FACT'}: ${g.label}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
+    return `Group ${i + 1} — VIEW: ${g.label}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
   }).join('\n\n');
 }
 
@@ -70,13 +71,10 @@ export function cleanSource(s) {
 // Model output (or a hand-made example) → the clean shape. Views get unique
 // ids; cruxes that don't split the views are dropped (they'd be values in
 // disguise); a view left with the same positions as another is dropped.
-export function normalizeMap(raw, { question = '' } = {}) {
-  const status = ['mapped', 'settled', 'none'].includes(raw?.status) ? raw.status : 'mapped';
-  const settled = (Array.isArray(raw?.settled) ? raw.settled : []).slice(0, MAX_SETTLED + 1).map((f) => ({
-    text: str(f?.text, 240), search: str(f?.search, 120),
-    sources: (Array.isArray(f?.sources) ? f.sources : []).map(cleanSource).filter(Boolean).slice(0, 2),
-  })).filter((f) => f.text);
+const cleanSources = (a, n) => (Array.isArray(a) ? a : []).map(cleanSource).filter(Boolean).slice(0, n);
 
+export function normalizeMap(raw, { question = '' } = {}) {
+  const status = raw?.status === 'none' ? 'none' : 'mapped';
   const ids = new Set();
   let views = (Array.isArray(raw?.views) ? raw.views : []).slice(0, MAX_VIEWS).map((v, i) => {
     let id = kebab(v?.id || v?.name, i);
@@ -85,7 +83,9 @@ export function normalizeMap(raw, { question = '' } = {}) {
     return {
       id, name: str(v?.name, 48), short: str(v?.short, 24) || str(v?.name, 24), summary: str(v?.summary, 280),
       who: str(v?.who, 320), changeMind: str(v?.changeMind, 280), search: str(v?.search, 120),
-      sources: (Array.isArray(v?.sources) ? v.sources : []).map(cleanSource).filter(Boolean).slice(0, 3),
+      reasons: (Array.isArray(v?.reasons) ? v.reasons : []).map((r) => ({ text: str(r?.text, 280), sources: cleanSources(r?.sources, 2) }))
+        .filter((r) => r.text).slice(0, MAX_REASONS),
+      sources: cleanSources(v?.sources, 3),
       _raw: v?.id || '',
     };
   }).filter((v) => v.name);
@@ -119,13 +119,11 @@ export function normalizeMap(raw, { question = '' } = {}) {
   const away = (Array.isArray(raw?.wording?.leansAwayFrom) ? raw.wording.leansAwayFrom : []).map(idOf).filter((id) => id && keepIds.has(id));
   const assumes = raw?.wording?.assumes ? str(raw.wording.assumes, 240) : null;
 
-  let finalStatus = status;
-  if (status === 'mapped' && (views.length < 2 || cruxes.length < 1)) finalStatus = settled.length ? 'settled' : 'none';
+  const finalStatus = status === 'mapped' && views.length >= 2 && cruxes.length >= 1 ? 'mapped' : 'none';
   return {
     status: finalStatus,
     question: str(raw?.question || question, 300),
     headline: str(raw?.headline, 300),
-    settled,
     views: finalStatus === 'mapped' ? views : [],
     cruxes: finalStatus === 'mapped' ? cruxes : [],
     wording: { assumes, leansAwayFrom: assumes ? away : [] },
@@ -151,5 +149,8 @@ export function closestTo(map, id) {
   return best;
 }
 
-export const SOURCE_COUNT = (map) =>
-  map.views.reduce((n, v) => n + v.sources.length, 0) + map.settled.reduce((n, f) => n + f.sources.length, 0);
+// Every source a view stands on: those behind its reasons, then further reading.
+export const viewSources = (v) => [...(v.reasons || []).flatMap((r) => r.sources), ...(v.sources || [])];
+
+// Distinct pages linked on the whole map.
+export const SOURCE_COUNT = (map) => new Set(map.views.flatMap((v) => viewSources(v).map((s) => s.url))).size;

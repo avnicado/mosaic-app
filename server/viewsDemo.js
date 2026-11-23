@@ -2,13 +2,13 @@
 // Public (no sign-in), so it is capped: per address per hour, and in total
 // per day, and every answer is cached so a question is only ever paid for once.
 //
-//   1 Groq call   maps the question (settled facts, views, the points they split on)
-//   ≤7 searches   one per view, one per settled fact (Tavily, real results only)
-//   1 Groq call   picks, for each view, pieces written by people who hold it,
-//                 and for each fact a strong source; URLs are never model-written
+//   1 Groq call   maps the question (the views, who holds them, the points they split on)
+//   ≤4 searches   one per view (Tavily, real results only)
+//   1 Groq call   picks, for each view, pieces written by people who hold it, and
+//                 says in a line what each argues; URLs are never model-written
 //   link check    every picked page is opened; one that doesn't load is dropped
 //
-// Store: m2:views-demo  "q:<hash>" → JSON map   "d:<day>" / "ip:<ip>:<hour>" → counts
+// Store: m2:views-demo  "v:<hash>" → JSON map   "d:<day>" / "ip:<ip>:<hour>" → counts
 
 import { handleLLM, tavilySearch, hasSearchKey, hasKey } from './proxyCore.js';
 import { claudeFallbackOn } from './claudeCli.js';
@@ -91,7 +91,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `q:${hashString(norm(q))}`;
+  const key = `v:${hashString(norm(q))}`;
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
@@ -110,22 +110,18 @@ export async function mapLive(question, {
   const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
   const map = normalizeMap(raw, { question: q });
 
-  // Search for each view and each settled fact, then let the model pick.
-  const groups = [
-    ...map.views.map((v) => ({ kind: 'view', label: `"${v.name}": ${v.summary}`, search: v.search, ref: v })),
-    ...map.settled.map((f) => ({ kind: 'fact', label: f.text, search: f.search, ref: f })),
-  ];
+  // Search for each view, then let the model pick pages and say what each argues.
+  const groups = map.views.map((v) => ({ label: `"${v.name}": ${v.summary}`, search: v.search, ref: v }));
   const results = await searchAll(groups, search);
-  groups.forEach((g, i) => { g.results = results[i]; g.ref.sources = []; });
+  groups.forEach((g, i) => { g.results = results[i]; g.ref.reasons = []; g.ref.sources = []; });
   if (results.some((r) => r.length) && Date.now() < deadline - 12_000) {
     try {
-      const out = await groqJSON({ system: PICK_SYSTEM, prompt: pickPrompt(groups), maxTokens: 900, deadline, llm });
+      const out = await groqJSON({ system: PICK_SYSTEM, prompt: pickPrompt(groups), maxTokens: 1100, deadline, llm });
       const picked = [];
       for (const p of Array.isArray(out?.picks) ? out.picks : []) {
         const g = groups[Number(p?.group) - 1];
         const r = g?.results?.[Number(p?.result) - 1];
-        if (!g || !r || g.ref.sources.some((s) => s.url === r.url)) continue;
-        if (g.ref.sources.length >= (g.kind === 'view' ? 2 : 1)) continue;
+        if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
         // A quote only counts if it is really in the result text.
         const quote = String(p.quote || '').replace(/\s+/g, ' ').trim();
         const inText = quote && String(r.snippet || '').replace(/\s+/g, ' ').includes(quote.slice(0, 60));
@@ -133,13 +129,14 @@ export async function mapLive(question, {
           title: String(r.title).slice(0, 200), url: r.url, outlet: String(p.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
           author: '', date: r.published ? String(r.published).slice(0, 7) : '', quote: inText ? quote.slice(0, 200) : '',
         };
-        g.ref.sources.push(src);
+        const text = String(p.reason || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+        g.ref.reasons.push({ text: text || (inText ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
         picked.push(src);
       }
       // Every picked page must open.
       const ok = await Promise.all(picked.map((s) => check(s.url)));
       const dead = new Set(picked.filter((_, i) => !ok[i]).map((s) => s.url));
-      for (const g of groups) g.ref.sources = g.ref.sources.filter((s) => !dead.has(s.url));
+      for (const g of groups) g.ref.reasons = g.ref.reasons.filter((x) => !dead.has(x.sources[0].url));
     } catch (e) {
       console.warn('[views-demo] picking sources failed:', e.message);
     }
@@ -147,19 +144,18 @@ export async function mapLive(question, {
 
   // Views must stand on real pieces: keep only sourced views, when enough are.
   let views = map.views;
-  const sourced = views.filter((v) => v.sources.length);
+  const sourced = views.filter((v) => v.reasons.length);
   if (sourced.length >= 2) views = sourced;
   views = views.map(({ search: _s, ...v }) => v);
   const keep = new Set(views.map((v) => v.id));
   const cruxes = map.cruxes
     .map((c) => ({ ...c, positions: Object.fromEntries(Object.entries(c.positions).filter(([id]) => keep.has(id))) }))
     .filter((c) => Object.values(c.positions).includes('left') && Object.values(c.positions).includes('right'));
-  const settled = map.settled.map(({ search: _s, ...f }) => f);
 
   let status = map.status;
-  if (status === 'mapped' && (views.length < 2 || !cruxes.length)) status = settled.length ? 'settled' : 'none';
+  if (status === 'mapped' && (views.length < 2 || !cruxes.length)) status = 'none';
   const out = {
-    ...map, status, settled,
+    ...map, status,
     views: status === 'mapped' ? views : [], cruxes: status === 'mapped' ? cruxes : [],
     wording: { ...map.wording, leansAwayFrom: map.wording.leansAwayFrom.filter((id) => keep.has(id)) },
     question: q, at: now, live: true,

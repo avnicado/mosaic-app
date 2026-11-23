@@ -1,84 +1,6 @@
 {
  "question": "Should kids under 16 be kept off social media?",
- "headline": "Experts agree nearly all teens use social media and that heavy use goes with worse mental health. The argument is over whether it causes the harm, and what the fix should be.",
- "settled": [
-  {
-   "text": "Nearly all teenagers use social media: up to 95% of US 13- to 17-year-olds say they use at least one platform.",
-   "sources": [
-    {
-     "title": "Social Media and Youth Mental Health",
-     "outlet": "U.S. Department of Health and Human Services (Office of the Surgeon General)",
-     "author": "",
-     "date": "2024-05",
-     "url": "https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media",
-     "quote": "Up to 95% of young people aged 13-17 report using a social media platform."
-    }
-   ]
-  },
-  {
-   "text": "Heavy use goes with worse mental health: teens on it more than three hours a day face about double the risk of depression and anxiety symptoms. The major reviews say this doesn't yet prove it causes harm for teens in general.",
-   "sources": [
-    {
-     "title": "Social Media and Youth Mental Health",
-     "outlet": "U.S. Department of Health and Human Services (Office of the Surgeon General)",
-     "author": "",
-     "date": "2024-05",
-     "url": "https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media",
-     "quote": "face double the risk of mental health problems including experiencing symptoms of depression and anxiety."
-    },
-    {
-     "title": "To Minimize Harms and Maximize Benefits of Social Media to Adolescent Health, New Report Recommends Setting Industrywide Standards, New Protections Against Harassment",
-     "outlet": "National Academies of Sciences, Engineering, and Medicine",
-     "author": "",
-     "date": "2023-12",
-     "url": "https://www.nationalacademies.org/news/2023/12/to-minimize-harms-and-maximize-benefits-of-social-media-to-adolescent-health-new-report-recommends-setting-industrywide-standards-new-protections-against-harassment",
-     "quote": "not enough evidence to say that social media causes changes in adolescent health at the population level."
-    }
-   ]
-  },
-  {
-   "text": "Social media also does real good for some young people, such as staying connected with friends and family, finding community and getting information.",
-   "sources": [
-    {
-     "title": "Social Media Has Both Positive and Negative Impacts on Children and Adolescents",
-     "outlet": "U.S. Surgeon General, via NCBI Bookshelf",
-     "author": "",
-     "date": "2023",
-     "url": "https://www.ncbi.nlm.nih.gov/books/NBK594763/",
-     "quote": "Social media can provide benefits for some youth by providing positive community and connection"
-    },
-    {
-     "title": "To Minimize Harms and Maximize Benefits of Social Media to Adolescent Health, New Report Recommends Setting Industrywide Standards, New Protections Against Harassment",
-     "outlet": "National Academies of Sciences, Engineering, and Medicine",
-     "author": "",
-     "date": "2023-12",
-     "url": "https://www.nationalacademies.org/news/2023/12/to-minimize-harms-and-maximize-benefits-of-social-media-to-adolescent-health-new-report-recommends-setting-industrywide-standards-new-protections-against-harassment",
-     "quote": "The benefits of social media use suggested by research can include connecting children and adolescents with friends and family."
-    }
-   ]
-  },
-  {
-   "text": "Australia's under-16 ban began on 10 December 2025; three months in, the regulator's own survey found most 10- to 15-year-olds still used at least one banned platform (about 82%, down from 86%).",
-   "sources": [
-    {
-     "title": "Early days, early insights: Understanding experiences of social media age restrictions at the three-month follow-up",
-     "outlet": "eSafety Commissioner (Australian Government)",
-     "author": "",
-     "date": "2026-07",
-     "url": "https://www.esafety.gov.au/sites/default/files/2026-08/Early-days-Early-Insights-SMMA-Evaluation-Understanding-experiences-of-social-media-age-restrictions-August2026.pdf",
-     "quote": "Despite this reduction, many children who held accounts at baseline had retained them at three months"
-    },
-    {
-     "title": "Australia's under-16 social media ban failing, study shows: What it means",
-     "outlet": "Al Jazeera",
-     "author": "Sarah Shamim",
-     "date": "2026-08",
-     "url": "https://www.aljazeera.com/economy/2026/8/6/australias-under-16-social-media-ban-failing-study-shows-what-it-means",
-     "quote": "continuing to use social media despite being banned from doing so"
-    }
-   ]
-  }
- ],
+ "headline": "Four main views: ban accounts under 16, make the apps safer, put the effort into supporting kids, or protect everyone's privacy. They split most on whether social media causes the harm and whether bans work.",
  "views": [
   {
    "id": "ban-under-16",
@@ -87,22 +9,46 @@
    "summary": "Social media is harming a generation of children, and a legal minimum age of 16 that platforms are forced to enforce is the clearest way to give kids their childhood back.",
    "who": "Jonathan Haidt, Zach Rausch and Ravi Iyer (The Anxious Generation movement); the Australian government under Prime Minister Anthony Albanese and its eSafety Commissioner; parent campaign groups; governments now copying Australia",
    "changeMind": "Solid follow-up data from Australia showing no improvement in teens' sleep, mood or wellbeing, or a clear rise in harm as kids move to riskier, less-watched apps.",
-   "sources": [
+   "sources": [],
+   "reasons": [
     {
-     "title": "What the World Should Learn from Australia's Social Media Law",
-     "outlet": "TIME",
-     "author": "Ravi Iyer, Jonathan Haidt and Zach Rausch",
-     "date": "2026-07",
-     "url": "https://time.com/article/2026/07/18/the-world-should-learn-from-australia-s-social-media-law/",
-     "quote": "The Australian social media law has not failed."
+     "text": "Up to 95% of US 13- to 17-year-olds use social media, and those on it more than three hours a day face double the risk of depression and anxiety symptoms, says the US Surgeon General.",
+     "sources": [
+      {
+       "title": "Social Media and Youth Mental Health",
+       "outlet": "U.S. Department of Health and Human Services (Office of the Surgeon General)",
+       "author": "",
+       "date": "2024-05",
+       "url": "https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media",
+       "quote": "face double the risk of mental health problems including experiencing symptoms of depression and anxiety."
+      }
+     ]
     },
     {
-     "title": "Minimum age for social media access to protect Australian kids",
-     "outlet": "Minister for Communications / Prime Minister of Australia",
-     "author": "Anthony Albanese and Michelle Rowland",
-     "date": "",
-     "url": "https://minister.infrastructure.gov.au/node/6365",
-     "quote": "Social media is doing social harm to our kids."
+     "text": "Australia's law has not failed, and other countries should learn from it, argue Jonathan Haidt and colleagues.",
+     "sources": [
+      {
+       "title": "What the World Should Learn from Australia's Social Media Law",
+       "outlet": "TIME",
+       "author": "Ravi Iyer, Jonathan Haidt and Zach Rausch",
+       "date": "2026-07",
+       "url": "https://time.com/article/2026/07/18/the-world-should-learn-from-australia-s-social-media-law/",
+       "quote": "The Australian social media law has not failed."
+      }
+     ]
+    },
+    {
+     "text": "Australia's prime minister says social media is doing social harm to children, and the government said it would legislate 16 as the minimum age.",
+     "sources": [
+      {
+       "title": "Minimum age for social media access to protect Australian kids",
+       "outlet": "Minister for Communications / Prime Minister of Australia",
+       "author": "Anthony Albanese and Michelle Rowland",
+       "date": "",
+       "url": "https://minister.infrastructure.gov.au/node/6365",
+       "quote": "Social media is doing social harm to our kids."
+      }
+     ]
     }
    ]
   },
@@ -113,22 +59,54 @@
    "summary": "The harm comes from how the apps are built, so the law should force tech companies to redesign them to be safe for children rather than simply shutting kids out and letting the companies off the hook.",
    "who": "Molly Rose Foundation (UK online-safety charity), UNICEF, Amnesty International, Australia's Human Rights and Children's Commissioners",
    "changeMind": "Evidence that design-safety laws, such as the UK Online Safety Act, fail to reduce harm to children while age limits clearly do.",
-   "sources": [
+   "sources": [],
+   "reasons": [
     {
-     "title": "Social media bans are the wrong approach for children",
-     "outlet": "Molly Rose Foundation",
-     "author": "",
-     "date": "2026-01",
-     "url": "https://mollyrosefoundation.org/wp-content/uploads/2026/01/MRF-Briefing_Social-media-bans-are-the-wrong-approach-for-children_Jan-2026.pdf",
-     "quote": "Blunt and simplistic solutions will fail to offer parents and children the safety and wellbeing they are rightly demanding."
+     "text": "Blunt bans won't give children the safety they need; laws should force companies to build safer apps.",
+     "sources": [
+      {
+       "title": "Social media bans are the wrong approach for children",
+       "outlet": "Molly Rose Foundation",
+       "author": "",
+       "date": "2026-01",
+       "url": "https://mollyrosefoundation.org/wp-content/uploads/2026/01/MRF-Briefing_Social-media-bans-are-the-wrong-approach-for-children_Jan-2026.pdf",
+       "quote": "Blunt and simplistic solutions will fail to offer parents and children the safety and wellbeing they are rightly demanding."
+      }
+     ]
     },
     {
-     "title": "Age restrictions alone won't keep children safe online",
-     "outlet": "UNICEF",
-     "author": "",
-     "date": "2025-12",
-     "url": "https://www.unicef.org/press-releases/age-restrictions-alone-wont-keep-children-safe-online",
-     "quote": "Regulation should not be a substitute for platforms investing in child safety."
+     "text": "Age limits are no substitute for platforms investing in child safety, says UNICEF.",
+     "sources": [
+      {
+       "title": "Age restrictions alone won't keep children safe online",
+       "outlet": "UNICEF",
+       "author": "",
+       "date": "2025-12",
+       "url": "https://www.unicef.org/press-releases/age-restrictions-alone-wont-keep-children-safe-online",
+       "quote": "Regulation should not be a substitute for platforms investing in child safety."
+      }
+     ]
+    },
+    {
+     "text": "Three months into Australia's ban, about 82% of 10- to 15-year-olds still used a banned platform, by the regulator's own survey.",
+     "sources": [
+      {
+       "title": "Early days, early insights: Understanding experiences of social media age restrictions at the three-month follow-up",
+       "outlet": "eSafety Commissioner (Australian Government)",
+       "author": "",
+       "date": "2026-07",
+       "url": "https://www.esafety.gov.au/sites/default/files/2026-08/Early-days-Early-Insights-SMMA-Evaluation-Understanding-experiences-of-social-media-age-restrictions-August2026.pdf",
+       "quote": "Despite this reduction, many children who held accounts at baseline had retained them at three months"
+      },
+      {
+       "title": "Australia's under-16 social media ban failing, study shows: What it means",
+       "outlet": "Al Jazeera",
+       "author": "Sarah Shamim",
+       "date": "2026-08",
+       "url": "https://www.aljazeera.com/economy/2026/8/6/australias-under-16-social-media-ban-failing-study-shows-what-it-means",
+       "quote": "continuing to use social media despite being banned from doing so"
+      }
+     ]
     }
    ]
   },
@@ -141,20 +119,53 @@
    "changeMind": "Well-run studies showing that removing social media actually improves teenagers' mental health.",
    "sources": [
     {
-     "title": "Are we using screens as a scapegoat for teen mental health? (TED Radio Hour transcript)",
-     "outlet": "NPR",
-     "author": "Manoush Zomorodi (host), with Candice Odgers",
-     "date": "2026",
-     "url": "https://www.npr.org/transcripts/nx-s1-5871161",
-     "quote": "We need to hire teachers. We need to hire counselors. And we need to pay them well."
-    },
-    {
      "title": "Australia's under-16 social media ban won't change the reality of growing up online",
      "outlet": "Pursuit, University of Melbourne",
      "author": "Catherine Smith",
      "date": "2025-12",
      "url": "https://pursuit.unimelb.edu.au/articles/australias-under-16-social-media-ban-wont-change-the-reality-of-growing-up-online",
      "quote": "blanket bans on technology rarely solve the issues they claim to address."
+    }
+   ],
+   "reasons": [
+    {
+     "text": "A National Academies review found not enough evidence that social media changes teen health across the population.",
+     "sources": [
+      {
+       "title": "To Minimize Harms and Maximize Benefits of Social Media to Adolescent Health, New Report Recommends Setting Industrywide Standards, New Protections Against Harassment",
+       "outlet": "National Academies of Sciences, Engineering, and Medicine",
+       "author": "",
+       "date": "2023-12",
+       "url": "https://www.nationalacademies.org/news/2023/12/to-minimize-harms-and-maximize-benefits-of-social-media-to-adolescent-health-new-report-recommends-setting-industrywide-standards-new-protections-against-harassment",
+       "quote": "not enough evidence to say that social media causes changes in adolescent health at the population level."
+      }
+     ]
+    },
+    {
+     "text": "Social media can benefit some young people by giving them positive community and connection with others who share their identities, abilities and interests.",
+     "sources": [
+      {
+       "title": "Social Media Has Both Positive and Negative Impacts on Children and Adolescents",
+       "outlet": "U.S. Surgeon General, via NCBI Bookshelf",
+       "author": "",
+       "date": "2023",
+       "url": "https://www.ncbi.nlm.nih.gov/books/NBK594763/",
+       "quote": "Social media can provide benefits for some youth by providing positive community and connection"
+      }
+     ]
+    },
+    {
+     "text": "Money spent locking up kids' phones would be better spent hiring teachers and counsellors and paying them well, says psychologist Candice Odgers.",
+     "sources": [
+      {
+       "title": "Are we using screens as a scapegoat for teen mental health? (TED Radio Hour transcript)",
+       "outlet": "NPR",
+       "author": "Manoush Zomorodi (host), with Candice Odgers",
+       "date": "2026",
+       "url": "https://www.npr.org/transcripts/nx-s1-5871161",
+       "quote": "We need to hire teachers. We need to hire counselors. And we need to pay them well."
+      }
+     ]
     }
    ]
   },
@@ -165,22 +176,33 @@
    "summary": "Enforcing an age limit means making everyone prove their age with ID or face scans, which endangers privacy and cuts young people off from speech and information, so mandatory age checks do more harm than good.",
    "who": "Electronic Frontier Foundation (EFF), American Civil Liberties Union (ACLU), digital-rights groups",
    "changeMind": "Age-check technology that is accurate, stores no personal data, and cannot be used to track or censor people.",
-   "sources": [
+   "sources": [],
+   "reasons": [
     {
-     "title": "When No ID Means No Internet: Age Verification and the Right to Access Information",
-     "outlet": "Electronic Frontier Foundation",
-     "author": "Jillian C. York and Sheila B. Lalwani",
-     "date": "2026-10",
-     "url": "https://www.eff.org/deeplinks/2026/10/when-no-id-means-no-internet-age-verification-and-right-access-information",
-     "quote": "Age verification technology itself is often inaccurate and privacy-invasive."
+     "text": "Age verification technology is often inaccurate and privacy-invasive, and ID-based checks risk shutting out people who lack documents such as a passport or driver's licence.",
+     "sources": [
+      {
+       "title": "When No ID Means No Internet: Age Verification and the Right to Access Information",
+       "outlet": "Electronic Frontier Foundation",
+       "author": "Jillian C. York and Sheila B. Lalwani",
+       "date": "2026-10",
+       "url": "https://www.eff.org/deeplinks/2026/10/when-no-id-means-no-internet-age-verification-and-right-access-information",
+       "quote": "Age verification technology itself is often inaccurate and privacy-invasive."
+      }
+     ]
     },
     {
-     "title": "Lawmakers Renew Push to Regulate Kids' Speech Online Despite Speech Protections",
-     "outlet": "ACLU",
-     "author": "Hibah Ansari",
-     "date": "2025-12",
-     "url": "https://aclu.org/news/privacy-technology/lawmakers-renew-push-to-regulate-kids-speech-online-despite-speech-protections",
-     "quote": "broad attempts to regulate speech fail to protect children and violate the First Amendment in the process."
+     "text": "Broad laws to regulate what kids see online fail to protect them and run against free-speech rights, says the ACLU.",
+     "sources": [
+      {
+       "title": "Lawmakers Renew Push to Regulate Kids' Speech Online Despite Speech Protections",
+       "outlet": "ACLU",
+       "author": "Hibah Ansari",
+       "date": "2025-12",
+       "url": "https://aclu.org/news/privacy-technology/lawmakers-renew-push-to-regulate-kids-speech-online-despite-speech-protections",
+       "quote": "broad attempts to regulate speech fail to protect children and violate the First Amendment in the process."
+      }
+     ]
     }
    ]
   }
@@ -236,7 +258,7 @@
   }
  ],
  "wording": {
-  "assumes": "The question treats keeping kids off (access) as the main choice, which takes for granted that the problem is kids being on social media rather than how the apps are designed or what else is going on in kids' lives.",
+  "assumes": "The question frames the choice as keeping kids off or not. Three of the four views say the answer lies elsewhere: in how the apps are built, in support for kids, or in protecting privacy.",
   "leansAwayFrom": [
    "safer-design",
    "support-kids",

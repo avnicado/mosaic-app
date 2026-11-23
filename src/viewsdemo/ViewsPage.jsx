@@ -1,7 +1,7 @@
-// The public views page (/views). Ask a contested question and see, at a
-// glance: what the evidence settles, the main views, the exact points they
-// split on (each view placed on a line between two answers), and real
-// articles by people who hold each view. Ready-made examples load instantly;
+// The public views page (/views). Ask a question and see, at a glance, the
+// main views on it, who holds each, the exact points they split on (each view
+// placed on a line between two answers), and each view's reasons with real
+// articles by people who hold it. It never rules on the question. Ready-made examples load instantly;
 // a typed question is mapped live by /api/views-demo when it's switched on.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EXAMPLES, exampleFor } from './examples.js';
@@ -46,24 +46,6 @@ function Tag({ map, view, focus, onFocus, small }) {
       aria-pressed={focus === view.id} title={view.name}>
       {view.short || view.name}
     </button>
-  );
-}
-
-function Settled({ map }) {
-  if (!map.settled.length) return null;
-  return (
-    <section className="vd-block vd-settled" aria-labelledby="vd-settled-h">
-      <h2 id="vd-settled-h"><span className="vd-check" aria-hidden="true">✓</span> What the evidence settles</h2>
-      <p className="vd-block-sub">Not up for debate among the views below. Strong sources, not opinion.</p>
-      <ul className="vd-facts">
-        {map.settled.map((f, i) => (
-          <li key={i}>
-            <p className="vd-fact">{f.text}</p>
-            {f.sources.length > 0 && <ul className="vd-srcs inline">{f.sources.map((s, j) => <SourceLink key={j} s={s} withQuote={false} />)}</ul>}
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
@@ -121,6 +103,7 @@ function ViewCard({ map, view, focus, onFocus }) {
   const close = closestTo(map, view.id);
   const n = map.cruxes.length;
   const dim = focus && focus !== view.id;
+  const reasons = view.reasons || [];
   return (
     <article className={`vd-card ${dim ? 'dim' : ''} ${focus === view.id ? 'on' : ''}`} style={{ '--c': colorOf(map, view.id) }} id={`view-${view.id}`}>
       <header>
@@ -129,20 +112,32 @@ function ViewCard({ map, view, focus, onFocus }) {
       </header>
       <p className="vd-card-sum">{view.summary}</p>
       {view.who && <p className="vd-card-who"><span>Held by</span> {view.who}</p>}
+      {reasons.length > 0 && (
+        <>
+          <p className="vd-card-read">Its reasons, and where they’re made</p>
+          <ol className="vd-reasons">
+            {reasons.map((r, i) => (
+              <li key={i}>
+                <p className="vd-reason">{r.text}</p>
+                {r.sources.length > 0 && <ul className="vd-srcs">{r.sources.map((s, j) => <SourceLink key={j} s={s} />)}</ul>}
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      {view.sources.length > 0 && (
+        <>
+          <p className="vd-card-read">More from people who make this case</p>
+          <ul className="vd-srcs">{view.sources.map((s, j) => <SourceLink key={j} s={s} />)}</ul>
+        </>
+      )}
+      {!reasons.length && !view.sources.length && <p className="vd-muted">No article found yet by someone who argues this view.</p>}
       <ul className="vd-card-facts">
         {close && n > 0 && (close.same > 0
           ? <li><span>Closest to</span> {close.name}: same answer on {close.same} of {n}</li>
           : <li><span>Stands apart</span> No other view shares any of its answers.</li>)}
         {view.changeMind && <li><span>What would change its mind</span> {view.changeMind}</li>}
       </ul>
-      {view.sources.length > 0 ? (
-        <>
-          <p className="vd-card-read">Read the case, from people who make it</p>
-          <ul className="vd-srcs">{view.sources.map((s, j) => <SourceLink key={j} s={s} />)}</ul>
-        </>
-      ) : (
-        <p className="vd-muted">No article found yet by someone who argues this view.</p>
-      )}
     </article>
   );
 }
@@ -159,13 +154,11 @@ function Result({ map }) {
       {map.headline && <p className="vd-headline">{map.headline}</p>}
       {mapped && (
         <ul className="vd-stats" aria-label="At a glance">
-          {map.settled.length > 0 && <li><b>{map.settled.length}</b> settled {map.settled.length === 1 ? 'fact' : 'facts'}</li>}
           <li><b>{map.views.length}</b> main views</li>
           <li><b>{map.cruxes.length}</b> points they split on</li>
           {sources > 0 && <li><b>{sources}</b> real sources, each opened and checked</li>}
         </ul>
       )}
-      <Settled map={map} />
       {mapped && (
         <>
           <Wording map={map} focus={focus} onFocus={setFocus} />
@@ -178,17 +171,14 @@ function Result({ map }) {
           </section>
         </>
       )}
-      {map.status === 'settled' && (
-        <p className="vd-empty">No live public argument turned up around this one: the evidence answers it.</p>
-      )}
       {map.status === 'none' && (
-        <p className="vd-empty">This doesn’t look like something people argue about in public, so there are no sides to map.</p>
+        <p className="vd-empty">This doesn’t look like something people hold public views on, so there are no sides to map.</p>
       )}
     </div>
   );
 }
 
-const STEPS = ['Finding where people really disagree', 'Separating settled facts from live arguments', 'Searching for articles by people who hold each view', 'Opening every link to check it'];
+const STEPS = ['Finding the main views and who holds them', 'Working out the points they split on', 'Searching for articles by people who hold each view', 'Opening every link to check it'];
 
 function Working() {
   const [i, setI] = useState(0);
@@ -260,8 +250,8 @@ export default function ViewsPage() {
       </header>
 
       <section className="vd-hero">
-        <h1 className="vd-title">See where people really disagree</h1>
-        <p className="vd-lede">Ask about a contested issue. Mosaic separates what the evidence settles from what people actually argue about, shows the exact points the main views split on, and links real articles from people who hold each one.</p>
+        <h1 className="vd-title">See every side of a question</h1>
+        <p className="vd-lede">Ask about something people disagree on. Mosaic lays out the main views, who holds each one, the exact points they split on, and real articles from the people who make each case. It never picks a side: you read the sources and decide.</p>
         <form className="vd-ask" onSubmit={submit}>
           <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask a question, e.g. Should cities ban cars downtown?" aria-label="Your question" maxLength={300} enterKeyHint="go" />
           <button type="submit" disabled={busy}>{busy ? 'Mapping…' : 'Map it'}</button>
@@ -288,7 +278,7 @@ export default function ViewsPage() {
         {map && !busy && <Result map={map} />}
         {map?.status === 'none' && map.nearby?.length > 0 && (
           <div className="vd-nearby">
-            <p>Questions near it that people do argue about:</p>
+            <p>Questions near it that people do hold different views on:</p>
             {map.nearby.map((q) => <button key={q} className="vd-ex small" onClick={() => { setText(q); ask(q); }}>{q}</button>)}
           </div>
         )}
@@ -296,8 +286,8 @@ export default function ViewsPage() {
 
       <footer className="vd-foot">
         {map && !map.live
-          ? <p>This example was researched in {map.preparedOn || 'November 2026'}. Every link was opened and read to confirm it says what it’s cited for. Views are summarised fairly, the way their own holders put them.</p>
-          : <p>A typed question is mapped by AI from live web search. It only links pages it actually found, and opens each one to check it loads. Read the sources themselves.</p>}
+          ? <p>This example was researched in {map.preparedOn || 'November 2026'}. Every link was opened and read to confirm it says what it’s cited for. Each view is summarised the way its own holders put it, and none is marked right or wrong.</p>
+          : <p>A typed question is mapped by AI from live web search. It only links pages it actually found, and opens each one to check it loads. It doesn’t pick a side, so read the sources themselves.</p>}
       </footer>
     </div>
   );
