@@ -272,13 +272,13 @@ export async function ringSides(input, {
   const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const q = s(input?.question, 300);
   const crux = { question: s(input?.crux?.question, 240), left: s(input?.crux?.left, 120), right: s(input?.crux?.right, 120) };
-  // The views that give each answer, as "who holds it — summary": naming the
-  // people and groups who hold it is what makes a search land on pages from
-  // that side rather than on the most-read pages on the topic.
+  // The views that give each answer, in their own words ("name: summary"):
+  // what makes a search land on pages making that case rather than on the
+  // most-read pages on the topic.
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r5:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r6:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = input?.debugCandidates ? null : await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -295,10 +295,28 @@ export async function ringSides(input, {
   const deadline = now + DEADLINE_MS;
   // Content farms re-post others' articles under a "(2026)"-style title.
   const copied = (r) => /\((19|20)\d\d\)\s*$/.test(String(r.title || '').trim()) && !/\.(gov|edu)$/.test(hostOf(r.url));
-  const [a, b] = (await searchAll([
-    { search: `${crux.question} ${crux.left}. ${holders('left') || q}`.slice(0, 380) },
-    { search: `${crux.question} ${crux.right}. ${holders('right') || q}`.slice(0, 380) },
-  ], search)).map((rs) => rs.filter((r) => !copied(r)));
+  // A fact-check page states a claim to refute it, so it never argues an answer;
+  // left in, it crowds out the pages that do on any contested side.
+  const NOT_ARGUING = ['factcheck.org', 'factcheck.afp.com', 'snopes.com', 'politifact.com', 'fullfact.org', 'healthfeedback.org', 'science.feedback.org', 'leadstories.com', 'tavily.com'];
+  const sideSearch = async (answer, pos) => {
+    // The answer in its holders' own words, not their names: a name finds pages
+    // about those people (often fact-checks), the words find pages making the case.
+    const query = `${crux.question} ${answer}. ${holders(pos) || q}`.slice(0, 380);
+    try {
+      const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      const hosts = new Set();
+      return rs.filter(usable).filter((r) => !copied(r)).filter((r) => {
+        const h = hostOf(r.url);
+        if (hosts.has(h)) return false;
+        hosts.add(h);
+        return true;
+      }).slice(0, 5);
+    } catch (e) {
+      console.warn('[views-demo] ring search failed:', e.message);
+      return [];
+    }
+  };
+  const [a, b] = await Promise.all([sideSearch(crux.left, 'left'), sideSearch(crux.right, 'right')]);
   // Both answers' results side by side in one list, each page once.
   const seen = new Set();
   const results = [];
