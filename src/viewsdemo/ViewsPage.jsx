@@ -85,7 +85,12 @@ function Splits({ map, focus, onFocus }) {
   return (
     <section className="vd-block" aria-labelledby="vd-splits-h">
       <h2 id="vd-splits-h">Where they split</h2>
-      <p className="vd-block-sub">Each coloured tag is one view. Its place on the line shows how that view answers the question. Tap a tag to follow one view.</p>
+      <p className="vd-block-sub">Each coloured tag is one of the main views. Its place on the line shows how that view answers the question. Tap a tag to follow one view.</p>
+      <ul className="vd-legend" aria-label="The main views">
+        {map.views.map((v) => (
+          <li key={v.id}><Tag map={map} view={v} focus={focus} onFocus={onFocus} small /><span>{v.name}</span></li>
+        ))}
+      </ul>
       <div className="vd-splits">
         {map.cruxes.map((c, i) => {
           const at = (pos) => map.views.filter((v) => c.positions[v.id] === pos);

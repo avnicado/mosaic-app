@@ -100,7 +100,10 @@ a { color: inherit; }
 .vd-why { margin: 8px 0 0; font-size: 14.5px; color: var(--vd-faded); }
 
 /* view cards */
-.vd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.vd-cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 720px) { .vd-cards { grid-template-columns: 1fr 1fr; } }
+.vd-legend { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.vd-legend li { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--vd-soft); }
 .vd-card { --c: #555; background: var(--vd-panel); border: 1px solid var(--vd-rule); border-top: 5px solid var(--c); border-radius: 14px; padding: 14px 16px 12px; transition: opacity .15s, box-shadow .15s; }
 .vd-card.dim { opacity: .45; }
 .vd-card.on { box-shadow: 0 0 0 2px var(--c); }

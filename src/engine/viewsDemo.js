@@ -84,7 +84,7 @@ export function normalizeMap(raw, { question = '' } = {}) {
     ids.add(id);
     return {
       id, name: str(v?.name, 48), short: str(v?.short, 24) || str(v?.name, 24), summary: str(v?.summary, 280),
-      who: str(v?.who, 200), changeMind: str(v?.changeMind, 280), search: str(v?.search, 120),
+      who: str(v?.who, 320), changeMind: str(v?.changeMind, 280), search: str(v?.search, 120),
       sources: (Array.isArray(v?.sources) ? v.sources : []).map(cleanSource).filter(Boolean).slice(0, 3),
       _raw: v?.id || '',
     };
