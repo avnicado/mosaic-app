@@ -9,6 +9,7 @@ import DemoMandala, { answerText, anchorPoint } from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
 import { closestTo, SOURCE_COUNT, hostOf } from '../engine/viewsDemo.js';
 import { Icon } from '../ui/icons.jsx';
+import { fetchRingSides } from './ringSides.js';
 
 // Mosaic's own palette: its teal, coral, slate blue and ochre.
 const COLORS = ['#4f8079', '#b84a3c', '#3d5875', '#8a6a1f'];
@@ -272,10 +273,14 @@ function ChartCaption() {
 // articles arguing each answer. With a view picked, its answer comes first.
 function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   const c = map.cruxes[k];
-  // Too few checked articles on this question: look for more items about it.
-  const few = (c.reading || []).length < 2;
+  // A side with fewer than two checked articles: look for pieces arguing it.
+  const checked = (pos) => (c.reading || []).filter((r) => r.side === pos);
+  const short = { left: checked('left').length < 2, right: checked('right').length < 2 };
+  const few = short.left || short.right;
   useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
   const filling = few && !!onItems;
+  const found = (pos) => (filling && short[pos] ? (items?.reading || []).filter((r) => r.side === pos) : []);
+  const looking = filling && (!items || items.loading);
   const M = map.cruxes.length;
   const mine = view ? (c.positions[view.id] || 'mid') : null;
   const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]];
@@ -296,7 +301,7 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
       )}
       {c.why && <p className="vd-ring-why">{c.why}</p>}
       {sides.map(([pos, sw, label]) => {
-        const items = (c.reading || []).filter((r) => r.side === pos);
+        const items = [...checked(pos), ...found(pos)];
         const holders = map.views.filter((v) => c.positions[v.id] === pos);
         return (
           <section key={pos} className={`vd-side ${mine === pos ? 'mine' : ''}`}>
@@ -310,12 +315,14 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
               <ul className="vd-read">
                 {items.map((s, j) => (
                   <li key={j}>
-                    {s.says && <p className="vd-read-says">{s.says}</p>}
+                    {s.says && <p className="vd-read-says">{s.label && <span className="vd-ritem-type">{s.label}</span>}{s.says}</p>}
                     <ul className="vd-srcs"><SourceLink s={s} /></ul>
                   </li>
                 ))}
               </ul>
-            ) : filling ? null : <p className="vd-muted">No checked article on this side yet.</p>}
+            ) : null}
+            {filling && short[pos] && looking && <p className="vd-muted">Finding pieces that argue this…</p>}
+            {!items.length && !(filling && looking) && <p className="vd-muted">{filling ? 'Nothing found arguing this yet.' : 'No checked article on this side yet.'}</p>}
           </section>
         );
       })}
@@ -324,39 +331,15 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
           <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
         ))}</p>
       )}
-      {filling && <RingItems items={items} hasReading={(c.reading || []).length > 0} onRetry={() => onItems(k, { retry: true })} />}
+      {filling && items && !items.loading && (items.error || short.left && !found('left').length || short.right && !found('right').length) && (
+        <p className="vd-muted">{items.error ? 'Couldn’t look for pieces just now.' : 'Nothing turned up for one of the answers.'}{' '}
+          <button type="button" className="vd-linkish" onClick={() => onItems(k, { retry: true })}>Try again</button></p>
+      )}
       <div className="vd-detail-nav">
         <button type="button" onClick={() => onRing((k - 1 + M) % M)}>← Question {((k - 1 + M) % M) + 1}</button>
         <button type="button" onClick={() => onRing((k + 1) % M)}>Question {((k + 1) % M) + 1} →</button>
       </div>
     </>
-  );
-}
-
-// Items about a ring's question, found by a web search when it has too few
-// checked articles: each link opened, labelled by what it is (article, video…).
-function RingItems({ items, hasReading, onRetry }) {
-  const list = items?.items || [];
-  return (
-    <section className="vd-ritems" aria-live="polite">
-      <p className="vd-side-h">{hasReading ? 'More on this question' : 'On this question'}</p>
-      {!items || items.loading ? <p className="vd-muted">Finding items on this question…</p>
-        : list.length ? (
-          <ul className="vd-read">
-            {list.map((it) => (
-              <li key={it.url} className="vd-src vd-ritem">
-                <span className="vd-ritem-type">{it.label}</span>
-                <a href={it.url} target="_blank" rel="noopener noreferrer">{it.title || hostOf(it.url)}<span aria-hidden="true"> ↗</span></a>
-                <span className="vd-src-meta">{it.outlet || hostOf(it.url)}</span>
-                {it.snippet && <p className="vd-ritem-snip">{it.snippet}</p>}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="vd-muted">{items.error ? 'Couldn’t look for items just now.' : 'Nothing good turned up for this question.'}{' '}
-            <button type="button" className="vd-linkish" onClick={onRetry}>Try again</button></p>
-        )}
-    </section>
   );
 }
 
@@ -442,9 +425,12 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView, items,
 
 // embedded: shown inside the app on a thread's page, under the thread's own
 // question, so it skips repeating the question and keeps the one-column layout.
-// ringItems(k) / onRingItems(k): items about a ring's question with too few
-// checked articles (on a thread's page; the standalone page has none).
+// ringItems(k) / onRingItems(k): pieces arguing each answer of a ring with too
+// few checked articles, kept on the thread. Without them (the standalone page)
+// they're looked up here and kept for as long as the page is open.
 export function Result({ map, embedded = false, ringItems = null, onRingItems = null }) {
+  const [localRings, setLocalRings] = useState({});
+  const localRef = useRef({ key: '', rings: {} });
   const [focus, setFocus] = useState(null);
   const [ring, setRing] = useState(null);
   const [show, setShow] = useState(null); // 'view' or 'ring': what the panel or sheet shows
@@ -456,6 +442,17 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
   // thread re-reads it whenever anything on the thread changes).
   const mapKey = `${map.question}|${map.views.map((v) => v.id).join(',')}|${map.cruxes.map((c) => c.question).join('|')}`;
   useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [mapKey]);
+  const loadLocal = React.useCallback(async (k, { retry = false } = {}) => {
+    const store = localRef.current;
+    if (store.key !== mapKey) { store.key = mapKey; store.rings = {}; }
+    const have = store.rings[k];
+    if (have && (have.loading || !retry)) return;
+    const put = (entry) => { if (store.key === mapKey) { store.rings = { ...store.rings, [k]: entry }; setLocalRings(store.rings); } };
+    put({ loading: true });
+    try { put(await fetchRingSides(map, k)); } catch (e) { put({ reading: [], error: String(e?.message || e).slice(0, 200) }); }
+  }, [mapKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const getItems = ringItems || ((k) => (localRef.current.key === mapKey ? localRings[k] : null) || null);
+  const loadItems = onRingItems || (embedded ? null : loadLocal);
   const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
   const ringOpen = show === 'ring' && ring != null;
   const viewOpen = show === 'view' && !!focus;
@@ -520,7 +517,7 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
           <ChartCaption />
           {ringOpen && (
             <RingPop map={map} k={ring} view={fv} chartRef={chartRef} wide={wide} onClose={closeRing} onRing={pickRing} onView={pickView}
-              items={ringItems ? ringItems(ring) : null} onItems={onRingItems} />
+              items={getItems(ring)} onItems={loadItems} />
           )}
         </div>
 
