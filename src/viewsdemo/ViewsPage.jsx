@@ -344,6 +344,7 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
       const p = new DOMPoint(ax, ay).matrixTransform(m); // where the tile is, on screen
       const cr = col.getBoundingClientRect();
       const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      box.style.width = wide ? '' : `${vw - 24}px`; // the page's own width, so a scrollbar never pushes it wider
       const W = box.offsetWidth, H = box.offsetHeight;
       if (wide) {
         // Just outside the mandala's rim, so the tile stays in view, with a
