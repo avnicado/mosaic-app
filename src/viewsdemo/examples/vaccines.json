@@ -1,0 +1,234 @@
+{
+ "question": "How valuable are vaccines?",
+ "headline": "That vaccines are hugely valuable is settled: they've saved about 154 million lives in 50 years, and they don't cause autism. The live argument is over how many shots every child should get, and whether schools should require them.",
+ "settled": [
+  {
+   "text": "Vaccines have saved about 154 million lives worldwide over the past 50 years, most of them babies.",
+   "sources": [
+    {
+     "title": "Global immunization efforts have saved at least 154 million lives over the past 50 years",
+     "outlet": "World Health Organization (on a study in The Lancet)",
+     "author": "",
+     "date": "2024-04",
+     "url": "https://www.who.int/news/item/24-04-2024-global-immunization-efforts-have-saved-at-least-154-million-lives-over-the-past-50-years",
+     "quote": "The vast majority of lives saved – 101 million – were those of infants."
+    }
+   ]
+  },
+  {
+   "text": "The MMR vaccine does not cause autism: a study of about 657,000 Danish children found no increased risk.",
+   "sources": [
+    {
+     "title": "Measles, Mumps, Rubella Vaccination and Autism: A Nationwide Cohort Study",
+     "outlet": "Annals of Internal Medicine (PubMed)",
+     "author": "Anders Hviid et al.",
+     "date": "2019-04",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/30831578/",
+     "quote": "The study strongly supports that MMR vaccination does not increase the risk for autism."
+    }
+   ]
+  },
+  {
+   "text": "The aluminium used in many childhood vaccines is safe: a 2025 study of 1.2 million Danish children found no link to autism, asthma or other chronic conditions.",
+   "sources": [
+    {
+     "title": "Major new study finds no health risks from aluminium in childhood vaccines",
+     "outlet": "Gavi, VaccinesWork",
+     "author": "Priya Joi",
+     "date": "2025-07",
+     "url": "https://www.gavi.org/vaccineswork/major-new-study-finds-no-health-risks-aluminium-childhood-vaccines",
+     "quote": "They found no evidence of increased risk."
+    },
+    {
+     "title": "Report: No link between aluminum-adjuvanted childhood vaccines, conditions such as autism",
+     "outlet": "CIDRAP",
+     "author": "Mary Van Beusekom",
+     "date": "2025-07",
+     "url": "https://www.cidrap.umn.edu/childhood-vaccines/report-no-link-between-aluminum-adjuvanted-childhood-vaccines-conditions-such",
+     "quote": "This nationwide cohort study did not find evidence supporting an increased risk"
+    }
+   ]
+  },
+  {
+   "text": "When vaccination slips, diseases come back: the US has had 5,838 measles cases in 2026, the most since 1991, and lost its measles-elimination status in November 2026.",
+   "sources": [
+    {
+     "title": "Measles Cases and Outbreaks",
+     "outlet": "CDC",
+     "author": "",
+     "date": "2026-11",
+     "url": "https://www.cdc.gov/measles/data-research",
+     "quote": "As of November 19, 2026, 5,838 confirmed measles cases were reported in the United States in 2026."
+    },
+    {
+     "title": "U.S. loses measles elimination status",
+     "outlet": "Axios",
+     "author": "",
+     "date": "2026-11",
+     "url": "https://www.axios.com/2026/11/14/us-loses-measles-elimination-status",
+     "quote": "sustained transmission of the highly contagious virus for longer than 12 months."
+    }
+   ]
+  }
+ ],
+ "views": [
+  {
+   "id": "keep-full-schedule",
+   "name": "Keep the full schedule",
+   "short": "Full schedule",
+   "summary": "Every child should keep getting the full, proven set of routine vaccines, including hepatitis B at birth, and school requirements should stay because they keep rates high and outbreaks rare.",
+   "who": "The American Academy of Pediatrics and most doctors' groups (AAFP, ACOG, IDSA), and state alliances such as the West Coast Health Alliance.",
+   "changeMind": "Large, careful US studies showing children on a shorter schedule get no more serious disease, or real harm from a specific routine shot.",
+   "sources": [
+    {
+     "title": "American Academy of Pediatrics Issues Recommended Childhood and Adolescent Immunization Schedule for 2026",
+     "outlet": "American Academy of Pediatrics",
+     "author": "",
+     "date": "2026-01",
+     "url": "https://www.aap.org/en/news-room/news-releases/aap/2026/american-academy-of-pediatric-issues-recommended-childhood-and-adolescent-immunization-schedule-for-2026/",
+     "quote": "recent changes to the CDC immunization schedule depart from longstanding medical evidence"
+    },
+    {
+     "title": "CIDRAP Op-Ed: Quiet dismantling: How 'shared decision-making' weakens vaccine policy and harms kids",
+     "outlet": "CIDRAP",
+     "author": "Jake Scott, MD (Stanford)",
+     "date": "2026-01",
+     "url": "https://www.cidrap.umn.edu/childhood-vaccines/cidrap-op-ed-quiet-dismantling-how-shared-decision-making-weakens-vaccine-policy",
+     "quote": "Shared decision-making recommendations correlate with lower uptake than routine recommendations."
+    }
+   ]
+  },
+  {
+   "id": "persuade-not-pressure",
+   "name": "Persuade, don't pressure",
+   "short": "Persuade",
+   "summary": "The evidence for the vaccines is strong, but trust is won back by candid, respectful persuasion that leaves parents the final say, not by presuming consent or leaning on mandates.",
+   "who": "Risk-communication expert Peter Sandman; bioethicists Lainie Friedman Ross and Mark Navin (JAMA); some doctors who work with hesitant families.",
+   "changeMind": "Evidence that softer, choice-first approaches lower vaccination and bring more outbreaks rather than rebuilding trust.",
+   "sources": [
+    {
+     "title": "Shared decision-making on vaccines is not the enemy",
+     "outlet": "STAT (First Opinion)",
+     "author": "Peter M. Sandman",
+     "date": "2026-01",
+     "url": "https://www.statnews.com/2026/01/26/shared-decision-making-vaccines/",
+     "quote": "Vaccination decisions belong to patients and their parents, guided by candid advice from health care professionals."
+    },
+    {
+     "title": "A middle-ground framework for US vaccine policy",
+     "outlet": "EurekAlert! (University of Rochester Medical Center, on a JAMA Viewpoint)",
+     "author": "Lainie Friedman Ross and Mark Navin",
+     "date": "2025-10",
+     "url": "https://www.eurekalert.org/news-releases/1100389",
+     "quote": "Mandates were intended to be one tool among many, not a substitute for robust communication and public education"
+    }
+   ]
+  },
+  {
+   "id": "fewer-shots-more-choice",
+   "name": "Fewer shots, more choice",
+   "short": "Fewer shots",
+   "summary": "The US recommends more shots than any peer nation, so a slimmer schedule like Denmark's, with more left to parents and doctors, would rebuild trust while still protecting children from the most serious diseases.",
+   "who": "HHS Secretary Robert F. Kennedy Jr. and CDC leadership, President Trump's August 2026 executive order, and the MAHA movement. A federal judge blocked the January 2026 schedule cut in March 2026.",
+   "changeMind": "Rigorous US data showing that dropping routine shots such as hepatitis B at birth leads to more infections, hospital stays or deaths in children.",
+   "sources": [
+    {
+     "title": "CDC Acts on Presidential Memorandum to Update Childhood Immunization Schedule",
+     "outlet": "CDC",
+     "author": "",
+     "date": "2026-01",
+     "url": "https://www.cdc.gov/media/releases/2026/2026-cdc-acts-on-presidential-memorandum-to-update-childhood-immunization-schedule.html",
+     "quote": "This framework empowers parents and physicians to make individualized decisions based on risk."
+    },
+    {
+     "title": "Delivering Gold Standard Childhood Vaccine Recommendations for Americans",
+     "outlet": "The White House",
+     "author": "",
+     "date": "2026-08",
+     "url": "https://www.whitehouse.gov/presidential-actions/2026/08/delivering-gold-standard-childhood-vaccine-recommendations-for-americans/",
+     "quote": "Federal programs and funding should support maximal parental choice over childhood vaccines."
+    }
+   ]
+  },
+  {
+   "id": "end-mandates",
+   "name": "End mandates, parents decide",
+   "short": "Parents decide",
+   "summary": "Vaccines should stay available and covered, but no child should have to get them to attend school, because parents, not the government, should decide what goes into their children's bodies.",
+   "who": "Florida Surgeon General Joseph Ladapo and Florida's Department of Health (now moving to drop four vaccines from school-entry rules); Heritage Foundation's Corey DeAngelis; medical-freedom and parental-rights groups.",
+   "changeMind": "Clear evidence that ending school requirements drives coverage down and causes outbreaks that harm children in those schools.",
+   "sources": [
+    {
+     "title": "Parents, Not Bureaucrats, Should Call the Shots",
+     "outlet": "The Heritage Foundation",
+     "author": "Corey DeAngelis",
+     "date": "2026-08",
+     "url": "https://www.heritage.org/node/25160416",
+     "quote": "Parents, not bureaucrats, should decide what goes into their children's bodies."
+    },
+    {
+     "title": "Florida Department of Health Holds Public Hearing on Proposed Revisions to School Immunization Rule",
+     "outlet": "Florida Department of Health",
+     "author": "",
+     "date": "2026-10",
+     "url": "https://www.floridahealth.gov/2026/10/08/florida-department-of-health-holds-public-hearing-on-proposed-revisions-to-school-immunization-rule/",
+     "quote": "Parents know their children best, and they should be the ultimate decision-makers about their children's health"
+    }
+   ]
+  }
+ ],
+ "cruxes": [
+  {
+   "question": "Are school shot rules needed to keep vaccination high?",
+   "left": "Yes, they're essential",
+   "right": "No, trust does it",
+   "why": "Florida and the White House are pushing states to loosen school rules just as measles cases hit a 35-year high.",
+   "positions": {
+    "keep-full-schedule": "left",
+    "persuade-not-pressure": "mid",
+    "fewer-shots-more-choice": "right",
+    "end-mandates": "right"
+   }
+  },
+  {
+   "question": "Should every newborn get the hepatitis B shot at birth?",
+   "left": "Yes, every baby",
+   "right": "Let parents decide",
+   "why": "The birth dose protects babies whose mother's infection was missed. Kennedy's advisers voted in 2025 to stop recommending it for every newborn; a court set that vote aside in 2026.",
+   "positions": {
+    "keep-full-schedule": "left",
+    "persuade-not-pressure": "mid",
+    "fewer-shots-more-choice": "right",
+    "end-mandates": "right"
+   }
+  },
+  {
+   "question": "Is Denmark's shorter schedule a good model for the US?",
+   "left": "No, US is different",
+   "right": "Yes, follow Denmark",
+   "why": "HHS pointed to Denmark when it cut the routine childhood list from 17 diseases to 11 in January 2026.",
+   "positions": {
+    "keep-full-schedule": "left",
+    "persuade-not-pressure": "left",
+    "fewer-shots-more-choice": "right",
+    "end-mandates": "mid"
+   }
+  },
+  {
+   "question": "Does a firm doctor's 'your child needs this' build trust or break it?",
+   "left": "Clear advice builds trust",
+   "right": "Pressure breeds distrust",
+   "why": "Both sides say they want to rebuild trust, but they disagree on whether strong defaults or more choice gets there.",
+   "positions": {
+    "keep-full-schedule": "left",
+    "persuade-not-pressure": "right",
+    "fewer-shots-more-choice": "right",
+    "end-mandates": "right"
+   }
+  }
+ ],
+ "wording": {
+  "assumes": null,
+  "leansAwayFrom": []
+ }
+}

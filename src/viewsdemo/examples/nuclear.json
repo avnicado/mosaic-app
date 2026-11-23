@@ -1,0 +1,238 @@
+{
+ "question": "Is nuclear power too risky to help fight climate change?",
+ "headline": "The evidence settles that nuclear power is very low-carbon and among the safest sources of energy. The real argument is whether new reactors can be built fast and cheaply enough to beat wind, solar and batteries, and what to do with the waste.",
+ "settled": [
+  {
+   "text": "Over its whole life, from mining to dismantling, nuclear power gives off about as little greenhouse gas per unit of electricity as wind, and far less than coal or gas.",
+   "sources": [
+    {
+     "title": "Nuclear Energy Carbon Emissions Lowest Among Electricity Sources, UN Reports",
+     "outlet": "Earth.Org",
+     "author": "Olivia Lai",
+     "date": "2021-11",
+     "url": "https://earth.org/nuclear-energy-carbon-emissions-lowest-among-electricity-sources-un-reports/",
+     "quote": "producing within the range of 5.1-6.4g of carbon dioxide equivalent per kWh of generation"
+    },
+    {
+     "title": "Nuclear Energy",
+     "outlet": "Our World in Data",
+     "author": "Hannah Ritchie, Pablo Rosado",
+     "date": "2020",
+     "url": "https://ourworldindata.org/nuclear-energy",
+     "quote": "Nuclear energy and renewable technologies typically emit very little CO2 per unit of energy production"
+    }
+   ]
+  },
+  {
+   "text": "Counting accidents (including Chernobyl and Fukushima) and air pollution, nuclear causes about as few deaths per unit of electricity as wind and solar, and hundreds of times fewer than coal.",
+   "sources": [
+    {
+     "title": "What are the safest and cleanest sources of energy?",
+     "outlet": "Our World in Data",
+     "author": "Hannah Ritchie",
+     "date": "2020",
+     "url": "https://ourworldindata.org/safest-sources-of-energy",
+     "quote": "while nuclear and modern renewable energy sources are vastly safer and cleaner."
+    }
+   ]
+  },
+  {
+   "text": "Recent large reactors in the West have run years late and far over budget: Georgia's Vogtle expansion opened seven years late at about $36.8 billion, against a planned $14 billion.",
+   "sources": [
+    {
+     "title": "Two Years After Completion, Plant Vogtle Still Looms Over the Nuclear Debate",
+     "outlet": "Inside Climate News",
+     "author": "Ryan Krugman",
+     "date": "2026-05",
+     "url": "https://insideclimatenews.org/news/10052026/plant-vogtle-nuclear-debate-two-years-after-completion/",
+     "quote": "The project was ultimately completed in 2024—seven years behind schedule—at a final cost of $36.8 billion"
+    },
+    {
+     "title": "The Path to a New Era for Nuclear Energy: Executive summary",
+     "outlet": "International Energy Agency",
+     "author": "",
+     "date": "2025",
+     "url": "https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary",
+     "quote": "has struggled in recent years with project delays and cost overruns for all new large-scale reactors"
+    }
+   ]
+  },
+  {
+   "text": "No country yet runs a permanent underground store for used nuclear fuel; Finland licensed the world's first in October 2026, but it has not opened yet.",
+   "sources": [
+    {
+     "title": "Finland nearing opening of world’s first permanent nuclear waste repository",
+     "outlet": "Al Jazeera",
+     "author": "Al Jazeera Staff and AFP",
+     "date": "2026-10",
+     "url": "https://aljazeera.com/news/2026/10/23/finland-nearing-opening-of-worlds-first-permanent-nuclear-waste-repository",
+     "quote": "Finland has granted an operating licence for the world’s first permanent underground repository for spent nuclear fuel."
+    }
+   ]
+  }
+ ],
+ "views": [
+  {
+   "id": "build-more",
+   "name": "Build much more nuclear",
+   "short": "Build more",
+   "summary": "Nuclear is a proven, clean, round-the-clock power source, and the world should build a lot more of it alongside renewables to cut emissions at the scale needed.",
+   "who": "Clean Air Task Force, Breakthrough Institute, International Energy Agency; governments that signed the COP28 pledge to triple nuclear capacity by 2050",
+   "changeMind": "Standardised new reactors (including small modular ones) keeping on running late and over budget even after building several of the same design would undercut this view.",
+   "sources": [
+    {
+     "title": "Advanced Nuclear Energy",
+     "outlet": "Clean Air Task Force",
+     "author": "",
+     "date": "2026",
+     "url": "https://www.catf.us/advanced-nuclear-energy/",
+     "quote": "Nuclear energy is a proven, clean energy source that can operate 24/7, providing reliable baseload power."
+    },
+    {
+     "title": "The Path to a New Era for Nuclear Energy: Executive summary",
+     "outlet": "International Energy Agency",
+     "author": "",
+     "date": "2025",
+     "url": "https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary",
+     "quote": "Nuclear can provide services and scale that are difficult to replicate with other low-emissions technologies."
+    }
+   ]
+  },
+  {
+   "id": "keep-existing",
+   "name": "Keep plants, cautious on new",
+   "short": "Keep existing",
+   "summary": "Existing reactors with good safety records are valuable low-carbon power and should not be closed early only to be replaced by gas, but new designs need tougher safety rules and are overhyped on cost.",
+   "who": "Union of Concerned Scientists (e.g. Edwin Lyman, Steve Clemmer)",
+   "changeMind": "Clear proof that new reactor designs are as safe and secure as promised and can be built on budget would move them toward building more; cheap, firm renewable replacements would make them less worried about closures.",
+   "sources": [
+    {
+     "title": "Nuclear Power & Global Warming",
+     "outlet": "Union of Concerned Scientists",
+     "author": "",
+     "date": "2018-11",
+     "url": "https://www.ucs.org/resources/nuclear-power-global-warming",
+     "quote": "Many are being replaced in large part by natural gas."
+    },
+    {
+     "title": "Five Things the \"Nuclear Bros\" Don't Want You to Know About Small Modular Reactors",
+     "outlet": "Union of Concerned Scientists",
+     "author": "Edwin Lyman",
+     "date": "2024-04",
+     "url": "https://blog.ucs.org/edwin-lyman/five-things-the-nuclear-bros-dont-want-you-to-know-about-small-modular-reactors/",
+     "quote": "SMRs may have a role to play in our energy future, but only if they are sufficiently safe and secure."
+    }
+   ]
+  },
+  {
+   "id": "renewables-first",
+   "name": "Renewables first, nuclear too slow",
+   "short": "Renewables first",
+   "summary": "The problem with new nuclear is not mainly danger but that it is too slow and too expensive, so every dollar cuts more carbon, sooner, if spent on wind, solar, storage and efficiency.",
+   "who": "Amory Lovins (RMI co-founder), Mark Z. Jacobson (Stanford), Australia's Climate Council, many energy economists",
+   "changeMind": "New reactors being built in a few years at costs that beat renewables plus storage, or renewable-heavy grids failing to stay reliable, would change this view.",
+   "sources": [
+    {
+     "title": "Nuclear power is failing, and AI can't rescue it",
+     "outlet": "Utility Dive (opinion)",
+     "author": "Amory B. Lovins",
+     "date": "2025-09",
+     "url": "https://utilitydive.com/news/nuclear-power-smr-ai-amory-lovins/758660",
+     "quote": "nuclear displaces less fossil fuel per dollar (or year), making climate change worse."
+    },
+    {
+     "title": "Parliamentary inquiry finds nuclear is high risk, zero reward",
+     "outlet": "Climate Council",
+     "author": "",
+     "date": "2025-02",
+     "url": "https://www.climatecouncil.org.au/resources/parliamentary-inquiry-nuclear-high-risk-zero-reward",
+     "quote": "Nuclear reactors are wildly expensive and painfully slow."
+    }
+   ]
+  },
+  {
+   "id": "phase-out",
+   "name": "Phase nuclear out",
+   "short": "Phase out",
+   "summary": "Nuclear power's accident risk, long-lived waste and vulnerability in war are not worth it, so we should stop building reactors, close existing ones and decarbonise with renewables and efficiency.",
+   "who": "European Environmental Bureau, Greenpeace, Food & Water Watch, Friends of the Earth, Beyond Nuclear; the German government's 2023 exit",
+   "changeMind": "Permanent waste stores working safely for years and reactors proving secure even in war zones would weaken the core of this view.",
+   "sources": [
+    {
+     "title": "From Chornobyl to Zaporizhzhia: We Must Choose a Future Without Nuclear",
+     "outlet": "European Environmental Bureau",
+     "author": "Ruby Silk",
+     "date": "2026-04",
+     "url": "https://meta.eeb.org/2026/04/24/from-chornobyl-to-zaporizhzhia-we-must-choose-a-future-without-nuclear/",
+     "quote": "Every reactor produces materials that remain hazardous for tens of thousands of years."
+    },
+    {
+     "title": "5 Reasons Why Expanding Nuclear is a Terrible Idea",
+     "outlet": "Food & Water Watch",
+     "author": "Natalie Balbuena Chavez, Mia DiFelice",
+     "date": "2025-09",
+     "url": "https://www.foodandwaterwatch.org/2025/09/19/5-reasons-why-expanding-nuclear-is-a-terrible-idea/",
+     "quote": "halt expansion (including SMRs), and start decommissioning existing power plants"
+    }
+   ]
+  }
+ ],
+ "cruxes": [
+  {
+   "question": "Can new reactors be built fast and cheap enough to matter?",
+   "left": "Yes, with repeat designs",
+   "right": "No, too slow, too costly",
+   "why": "If new plants keep taking 10+ years and costing double, the same money could cut more carbon sooner elsewhere.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "right",
+    "phase-out": "right"
+   }
+  },
+  {
+   "question": "Can wind, solar and batteries alone keep the lights on?",
+   "left": "No, need steady power",
+   "right": "Yes, with storage",
+   "why": "If renewables plus storage can run a whole grid reliably, nuclear's always-on power is less needed.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "right",
+    "phase-out": "right"
+   }
+  },
+  {
+   "question": "Is nuclear waste a solved problem?",
+   "left": "Yes, it can be buried safely",
+   "right": "No, still unsolved",
+   "why": "Used fuel stays dangerous for thousands of years, and the first permanent store has only just been licensed.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "mid",
+    "phase-out": "right"
+   }
+  },
+  {
+   "question": "If a working reactor shuts, does pollution go up?",
+   "left": "Yes, gas fills in",
+   "right": "No, renewables fill in",
+   "why": "This decides whether closing existing plants early helps or hurts the climate.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "left",
+    "renewables-first": "mid",
+    "phase-out": "right"
+   }
+  }
+ ],
+ "wording": {
+  "assumes": "It assumes danger is the main thing deciding nuclear's climate role, when the evidence shows it is among the safest sources and much of the real debate is about cost and speed.",
+  "leansAwayFrom": [
+   "build-more",
+   "keep-existing",
+   "renewables-first"
+  ]
+ }
+}
