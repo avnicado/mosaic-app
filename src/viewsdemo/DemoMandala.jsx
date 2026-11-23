@@ -72,7 +72,7 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
             {cruxes.map((c, k) => {
               const pos = c.positions[v.id] || 'mid';
               const fill = pos === 'mid' ? `url(#vd-hatch-${i})` : col;
-              const op = pos === 'left' ? 0.92 : pos === 'right' ? 0.17 : 1;
+              const op = pos === 'left' ? 0.92 : pos === 'right' ? 0.26 : 1;
               return (
                 <path key={k} className={`vd-mm-cell ${ring != null && ring !== k ? 'rdim' : ''} ${ring === k && on ? 'here' : ''}`}
                   d={sector(HUB + k * ringW, HUB + (k + 1) * ringW, a0, a1)} fill={fill} fillOpacity={op}
