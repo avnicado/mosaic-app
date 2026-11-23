@@ -3,12 +3,15 @@
 // ring, and each view's case. It replaces the older chart (ViewsPanel.jsx,
 // kept for now) in the same spot under the question.
 //
-// For a new wording it maps the question by itself once the reading is done;
-// for an older thread there's a button. A ready example opens at once.
-import React, { useEffect } from 'react';
+// It never maps a question by itself: you press the button. A live test found
+// it mapped a four-way controversy onto questions with no public sides at all
+// ("How tall is Mount Everest?", "Is taste learnable?"), and most threads here
+// open with "teach me…" rather than a contested question. A ready example
+// still opens at once. See docs/views-review-2026-11-23.md.
+import React from 'react';
 import { isOwner } from '../../session.js';
 import { useBusy } from '../../data/hooks.js';
-import { currentViewsMap, wantsViewsMap, requestViewsMap, setViewsMapOpen } from '../../data/views.js';
+import { currentViewsMap, requestViewsMap, setViewsMapOpen } from '../../data/views.js';
 import { Result, Working } from '../../viewsdemo/ViewsPage.jsx';
 import '../../viewsdemo/viewsdemo.css';
 import './views.css';
@@ -18,13 +21,6 @@ export default function ThreadViews({ thread }) {
   const busy = useBusy(thread.id);
   const v = currentViewsMap(thread);
   const working = busy.viewsMap;
-  const otherWork = busy.reading || busy.judging || (busy.filling && busy.filling.size > 0);
-
-  // The automatic check: a new wording, once, after the reading and the feed.
-  useEffect(() => {
-    if (!admin || working || otherWork) return;
-    if (wantsViewsMap(thread) && thread.reading) requestViewsMap(thread.id);
-  }, [admin, thread.id, thread.articulations?.length, !!thread.reading, !!otherWork, !!working]);
 
   if (!admin || thread.status === 'closed') return null;
   const tag = <span className="vp-admin" title="Only the admin sees this for now">admin</span>;

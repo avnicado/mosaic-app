@@ -71,6 +71,12 @@ const shortWho = (who) => {
   const w = String(who || '');
   return w.length > 110 ? `${w.slice(0, 107).replace(/[\s,;]+\S*$/, '')}…` : w;
 };
+// Who holds a view. On a live map this is the model's claim and nothing checks
+// it: it named bodies that don't exist and put positions in real people's
+// mouths. So it is shown only for a view that stands on at least one source,
+// and it is labelled as unchecked. The ready examples were checked by hand.
+const whoOf = (map, v) => (map.live && !(v.reasons || []).length ? '' : v.who || '');
+const whoLabel = (map) => (map.live ? 'Said to hold it' : 'Held by');
 const countSources = (v) => new Set([...(v.reasons || []).flatMap((r) => r.sources), ...(v.sources || [])].map((s) => s.url)).size;
 
 function useWide(query = '(min-width: 760px)') {
@@ -130,6 +136,7 @@ function ViewsList({ map, focus, onFocus }) {
     <ul className="vd-vl">
       {map.views.map((v) => {
         const n = countSources(v);
+        const who = whoOf(map, v);
         return (
           <li key={v.id}>
             <button type="button" className={`vd-vl-row ${focus === v.id ? 'on' : ''}`} style={{ '--c': colorOf(map, v.id) }}
@@ -138,7 +145,7 @@ function ViewsList({ map, focus, onFocus }) {
               <span className="vd-vl-body">
                 <span className="vd-vl-name">{v.name}</span>
                 <span className="vd-vl-sum">{v.summary}</span>
-                {v.who && <span className="vd-vl-who"><b>Held by</b> {shortWho(v.who)}</span>}
+                {who && <span className="vd-vl-who"><b>{whoLabel(map)}</b> {shortWho(who)}</span>}
                 <span className="vd-vl-more">{n > 0 ? `Its reasons and ${n} source${n === 1 ? '' : 's'}` : 'Its case'} →</span>
               </span>
             </button>
@@ -158,7 +165,11 @@ function CaseBody({ map, view, onRing }) {
   return (
     <>
       <p className="vd-card-sum">{view.summary}</p>
-      {view.who && <p className="vd-card-who"><span>Held by</span> {view.who}</p>}
+      {whoOf(map, view) && (
+        <p className="vd-card-who"><span>{whoLabel(map)}</span> {whoOf(map, view)}
+          {map.live && <span className="vd-muted"> — named by the model, not checked.</span>}
+        </p>
+      )}
       <p className="vd-card-read">Its answers</p>
       <ol className="vd-its">
         {map.cruxes.map((c, k) => {
@@ -464,7 +475,9 @@ export function Result({ map, embedded = false }) {
     <div className="vd-result">
       <div className="vd-stage">
         <div className="vd-stage-head">
-          <p className="vd-kicker">{map.live ? 'Mapped just now' : 'Ready example'} · {map.views.length} views · {map.cruxes.length} questions they split on{sources > 0 ? ` · ${sources} sources, each opened and checked` : ''}</p>
+          <p className="vd-kicker">{map.live ? 'Mapped just now' : 'Ready example'} · {map.views.length} views · {map.cruxes.length} questions they split on{sources > 0
+            ? (map.live ? ` · ${sources} sources found by search, each opened to check it loads` : ` · ${sources} sources, each opened and read`)
+            : ''}</p>
           {!embedded && <h1 className="vd-q">{map.question}</h1>}
           {map.headline && <p className="vd-headline">{map.headline}</p>}
         </div>

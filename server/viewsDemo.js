@@ -24,6 +24,7 @@ export const DEMO_PER_DAY = Number(process.env.VIEWS_DEMO_PER_DAY || 60);
 export const DEMO_PER_HOUR_PER_IP = Number(process.env.VIEWS_DEMO_PER_HOUR || 8);
 const HASH = 'm2:views-demo';
 const CACHE_TTL_S = 90 * 24 * 3600;
+const THIN_TTL_S = 10 * 60;
 const DEADLINE_MS = 55_000; // the function may run 60s (vercel.json)
 const fail = (status, type, message) => Object.assign(new Error(message), { status, type });
 const norm = (s) => String(s || '').toLowerCase().replace(/[?!.\s]+/g, ' ').trim();
@@ -56,6 +57,26 @@ const BAD_HOST = /(^|\.)(pinterest|facebook|instagram|tiktok|x|twitter|quora|ama
 // A listing, map or directory page, not an argument: "…, Springfield, IL 62704 - MapQuest".
 const LISTING_TITLE = /\b\d{5}(-\d{4})?\b.*\b(US|USA)\b|\b(MapQuest|Yelp|Yellow Pages|Phone Number)\b/i;
 const usable = (r) => r?.url && safeResultUrl(r.url) && !BAD_HOST.test(hostOf(r.url)) && (r.title || '').trim().length >= 8 && !LISTING_TITLE.test(r.title || '') && (r.snippet || '').trim().length >= 40;
+
+// A page that debunks a claim states that claim before refuting it, and a
+// search snippet carries both. The model read such a sentence as the page's own
+// argument and cited National Geographic and TIME as arguing the moon landing
+// was staged. So: when a page reads as a refutation, a pick from it is kept
+// only if what it is said to argue reads as a refutation too. This drops some
+// good mainstream sources as well; a wrong attribution costs more.
+// Two lists, not one. The page side is broad, because on a settled question
+// the topic words themselves ("hoax", "conspiracy") mark a page as being about
+// the claim rather than for it. The line side must be narrow: those same topic
+// words appear in a line that states the claim ("Hoax believers say the
+// reflections come from studio lights"), and a shared list would wave it past.
+const PAGE_REFUTES = /\b(debunk\w*|fact[- ]check\w*|conspiracy|conspiracies|hoax\w*|no evidence|false claim\w*|myth\w*|misleading|not true|disproven)\b/i;
+const SAYS_REFUTES = /\b(debunk\w*|fact[- ]check\w*|no evidence|false claim\w*|not true|disproven|is a myth|was never)\b/i;
+export function reportedNotArgued(result, says) {
+  let path = '';
+  try { path = new URL(result?.url || '').pathname.replace(/[-_/]+/g, ' '); } catch {}
+  const page = `${result?.title || ''} ${result?.snippet || ''} ${path}`;
+  return PAGE_REFUTES.test(page) && !SAYS_REFUTES.test(String(says || ''));
+}
 
 // "The page states that X" → "X": a reason is the view's own point, not a note about a page.
 export function tidyReason(v) {
@@ -103,7 +124,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v4:${hashString(norm(q))}`;
+  const key = `v5:${hashString(norm(q))}`; // v5: the picking guards changed what a map may contain
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
@@ -130,9 +151,15 @@ export async function mapLive(question, {
   const results = all.slice(0, groups.length);
   groups.forEach((g, i) => { g.results = results[i]; g.ref.reasons = []; g.ref.sources = []; });
   rings.forEach((g, i) => { g.results = all[groups.length + i]; g.crux.reading = []; });
+  // A quote counts only when every piece of it is in the result's own text. An
+  // elided quote ("a … b") used to pass on its first 60 characters alone, which
+  // let a made-up second half through.
   const quoteOf = (p, r) => {
     const quote = String(p?.quote || '').replace(/\s+/g, ' ').trim();
-    return quote && String(r.snippet || '').replace(/\s+/g, ' ').includes(quote.slice(0, 60)) ? quote.slice(0, 200) : '';
+    if (!quote) return '';
+    const hay = String(r.snippet || '').replace(/\s+/g, ' ');
+    const parts = quote.split(/\s*(?:\.\.\.|…)\s*/).map((s) => s.trim()).filter((s) => s.length >= 8);
+    return parts.length && parts.every((s) => hay.includes(s)) ? quote.slice(0, 200) : '';
   };
   const srcOf = (p, r) => ({
     title: String(r.title).slice(0, 200), url: r.url, outlet: String(p?.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
@@ -150,6 +177,7 @@ export async function mapLive(question, {
         if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
         const src = srcOf(p, r);
         const text = tidyReason(p.reason);
+        if (reportedNotArgued(r, text || '')) continue;
         g.ref.reasons.push({ text: text || (src.quote ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
         picked.push(src);
       }
@@ -167,7 +195,7 @@ export async function mapLive(question, {
         const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
         if (!g || !r || !side || g.crux.reading.some((x) => x.url === r.url) || g.crux.reading.filter((x) => x.side === side).length >= 2) continue;
         const says = tidyReason(p.says);
-        if (!says) continue;
+        if (!says || reportedNotArgued(r, says)) continue;
         const src = { ...srcOf(p, r), side, says };
         g.crux.reading.push(src);
         picked.push(src);
@@ -176,31 +204,41 @@ export async function mapLive(question, {
       console.warn('[views-demo] picking ring sources failed:', e.message);
     }
   };
-  await Promise.all([pickViews(), pickRings()]);
+  // One after the other, not side by side: run together they collided on the
+  // Groq rate limit and one of the two was regularly lost, which left a map
+  // with no sources at all.
+  await pickViews();
+  await pickRings();
   // Every picked page must open.
   const ok = await Promise.all(picked.map((s) => check(s.url)));
   const dead = new Set(picked.filter((_, i) => !ok[i]).map((s) => s.url));
   for (const g of groups) g.ref.reasons = g.ref.reasons.filter((x) => !dead.has(x.sources[0].url));
   for (const g of rings) g.crux.reading = g.crux.reading.filter((x) => !dead.has(x.url));
 
-  // Views must stand on real pieces: keep only sourced views, when enough are.
-  // If the sourced views alone no longer disagree on anything, keep them all.
+  // Sourcing no longer decides which views survive. It used to: unsourced views
+  // were dropped whenever two sourced ones remained and still split. That is
+  // unsafe now that a picked page can be refused by the guard above. On a
+  // settled question the mainstream view's sources are the ones most often
+  // refused (a debunking page cited for it reads as a refutation), so the rule
+  // could delete the consensus slice and leave only the denial views. An
+  // unsourced view instead loses its "held by" line in the UI, and a map with
+  // no source at all is thin.
   const cruxesFor = (vs) => {
     const ids = new Set(vs.map((v) => v.id));
     return map.cruxes
       .map((c) => ({ ...c, positions: Object.fromEntries(Object.entries(c.positions).filter(([id]) => ids.has(id))) }))
       .filter((c) => Object.values(c.positions).includes('left') && Object.values(c.positions).includes('right'));
   };
-  let views = map.views;
-  const sourced = views.filter((v) => v.reasons.length);
-  if (sourced.length >= 2 && cruxesFor(sourced).length) views = sourced;
-  views = views.map(({ search: _s, ...v }) => v);
+  const views = map.views.map(({ search: _s, ...v }) => v);
   const keep = new Set(views.map((v) => v.id));
   const cruxes = cruxesFor(views);
 
   let status = map.status;
   let thin = false;
-  if (status === 'mapped' && (views.length < 2 || !cruxes.length)) { status = 'none'; thin = true; }
+  // A map with no source anywhere is the model's word and nothing else, so it
+  // is not worth showing. It happened whenever both picking calls were lost.
+  const anySource = views.some((v) => v.reasons.length) || cruxes.some((c) => c.reading.length);
+  if (status === 'mapped' && (views.length < 2 || !cruxes.length || !anySource)) { status = 'none'; thin = true; }
   // The headline counts views; make it match the views that survived sourcing.
   const WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five'];
   const headline = String(map.headline || '').replace(/^(One|Two|Three|Four|Five|\d) main views/i, `${WORDS[views.length] || views.length} main views`);
@@ -210,6 +248,10 @@ export async function mapLive(question, {
     wording: { ...map.wording, leansAwayFrom: map.wording.leansAwayFrom.filter((id) => keep.has(id)) },
     question: q, at: now, live: true, ...(thin ? { thin: true } : {}),
   };
-  if (!thin) await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: CACHE_TTL_S }).catch((e) => console.warn('[views-demo] cache write failed:', e.message));
+  // A thin verdict is often a passing failure (a lost model call), so it is
+  // held only briefly: long enough that a second click costs nothing, short
+  // enough that trying again later still runs.
+  await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: thin ? THIN_TTL_S : CACHE_TTL_S })
+    .catch((e) => console.warn('[views-demo] cache write failed:', e.message));
   return out;
 }

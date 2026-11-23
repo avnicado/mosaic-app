@@ -71,12 +71,6 @@ export function currentViewsMap(thread) {
   return v;
 }
 
-export function wantsViewsMap(thread) {
-  if (!thread || thread.status === 'closed') return false;
-  const w = lastWording(thread);
-  return !!(w && (w.at || 0) >= VIEWS_SINCE && !currentViewsMap(thread));
-}
-
 export async function requestViewsMap(threadId) {
   const t = R.getThread(threadId);
   if (!t || getBusy(threadId).viewsMap) return;
