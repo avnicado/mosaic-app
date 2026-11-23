@@ -6,6 +6,7 @@ import '../ui/thread/thread.css';
 import { setSessionInfo } from '../session.js';
 import * as R from '../data/record.js';
 import ThreadViews from '../ui/views/ThreadViews.jsx';
+import { useRecord } from '../data/hooks.js';
 import { normalizeMap } from '../engine/viewsDemo.js';
 
 const realFetch = window.fetch.bind(window);
@@ -41,8 +42,7 @@ const map = normalizeMap({ status: 'mapped', question: q, live: true, headline: 
 map.live = true;
 R.patchThread(t.id, { reading: {}, viewsMap: { text: q, status: 'mapped', map, open: true, at: Date.now() } });
 function App() {
-  const [th, setTh] = React.useState(R.getThread(t.id));
-  React.useEffect(() => { const i = setInterval(() => setTh(R.getThread(t.id)), 300); return () => clearInterval(i); }, []);
+  const th = useRecord(() => R.getThread(t.id), []);
   return (
     <div className="app"><nav className="sidebar"><span className="brand">Mosaic</span></nav>
       <div className="main"><div className="page wide th-page"><div className="th-layout">
