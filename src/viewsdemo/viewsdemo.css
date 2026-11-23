@@ -458,3 +458,9 @@
 .vd-embed .vd-vl-row { background: var(--vd-panel); }
 .vd-embed .vd-mm-svg { max-height: none; }
 .vd-embed .vd-detail.sheet { max-width: 680px; margin: 0 auto; }
+
+/* Items about a ring's question, when it has too few checked articles. */
+.vd-ritems { border-top: 1px solid var(--vd-rule); margin-top: 8px; padding-top: 8px; }
+.vd-ritem { padding: 3px 0 4px; }
+.vd-ritem-type { display: inline-block; margin-right: 6px; padding: 0 5px; font-family: var(--vd-mono, monospace); font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; border: 1px solid var(--vd-rule); color: var(--vd-soft); vertical-align: 1px; }
+.vd-ritem-snip { margin: 2px 0 0; font-size: 13px; line-height: 1.4; color: var(--vd-soft); }

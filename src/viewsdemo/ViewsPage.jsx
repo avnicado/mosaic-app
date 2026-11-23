@@ -281,8 +281,12 @@ function ChartCaption() {
 
 // One ring's question: the two answers, the views that give each, and real
 // articles arguing each answer. With a view picked, its answer comes first.
-function RingDetail({ map, k, view, onClose, onRing, onView }) {
+function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   const c = map.cruxes[k];
+  // Too few checked articles on this question: look for more items about it.
+  const few = (c.reading || []).length < 2;
+  useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
+  const filling = few && !!onItems;
   const M = map.cruxes.length;
   const mine = view ? (c.positions[view.id] || 'mid') : null;
   const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]];
@@ -322,7 +326,7 @@ function RingDetail({ map, k, view, onClose, onRing, onView }) {
                   </li>
                 ))}
               </ul>
-            ) : <p className="vd-muted">No checked article on this side yet.</p>}
+            ) : filling ? null : <p className="vd-muted">No checked article on this side yet.</p>}
           </section>
         );
       })}
@@ -331,6 +335,7 @@ function RingDetail({ map, k, view, onClose, onRing, onView }) {
           <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
         ))}</p>
       )}
+      {filling && <RingItems items={items} hasReading={(c.reading || []).length > 0} onRetry={() => onItems(k, { retry: true })} />}
       <div className="vd-detail-nav">
         <button type="button" onClick={() => onRing((k - 1 + M) % M)}>← Question {((k - 1 + M) % M) + 1}</button>
         <button type="button" onClick={() => onRing((k + 1) % M)}>Question {((k + 1) % M) + 1} →</button>
@@ -339,11 +344,38 @@ function RingDetail({ map, k, view, onClose, onRing, onView }) {
   );
 }
 
+// Items about a ring's question, found by a web search when it has too few
+// checked articles: each link opened, labelled by what it is (article, video…).
+function RingItems({ items, hasReading, onRetry }) {
+  const list = items?.items || [];
+  return (
+    <section className="vd-ritems" aria-live="polite">
+      <p className="vd-side-h">{hasReading ? 'More on this question' : 'On this question'}</p>
+      {!items || items.loading ? <p className="vd-muted">Finding items on this question…</p>
+        : list.length ? (
+          <ul className="vd-read">
+            {list.map((it) => (
+              <li key={it.url} className="vd-src vd-ritem">
+                <span className="vd-ritem-type">{it.label}</span>
+                <a href={it.url} target="_blank" rel="noopener noreferrer">{it.title || hostOf(it.url)}<span aria-hidden="true"> ↗</span></a>
+                <span className="vd-src-meta">{it.outlet || hostOf(it.url)}</span>
+                {it.snippet && <p className="vd-ritem-snip">{it.snippet}</p>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="vd-muted">{items.error ? 'Couldn’t look for items just now.' : 'Nothing good turned up for this question.'}{' '}
+            <button type="button" className="vd-linkish" onClick={onRetry}>Try again</button></p>
+        )}
+    </section>
+  );
+}
+
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(n, Math.max(lo, hi)));
 
 // A ring's articles, popping out of the tile that was tapped, with a pointer
 // back to it. Beside the tile on a laptop, just under it on a phone.
-function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
+function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView, items, onItems }) {
   const boxRef = useRef(null);
   const inRef = useRef(null);
   const [pos, setPos] = useState(null);
@@ -412,7 +444,7 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
       <div ref={boxRef} className={`vd-pop ${pos?.side || ''}`} style={style} role="dialog" tabIndex={-1}
         aria-label={`Question ${k + 1}: ${c.question}`} key={`${k}-${view?.id || ''}`}>
         <div ref={inRef} className="vd-pop-in vd-detail vd-ring">
-          <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} />
+          <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} items={items} onItems={onItems} />
         </div>
       </div>
     </>
@@ -421,7 +453,9 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
 
 // embedded: shown inside the app on a thread's page, under the thread's own
 // question, so it skips repeating the question and keeps the one-column layout.
-export function Result({ map, embedded = false }) {
+// ringItems(k) / onRingItems(k): items about a ring's question with too few
+// checked articles (on a thread's page; the standalone page has none).
+export function Result({ map, embedded = false, ringItems = null, onRingItems = null }) {
   const [focus, setFocus] = useState(null);
   const [ring, setRing] = useState(null);
   const [show, setShow] = useState(null); // 'view' or 'ring': what the panel or sheet shows
@@ -429,7 +463,10 @@ export function Result({ map, embedded = false }) {
   const wideScreen = useWide();
   const wide = embedded ? false : wideScreen;
   const chartRef = useRef(null);
-  useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [map]);
+  // Start fresh for another map, not when the same map is saved again (a
+  // thread re-reads it whenever anything on the thread changes).
+  const mapKey = `${map.question}|${map.views.map((v) => v.id).join(',')}|${map.cruxes.map((c) => c.question).join('|')}`;
+  useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [mapKey]);
   const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
   const ringOpen = show === 'ring' && ring != null;
   const viewOpen = show === 'view' && !!focus;
@@ -495,7 +532,8 @@ export function Result({ map, embedded = false }) {
             mark={ringOpen && fv ? anchorPoint(map, fv.id, ring) : null} />
           <ChartCaption />
           {ringOpen && (
-            <RingPop map={map} k={ring} view={fv} chartRef={chartRef} wide={wide} onClose={closeRing} onRing={pickRing} onView={pickView} />
+            <RingPop map={map} k={ring} view={fv} chartRef={chartRef} wide={wide} onClose={closeRing} onRing={pickRing} onView={pickView}
+              items={ringItems ? ringItems(ring) : null} onItems={onRingItems} />
           )}
         </div>
 

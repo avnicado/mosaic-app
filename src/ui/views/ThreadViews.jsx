@@ -8,10 +8,10 @@
 // ("How tall is Mount Everest?", "Is taste learnable?"), and most threads here
 // open with "teach me…" rather than a contested question. A ready example
 // still opens at once. See docs/views-review-2026-11-23.md.
-import React from 'react';
+import React, { useCallback } from 'react';
 import { isOwner } from '../../session.js';
 import { useBusy } from '../../data/hooks.js';
-import { currentViewsMap, requestViewsMap, setViewsMapOpen } from '../../data/views.js';
+import { currentViewsMap, requestViewsMap, setViewsMapOpen, ringItemsFor, requestRingItems } from '../../data/views.js';
 import { Result, Working } from '../../viewsdemo/ViewsPage.jsx';
 import '../../viewsdemo/viewsdemo.css';
 import './views.css';
@@ -21,6 +21,9 @@ export default function ThreadViews({ thread }) {
   const busy = useBusy(thread.id);
   const v = currentViewsMap(thread);
   const working = busy.viewsMap;
+  // A ring with too few checked articles looks for items about its question.
+  const loadRing = useCallback((k, opts) => requestRingItems(thread.id, k, opts), [thread.id]);
+  const ringItems = (k) => ringItemsFor(thread, k);
 
   if (!admin || thread.status === 'closed') return null;
   const tag = <span className="vp-admin" title="Only the admin sees this for now">admin</span>;
@@ -56,7 +59,7 @@ export default function ThreadViews({ thread }) {
         </div>
         {open && (
           <>
-            <div className="vd-embed"><Result map={v.map} embedded /></div>
+            <div className="vd-embed"><Result map={v.map} embedded ringItems={ringItems} onRingItems={loadRing} /></div>
             <div className="vp-foot">
               <span className="th-hint">{v.map.live
                 ? 'Mapped by AI from live web search. It only links pages it found and opened. It doesn’t pick a side, so read the sources themselves.'
