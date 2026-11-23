@@ -346,10 +346,17 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
       const vw = document.documentElement.clientWidth, vh = window.innerHeight;
       const W = box.offsetWidth, H = box.offsetHeight;
       if (wide) {
-        const side = p.x >= cr.left + cr.width / 2 ? 'right' : 'left';
-        const left = clamp(side === 'right' ? p.x + 14 : p.x - 14 - W, 12, vw - 12 - W);
+        // Just outside the mandala's rim, so the tile stays in view, with a
+        // line running from the tile to the pop-up's pointer.
+        const centre = new DOMPoint(0, 0).matrixTransform(m);
+        const side = p.x >= centre.x - 1 ? 'right' : 'left';
+        const rim = new DOMPoint(side === 'right' ? 140 : -140, 0).matrixTransform(m).x;
+        const left = clamp(side === 'right' ? rim + 18 : rim - 18 - W, 12, vw - 12 - W);
         const top = clamp(p.y - 60, 12, vh - 12 - H);
-        setPos({ side, left: left - cr.left, top: top - cr.top, a: clamp(p.y - top, 20, H - 20) });
+        const a = clamp(p.y - top, 22, H - 22);
+        const tipX = side === 'right' ? left - 10 : left + W + 10;
+        setPos({ side, left: left - cr.left, top: top - cr.top, a,
+          line: { x1: p.x - cr.left, y1: p.y - cr.top, x2: tipX - cr.left, y2: top + a - cr.top } });
       } else {
         const left = 12;
         setPos({ side: 'below', left: left - cr.left, top: p.y + 14 - cr.top, a: clamp(p.x - left, 22, W - 22) });
@@ -380,12 +387,19 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
   const style = { '--c': view ? colorOf(map, view.id) : 'var(--vd-ink)', '--a': `${pos?.a ?? 40}px` };
   if (pos) { style.left = pos.left; style.top = pos.top; } else { style.visibility = 'hidden'; style.left = 0; style.top = 0; }
   return (
-    <div ref={boxRef} className={`vd-pop ${pos?.side || ''}`} style={style} role="dialog" tabIndex={-1}
-      aria-label={`Question ${k + 1}: ${c.question}`} key={`${k}-${view?.id || ''}`}>
-      <div ref={inRef} className="vd-pop-in vd-detail vd-ring">
-        <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} />
+    <>
+      {pos?.line && (
+        <svg className="vd-pop-line" aria-hidden="true" style={{ '--c': style['--c'] }}>
+          <line {...pos.line} />
+        </svg>
+      )}
+      <div ref={boxRef} className={`vd-pop ${pos?.side || ''}`} style={style} role="dialog" tabIndex={-1}
+        aria-label={`Question ${k + 1}: ${c.question}`} key={`${k}-${view?.id || ''}`}>
+        <div ref={inRef} className="vd-pop-in vd-detail vd-ring">
+          <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
