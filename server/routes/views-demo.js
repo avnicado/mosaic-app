@@ -1,12 +1,14 @@
-// /api/views-demo — the public views page (/views), no sign-in.
+// /api/views-demo — maps the views on a question for the thread page. Owner only
+// for now (the standalone /views page is left out of the live site).
 //   GET            → { live } : can a typed question be mapped here right now?
 //   POST {question} → a map (server/viewsDemo.js), capped and cached.
 
-import { clientIp } from '../auth.js';
+import { clientIp, requireOwner } from '../auth.js';
 import { mapLive, liveReady } from '../viewsDemo.js';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');
+  if (!(await requireOwner(req, res))) return;
   if (req.method === 'GET') {
     res.status(200).json({ live: liveReady() });
     return;
