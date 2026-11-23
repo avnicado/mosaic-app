@@ -23,8 +23,8 @@
 }
 /* Page-wide rules (body, *) live in page.css, so this file is safe to load
    inside the app too (the views on a thread, src/ui/views/ThreadViews.jsx). */
-.vd button, .vd-embed button { font: inherit; color: inherit; cursor: pointer; }
-.vd a, .vd-embed a { color: inherit; }
+:where(.vd, .vd-embed) button { font: inherit; color: inherit; cursor: pointer; }
+:where(.vd, .vd-embed) a { color: inherit; }
 
 .vd { max-width: 1340px; margin: 0 auto; padding: 10px 16px 40px; }
 .vd-brand { font-family: var(--vd-serif); font-size: 22px; }
@@ -451,6 +451,7 @@
    one-column layout (chart, then the views and questions as tabs), whatever
    the screen width. */
 .vd-embed { color: var(--vd-ink); font-family: var(--vd-sans); font-size: 15px; line-height: 1.55; }
+.vd-embed { margin-top: 12px; }
 .vd-embed .vd-result { margin-top: 0; }
 .vd-embed .vd-stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "chart" "tabs"; }
 .vd-embed .vd-q { font-size: 24px; }
