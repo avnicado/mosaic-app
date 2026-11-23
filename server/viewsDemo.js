@@ -279,7 +279,7 @@ export async function ringSides(input, {
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
   const key = `r5:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
-  const cached = await hashGet(HASH, key).catch(() => null);
+  const cached = input?.debugCandidates ? null : await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
   }
@@ -308,6 +308,9 @@ export async function ringSides(input, {
     }
   }
   const reading = [];
+  if (input?.debugCandidates && process.env.VERCEL_ENV !== 'production') { // TEMP: see what the searches return
+    return { candidates: { a: a.map((r) => [r.url, r.title]), b: b.map((r) => [r.url, r.title]) } };
+  }
   if (results.length) {
     const out = await groqJSON({ system: `${RING_PICK_SYSTEM}\n\nNever pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick.`, prompt: ringPickPrompt([{ crux, results }]), maxTokens: 1000, deadline, llm });
     for (const p of Array.isArray(out?.picks) ? out.picks : []) {
