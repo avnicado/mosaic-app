@@ -278,7 +278,7 @@ export async function ringSides(input, {
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r7:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r8:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = input?.debugCandidates ? null : await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -306,7 +306,7 @@ export async function ringSides(input, {
   let queries = {};
   try {
     const out = await groqJSON({
-      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer one search (at most 12 words) that would find articles, op-eds, reports or papers by people who argue that answer, phrased the way they themselves would put it. Name no person or organisation. Output ONLY valid JSON: {"A":"...","B":"..."}',
+      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Output ONLY valid JSON: {"A":"...","B":"..."}',
       prompt: `QUESTION: ${crux.question}\nAbout: ${q}\nA: ${crux.left}${holders('left') ? ` (held by: ${holders('left')})` : ''}\nB: ${crux.right}${holders('right') ? ` (held by: ${holders('right')})` : ''}`,
       maxTokens: 400, deadline, llm,
     });
