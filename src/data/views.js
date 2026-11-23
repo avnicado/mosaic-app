@@ -12,8 +12,7 @@ import * as R from './record.js';
 import { getBusy, setBusy } from './actions.js';
 import { apiFetch } from '../engine/llm.js';
 import { exampleFor, EXAMPLES } from '../viewsdemo/examples.js';
-import { isJunkResult, verifyUrl } from '../engine/feed.js';
-import { mediaInfo } from '../media.js';
+import { fetchRingSides } from '../viewsdemo/ringSides.js';
 
 export const VIEWS_SINCE = Date.parse('2026-11-22T00:00:00Z');
 
@@ -98,30 +97,29 @@ export async function requestViewsMap(threadId) {
 export const setViewsMapOpen = (threadId, open) =>
   R.patchThread(threadId, (t) => ({ viewsMap: { ...(t.viewsMap?.text === R.currentArticulation(t) ? t.viewsMap : { text: R.currentArticulation(t) }), open } }));
 
-// ---- items on one ring's question ----
-// A ring with fewer than two checked articles gets items about its question
-// when it's tapped: a web search for the question, listings and junk dropped,
-// at most one per site, every link opened. Kept on the thread as
-// `viewsRingItems`, tied to the wording, so each ring is looked up once.
+// ---- pieces on one ring's question, from each answer's side ----
+// A ring with fewer than two checked articles on a side gets more when it's
+// tapped: the server searches for each answer and keeps only pages that argue
+// it, each with a line on what it argues (/api/views-demo, {ring}). Kept on the
+// thread as `viewsRingSides`, tied to the wording, so each ring is looked up once.
 const ringInFlight = new Set();
 
 export function ringItemsFor(thread, k) {
-  const r = thread?.viewsRingItems;
+  const r = thread?.viewsRingSides;
   return r && r.text === R.currentArticulation(thread) ? (r.rings?.[k] || null) : null;
 }
 
 function saveRing(threadId, text, k, entry) {
   R.patchThread(threadId, (t) => {
-    const cur = t.viewsRingItems?.text === text ? t.viewsRingItems : { text, rings: {} };
-    return { viewsRingItems: { text, rings: { ...cur.rings, [k]: entry } } };
+    const cur = t.viewsRingSides?.text === text ? t.viewsRingSides : { text, rings: {} };
+    return { viewsRingSides: { text, rings: { ...cur.rings, [k]: entry } } };
   });
 }
 
 export async function requestRingItems(threadId, k, { retry = false } = {}) {
   const t = R.getThread(threadId);
   const v = t && currentViewsMap(t);
-  const c = v?.map?.cruxes?.[k];
-  if (!c) return;
+  if (!v?.map?.cruxes?.[k]) return;
   const text = R.currentArticulation(t);
   const key = `${threadId}#${text}#${k}`;
   const have = ringItemsFor(t, k);
@@ -129,47 +127,10 @@ export async function requestRingItems(threadId, k, { retry = false } = {}) {
   ringInFlight.add(key);
   saveRing(threadId, text, k, { loading: true, at: Date.now() });
   try {
-    const res = await apiFetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: `${c.question} ${v.map.question}`.slice(0, 380), maxResults: 10 }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error?.message || `Search error (${res.status})`);
-    const taken = new Set((c.reading || []).map((s) => s.url));
-    const hosts = new Set();
-    const picks = [];
-    for (const r of data.results || []) {
-      const host = hostOf(r.url);
-      if (!host || taken.has(r.url) || hosts.has(host) || isJunkResult(r)) continue;
-      hosts.add(host);
-      picks.push(r);
-      if (picks.length >= 6) break;
-    }
-    const alive = await Promise.all(picks.map((r) => verifyUrl(r.url)));
-    const items = picks.filter((_, i) => alive[i] !== 'dead').slice(0, 4).map((r) => {
-      const m = mediaInfo('', r.url);
-      return {
-        title: String(r.title || '').slice(0, 200), url: r.url, outlet: hostOf(r.url),
-        type: m.type, label: m.label, snippet: snippetOf(r.snippet),
-      };
-    });
-    saveRing(threadId, text, k, { items, at: Date.now() });
+    saveRing(threadId, text, k, await fetchRingSides(v.map, k));
   } catch (e) {
-    saveRing(threadId, text, k, { items: [], error: (e?.message || String(e)).slice(0, 200), at: Date.now() });
+    saveRing(threadId, text, k, { reading: [], error: (e?.message || String(e)).slice(0, 200), at: Date.now() });
   } finally {
     ringInFlight.delete(key);
   }
-}
-
-function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } }
-// The search's own excerpt, cut at a sentence end where it can be: a hint of
-// what the page says, never presented as a quote.
-function snippetOf(s) {
-  const t = String(s || '').replace(/\s+/g, ' ').replace(/^[#*\-\s|]+/, '').trim();
-  if (t.length < 40) return '';
-  if (t.length <= 170) return t;
-  const cut = t.slice(0, 170);
-  const end = cut.lastIndexOf('. ');
-  return end > 80 ? cut.slice(0, end + 1) : `${cut.replace(/\s+\S*$/, '')}…`;
 }

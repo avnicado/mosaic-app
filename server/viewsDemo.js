@@ -255,3 +255,113 @@ export async function mapLive(question, {
     .catch((e) => console.warn('[views-demo] cache write failed:', e.message));
   return out;
 }
+
+// ---- pieces on one ring's question, from each answer's side ----
+// A ring tapped with too few checked articles: one search per answer
+// ("<question> <answer>"), then one Groq call that keeps only results arguing
+// answer A or B and says in a line what each argues (URLs never model-written),
+// every kept page opened. Cached per (question, ring, answers), so a ring is
+// paid for once. Capped per address and per day like the map itself.
+export const RING_PER_DAY = Number(process.env.VIEWS_RING_PER_DAY || 300);
+export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 40);
+
+export async function ringSides(input, {
+  ip = 'unknown', now = Date.now(), llm = handleLLM,
+  search = hasSearchKey() ? tavilySearch : null, check = linkLoads,
+} = {}) {
+  const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
+  const q = s(input?.question, 300);
+  const crux = { question: s(input?.crux?.question, 240), left: s(input?.crux?.left, 120), right: s(input?.crux?.right, 120) };
+  // The views that give each answer, in their own words ("name: summary"):
+  // what makes a search land on pages making that case rather than on the
+  // most-read pages on the topic.
+  const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
+  if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
+  const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
+  const key = `r9:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const cached = await hashGet(HASH, key).catch(() => null);
+  if (cached) {
+    try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
+  }
+  if (!search || !(hasKey() || claudeFallbackOn() || llm !== handleLLM)) {
+    throw fail(503, 'live_off', 'Finding pieces is not switched on here yet.');
+  }
+  const hour = new Date(now).toISOString().slice(0, 13);
+  const mine = await hashIncr(HASH, `rip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
+  if (mine > RING_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of rings in an hour. Try again a little later.');
+  const used = await hashIncr(HASH, `rd:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
+  if (used > RING_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough rings have been looked up today. Try again tomorrow.');
+
+  const deadline = now + DEADLINE_MS;
+  // Content farms re-post others' articles under a "(2026)"-style title.
+  const copied = (r) => /\((19|20)\d\d\)\s*$/.test(String(r.title || '').trim()) && !/\.(gov|edu)$/.test(hostOf(r.url));
+  // A fact-check page states a claim to refute it, so it never argues an answer;
+  // left in, it crowds out the pages that do on any contested side.
+  const NOT_ARGUING = ['factcheck.org', 'factcheck.afp.com', 'snopes.com', 'politifact.com', 'fullfact.org', 'healthfeedback.org', 'science.feedback.org', 'leadstories.com', 'tavily.com'];
+  // A search for the answer's bare words lands on the most-read pages on the
+  // topic, which on a contested question mostly argue one side. So the model
+  // first writes, for each answer, the search its own advocates' pages would
+  // match, in their words (no names: a name finds pages about those people,
+  // often fact-checks). On failure, the question and answer as they stand.
+  let queries = {};
+  try {
+    const out = await groqJSON({
+      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Output ONLY valid JSON: {"A":"...","B":"..."}',
+      prompt: `QUESTION: ${crux.question}\nAbout: ${q}\nA: ${crux.left}${holders('left') ? ` (held by: ${holders('left')})` : ''}\nB: ${crux.right}${holders('right') ? ` (held by: ${holders('right')})` : ''}`,
+      maxTokens: 400, deadline, llm,
+    });
+    queries = { left: s(out?.A, 160), right: s(out?.B, 160) };
+  } catch (e) {
+    console.warn('[views-demo] ring queries failed:', e.message);
+  }
+  const sideSearch = async (answer, pos) => {
+    const query = (queries[pos] && queries[pos].length > 8 ? queries[pos] : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
+    try {
+      const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      const hosts = new Set();
+      return rs.filter(usable).filter((r) => !copied(r)).filter((r) => {
+        const h = hostOf(r.url);
+        if (hosts.has(h)) return false;
+        hosts.add(h);
+        return true;
+      }).slice(0, 5);
+    } catch (e) {
+      console.warn('[views-demo] ring search failed:', e.message);
+      return [];
+    }
+  };
+  const [a, b] = await Promise.all([sideSearch(crux.left, 'left'), sideSearch(crux.right, 'right')]);
+  // Both answers' results side by side in one list, each page once.
+  const seen = new Set();
+  const results = [];
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    for (const r of [a[i], b[i]]) {
+      if (r && !seen.has(r.url)) { seen.add(r.url); results.push(r); }
+    }
+  }
+  const reading = [];
+  if (results.length) {
+    const out = await groqJSON({ system: `${RING_PICK_SYSTEM}\n\nNever pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick. A page counts only if it argues the answer to the QUESTION exactly as asked: a page on something nearby (mild side effects, when the question is about serious ones) is not a pick.`, prompt: ringPickPrompt([{ crux, results }]), maxTokens: 1000, deadline, llm });
+    for (const p of Array.isArray(out?.picks) ? out.picks : []) {
+      const r = results[Number(p?.result) - 1];
+      const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
+      const says = tidyReason(p?.says);
+      if (!r || !side || says.length < 12 || reportedNotArgued(r, says) || reading.some((x) => x.url === r.url) || reading.filter((x) => x.side === side).length >= 2) continue;
+      const quote = String(p?.quote || '').replace(/\s+/g, ' ').trim();
+      const hay = String(r.snippet || '').replace(/\s+/g, ' ');
+      const parts = quote.split(/\s*(?:\.\.\.|…)\s*/).map((x) => x.trim()).filter((x) => x.length >= 8);
+      reading.push({
+        title: String(r.title).slice(0, 200), url: r.url,
+        outlet: String(p?.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
+        date: r.published ? String(r.published).slice(0, 7) : '',
+        quote: parts.length && parts.every((x) => hay.includes(x)) ? quote.slice(0, 200) : '',
+        side, says,
+      });
+    }
+  }
+  const ok = await Promise.all(reading.map((x) => check(x.url)));
+  const live = reading.filter((_, i) => ok[i]);
+  const out = { reading: live, at: now };
+  if (live.length) await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: CACHE_TTL_S }).catch((e) => console.warn('[views-demo] ring cache write failed:', e.message));
+  return { ...out, reading: live.filter((x) => !have.has(x.url)) };
+}
