@@ -3,8 +3,9 @@
 // one of the questions the views split on, numbered from the centre out. A
 // cell's shade is that view's answer to that ring's question: solid for the
 // first answer, pale for the second, striped for "it depends". Slices that
-// look alike agree. Tapping a slice opens that view; tapping a ring number
-// picks out that question.
+// look alike agree. Tapping a cell opens that ring's question, with the
+// articles on each side of it and that view's answer marked; tapping a ring
+// number opens the question alone; tapping a view's name opens its case.
 import React from 'react';
 
 const RIM = 132, HUB = 30, C = 0;
@@ -33,7 +34,7 @@ function lines(name) {
 
 export const answerText = (c, pos) => (pos === 'left' ? c.left : pos === 'right' ? c.right : 'It depends, or in between');
 
-export default function DemoMandala({ map, focus, onFocus, ring, onRing, colorOf }) {
+export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf }) {
   const { views, cruxes } = map;
   const N = views.length, M = cruxes.length;
   const step = 360 / N;
@@ -58,17 +59,18 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, colorOf
         const col = colorOf(map, v.id);
         const on = focus === v.id, dim = focus && !on;
         return (
-          <g key={v.id} className={`vd-mm-slice ${on ? 'on' : ''} ${dim ? 'dim' : ''}`} role="button" tabIndex={0}
-            aria-pressed={on} aria-label={`${v.name}. ${cruxes.map((c, k) => `Question ${k + 1}: ${answerText(c, c.positions[v.id])}`).join('. ')}`}
-            onClick={() => pick(v.id)} onKeyDown={keys(() => pick(v.id))}>
+          <g key={v.id} className={`vd-mm-slice ${on ? 'on' : ''} ${dim ? 'dim' : ''}`}>
             {cruxes.map((c, k) => {
               const pos = c.positions[v.id] || 'mid';
               const fill = pos === 'mid' ? `url(#vd-hatch-${i})` : col;
               const op = pos === 'left' ? 0.92 : pos === 'right' ? 0.17 : 1;
               return (
-                <path key={k} className={`vd-mm-cell ${ring != null && ring !== k ? 'rdim' : ''}`}
-                  d={sector(HUB + k * ringW, HUB + (k + 1) * ringW, a0, a1)} fill={fill} fillOpacity={op}>
-                  <title>{`${v.name}, question ${k + 1}: ${answerText(c, pos)}`}</title>
+                <path key={k} className={`vd-mm-cell ${ring != null && ring !== k ? 'rdim' : ''} ${ring === k && on ? 'here' : ''}`}
+                  d={sector(HUB + k * ringW, HUB + (k + 1) * ringW, a0, a1)} fill={fill} fillOpacity={op}
+                  role="button" tabIndex={0}
+                  aria-label={`${v.name} on question ${k + 1}, ${c.question}: ${answerText(c, pos)}. Open what to read on this question.`}
+                  onClick={() => onCell(v.id, k)} onKeyDown={keys(() => onCell(v.id, k))}>
+                  <title>{`${v.short || v.name} on question ${k + 1}: ${answerText(c, pos)}`}</title>
                 </path>
               );
             })}
@@ -86,8 +88,8 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, colorOf
         return <line key={i} className="vd-mm-seam" x1={x0} y1={y0} x2={x1} y2={y1} />;
       })}
       <circle className="vd-mm-hub" cx={C} cy={C} r={HUB - 2} />
-      <text className="vd-mm-hubt" x={C} y={C - 1}>Tap a</text>
-      <text className="vd-mm-hubt" x={C} y={C + 10}>slice</text>
+      <text className="vd-mm-hubt" x={C} y={C - 1}>Tap to</text>
+      <text className="vd-mm-hubt" x={C} y={C + 10}>explore</text>
       {cruxes.map((c, k) => {
         const r = HUB + (k + 0.5) * ringW;
         // Ring numbers sit on the seam at the top, so they never cover a cell's colour.
@@ -112,7 +114,8 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, colorOf
         const on = focus === v.id, dim = focus && !on;
         return (
           <text key={v.id} className={`vd-mm-label ${on ? 'on' : ''} ${dim ? 'dim' : ''}`} x={x} y={y0} textAnchor={anchor}
-            style={{ fill: colorOf(map, v.id) }} onClick={() => pick(v.id)} aria-hidden="true">
+            style={{ fill: colorOf(map, v.id) }} onClick={() => pick(v.id)} role="button" tabIndex={0}
+            aria-label={`${v.name}: its whole case`} onKeyDown={keys(() => pick(v.id))}>
             {ls.map((l, j) => <tspan key={j} x={x} dy={j ? lh : 0}>{l}</tspan>)}
           </text>
         );

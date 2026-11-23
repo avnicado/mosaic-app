@@ -271,3 +271,38 @@ a { color: inherit; }
 .vd-more summary { cursor: pointer; font-weight: 600; font-size: 15px; color: var(--vd-soft); }
 .vd-more[open] summary { margin-bottom: 10px; }
 .vd-foot { margin-top: 20px; padding-top: 10px; }
+
+/* caption under the chart */
+.vd-cap { display: grid; gap: 4px; margin: 6px 0 0; }
+.vd-cap p { margin: 0; }
+.vd-cap-how { text-align: center; font-size: 14px; color: var(--vd-ink); }
+.vd-cap-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 12.5px; color: var(--vd-soft); }
+.vd-cap-key span { display: inline-flex; align-items: center; gap: 5px; }
+.vd-cap-key b { font-weight: 600; color: var(--vd-ink); }
+.vd-mm-cell { cursor: pointer; outline: none; }
+.vd-mm-cell:hover, .vd-mm-cell:focus-visible { stroke: var(--vd-ink); stroke-width: 2; }
+.vd-mm-cell.here { stroke: var(--vd-ink); stroke-width: 2.5; }
+.vd-mm-label:focus-visible { outline: none; text-decoration: underline; }
+
+/* a question's link to its articles */
+.vd-qi-read { display: block; margin: 7px 0 0 29px; padding: 0; border: 0; background: none; font-size: 13px; font-weight: 600; color: var(--vd-accent); text-align: left; }
+.vd-qi-read:hover { text-decoration: underline; }
+
+/* one ring's question, with articles on each side */
+.vd-ring-q { display: flex; gap: 8px; align-items: flex-start; font-size: 18px; line-height: 1.25; font-weight: 600; margin: 2px 0 6px; }
+.vd-ring-q .vd-qi-n { margin-top: 2px; background: var(--vd-ink); color: #fff; border-color: var(--vd-ink); }
+.vd-ring-why { margin: 0 0 8px; font-size: 13.5px; color: var(--vd-faded); }
+.vd-ring-mine { margin: 0 0 8px; padding: 7px 10px; border-left: 4px solid var(--c, var(--vd-ink)); background: var(--vd-bg); border-radius: 0 8px 8px 0; font-size: 14px; }
+.vd-linkish { border: 0; background: none; padding: 0; font-size: 13.5px; font-weight: 600; color: var(--vd-accent); }
+.vd-linkish:hover { text-decoration: underline; }
+.vd-side { border-top: 1px solid var(--vd-rule); padding: 9px 0 4px; }
+.vd-side.mine .vd-side-h::after { content: 'its answer'; margin-left: 6px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--c, var(--vd-faded)); }
+.vd-side-h { display: flex; align-items: center; gap: 7px; margin: 0 0 4px; font-weight: 700; font-size: 15px; }
+.vd-side-who { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 4px; font-size: 12.5px; color: var(--vd-faded); }
+.vd-side-mid { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 6px 0 0; padding-top: 8px; border-top: 1px solid var(--vd-rule); font-size: 13px; color: var(--vd-soft); }
+.vd-read { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.vd-read > li { padding: 4px 0 0; }
+.vd-read-says { margin: 0 0 1px; font-size: 14.5px; line-height: 1.38; }
+.vd-read .vd-src { padding: 1px 0; font-size: 14px; }
+.vd-read .vd-src-quote { font-size: 13px; }
+.vd-ring .vd-detail-nav button { --c: var(--vd-soft); }

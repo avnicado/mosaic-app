@@ -110,7 +110,11 @@ function Questions({ map, focus, onFocus, ring, onRing }) {
                 );
               })}
             </ul>
-            {on && c.why && <p className="vd-qi-why">{c.why}</p>}
+            {(c.reading || []).length > 0 && (
+              <button type="button" className="vd-qi-read" onClick={() => onRing(k)}>
+                {c.reading.length} article{c.reading.length === 1 ? '' : 's'} on this question →
+              </button>
+            )}
           </li>
         );
       })}
@@ -249,29 +253,104 @@ function Splits({ map, focus, onFocus }) {
 
 function ChartCaption() {
   return (
-    <p className="vd-cap">
-      <span><b>Slice</b> = a view</span>
-      <span><b>Ring</b> = a question, numbered from the centre</span>
-      <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
-      <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>
-      <span><i className="vd-sw striped" aria-hidden="true" /> it depends</span>
-    </p>
+    <div className="vd-cap">
+      <p className="vd-cap-how"><b>Tap any cell</b> to read real articles on that ring’s question. <b>Tap a name</b> for that view’s whole case.</p>
+      <p className="vd-cap-key">
+        <span><b>Slice</b> = a view</span>
+        <span><b>Ring</b> = a question, numbered from the centre</span>
+        <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
+        <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>
+        <span><i className="vd-sw striped" aria-hidden="true" /> it depends</span>
+      </p>
+    </div>
+  );
+}
+
+// One ring's question: the two answers, the views that give each, and real
+// articles arguing each answer. With a view picked, its answer is marked.
+function RingDetail({ map, k, view, onClose, onRing, onView, sheet }) {
+  const c = map.cruxes[k];
+  const M = map.cruxes.length;
+  const ref = useRef(null);
+  useEffect(() => { ref.current?.scrollTo?.({ top: 0 }); }, [k]);
+  const mine = view ? (c.positions[view.id] || 'mid') : null;
+  const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]];
+  if (mine === 'right') sides.reverse();
+  const mids = map.views.filter((v) => (c.positions[v.id] || 'mid') === 'mid');
+  return (
+    <div ref={ref} className={`vd-detail vd-ring ${sheet ? 'sheet' : ''}`} style={view ? { '--c': colorOf(map, view.id) } : undefined}
+      role={sheet ? 'dialog' : undefined} aria-label={`Question ${k + 1}: ${c.question}`}>
+      <div className="vd-detail-head">
+        <button type="button" className="vd-detail-back" onClick={onClose}>{sheet ? 'Close' : '← All views'}</button>
+        <span className="vd-detail-step">Ring {k + 1} of {M}</span>
+      </div>
+      <h3 className="vd-ring-q"><span className="vd-qi-n">{k + 1}</span>{c.question}</h3>
+      {c.why && <p className="vd-ring-why">{c.why}</p>}
+      {view && (
+        <p className="vd-ring-mine">
+          <b style={{ color: colorOf(map, view.id) }}>{view.name}</b> answers: {answerText(c, mine)}.{' '}
+          <button type="button" className="vd-linkish" onClick={() => onView(view.id)}>Its whole case →</button>
+        </p>
+      )}
+      {sides.map(([pos, sw, label]) => {
+        const items = (c.reading || []).filter((r) => r.side === pos);
+        const holders = map.views.filter((v) => c.positions[v.id] === pos);
+        return (
+          <section key={pos} className={`vd-side ${mine === pos ? 'mine' : ''}`}>
+            <p className="vd-side-h"><i className={`vd-sw ${sw}`} aria-hidden="true" />{label}</p>
+            {holders.length > 0 && (
+              <p className="vd-side-who">Views here: {holders.map((v) => (
+                <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
+              ))}</p>
+            )}
+            {items.length ? (
+              <ul className="vd-read">
+                {items.map((s, j) => (
+                  <li key={j}>
+                    {s.says && <p className="vd-read-says">{s.says}</p>}
+                    <ul className="vd-srcs"><SourceLink s={s} /></ul>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="vd-muted">No checked article on this side yet.</p>}
+          </section>
+        );
+      })}
+      {mids.length > 0 && (
+        <p className="vd-side-mid"><i className="vd-sw striped" aria-hidden="true" />It depends: {mids.map((v) => (
+          <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
+        ))}</p>
+      )}
+      <div className="vd-detail-nav">
+        <button type="button" onClick={() => onRing((k - 1 + M) % M)}>← Question {((k - 1 + M) % M) + 1}</button>
+        <button type="button" onClick={() => onRing((k + 1) % M)}>Question {((k + 1) % M) + 1} →</button>
+      </div>
+    </div>
   );
 }
 
 function Result({ map }) {
   const [focus, setFocus] = useState(null);
   const [ring, setRing] = useState(null);
+  const [show, setShow] = useState(null); // 'view' or 'ring': what the panel or sheet shows
   const [tab, setTab] = useState('views');
   const wide = useWide();
-  useEffect(() => { setFocus(null); setRing(null); }, [map]);
+  useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [map]);
+  const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
+  const open = show === 'ring' && ring != null ? 'ring' : focus ? 'view' : ring != null ? 'ring' : null;
   useEffect(() => {
-    if (!focus || wide) return;
-    const esc = (e) => { if (e.key === 'Escape') setFocus(null); };
+    if (!open || wide) return;
+    const esc = (e) => { if (e.key === 'Escape') closeAll(); };
     window.addEventListener('keydown', esc);
     return () => window.removeEventListener('keydown', esc);
-  }, [focus, wide]);
-  const pickRing = (k) => { setRing(k); if (!wide && k != null) { setTab('questions'); setFocus(null); } };
+  }, [open, wide]);
+  // A view's case: tap its name, its row or its tag.
+  const pickView = (id) => { setFocus(id); setRing(null); setShow(id ? 'view' : null); };
+  // A question: tap its ring number or its card.
+  const pickRing = (k) => { setRing(k); if (k == null) { setShow(focus ? 'view' : null); } else { setShow('ring'); } };
+  // A cell: that view on that question.
+  const pickCell = (id, k) => { setFocus(id); setRing(k); setShow('ring'); };
+  // Tags in the question list only highlight; they don't open anything.
   const sources = SOURCE_COUNT(map);
   const mapped = map.status === 'mapped';
   const fv = map.views.find((v) => v.id === focus);
@@ -289,10 +368,13 @@ function Result({ map }) {
 
   const questions = (
     <>
-      <Questions map={map} focus={focus} onFocus={setFocus} ring={ring} onRing={setRing} />
+      <Questions map={map} focus={focus} onFocus={setFocus} ring={ring} onRing={pickRing} />
       <Wording map={map} focus={focus} onFocus={setFocus} />
     </>
   );
+  const detail = (sheet) => (open === 'ring'
+    ? <RingDetail map={map} k={ring} view={fv} onClose={closeAll} onRing={pickRing} onView={pickView} sheet={sheet} />
+    : open === 'view' ? <ViewDetail map={map} view={fv} onFocus={pickView} onRing={pickRing} sheet={sheet} /> : null);
 
   return (
     <div className="vd-result">
@@ -306,23 +388,23 @@ function Result({ map }) {
         {wide && (
           <aside className="vd-col vd-col-key" aria-labelledby="vd-key-h">
             <h2 id="vd-key-h" className="vd-col-h">The {map.cruxes.length} questions they split on</h2>
-            <p className="vd-col-sub">One per ring. Under each answer, the views that give it.</p>
+            <p className="vd-col-sub">One per ring. Tap one for real articles on each side of it.</p>
             {questions}
           </aside>
         )}
 
         <div className="vd-col-chart">
-          <DemoMandala map={map} focus={focus} onFocus={setFocus} ring={ring} onRing={pickRing} colorOf={colorOf} />
+          <DemoMandala map={map} focus={focus} onFocus={pickView} ring={ring} onRing={pickRing} onCell={pickCell} colorOf={colorOf} />
           <ChartCaption />
         </div>
 
         {wide ? (
           <aside className="vd-col vd-col-panel" aria-live="polite">
-            {fv ? <ViewDetail map={map} view={fv} onFocus={setFocus} onRing={setRing} /> : (
+            {open ? detail(false) : (
               <>
                 <h2 className="vd-col-h">The {map.views.length} main views</h2>
-                <p className="vd-col-sub">Tap one, or its slice, to see its reasons and sources.</p>
-                <ViewsList map={map} focus={focus} onFocus={setFocus} />
+                <p className="vd-col-sub">Tap one to see its reasons and sources.</p>
+                <ViewsList map={map} focus={focus} onFocus={pickView} />
               </>
             )}
           </aside>
@@ -333,16 +415,16 @@ function Result({ map }) {
               <button type="button" role="tab" aria-selected={tab === 'questions'} onClick={() => setTab('questions')}>The {map.cruxes.length} questions</button>
             </div>
             <div role="tabpanel">
-              {tab === 'views' ? <ViewsList map={map} focus={focus} onFocus={setFocus} /> : questions}
+              {tab === 'views' ? <ViewsList map={map} focus={focus} onFocus={pickView} /> : questions}
             </div>
           </div>
         )}
       </div>
 
-      {!wide && fv && (
+      {!wide && open && (
         <>
-          <div className="vd-scrim" onClick={() => setFocus(null)} aria-hidden="true" />
-          <ViewDetail map={map} view={fv} onFocus={setFocus} onRing={pickRing} sheet />
+          <div className="vd-scrim" onClick={closeAll} aria-hidden="true" />
+          {detail(true)}
         </>
       )}
 

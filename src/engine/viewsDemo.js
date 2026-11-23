@@ -43,6 +43,17 @@ export const PICK_SYSTEM = `You match views to real web pages found by search. Y
 
 Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"outlet":"...","reason":"...","quote":"..."}]}`;
 
+export const RING_PICK_SYSTEM = `You match questions to real web pages found by search. You get numbered groups, one per QUESTION, each with two opposite answers, A and B. For each group, pick up to 2 results that argue answer A and up to 2 that argue answer B, on that question itself: an op-ed, essay, position statement, report, paper, or news analysis that makes that case. Never a page that only mentions the topic, never a business listing, map, directory, shop or profile page. If nothing qualifies for a side, pick none for it. Never invent a result. For each pick give: "side" ("A" or "B"); the outlet or organisation; "says", one plain sentence (at most 30 words) stating the argument the page makes on this question as its author makes it, never "The page states…", using only what the result text says and never as your own ruling; and "quote", at most 20 words copied exactly from the result text that shows it.
+
+Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"side":"A","outlet":"...","says":"...","quote":"..."}]}`;
+
+export function ringPickPrompt(groups) {
+  return groups.map((g, i) => {
+    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
+    return `Group ${i + 1} — QUESTION: ${g.crux.question}\n  A: ${g.crux.left}\n  B: ${g.crux.right}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
+  }).join('\n\n');
+}
+
 export function pickPrompt(groups) {
   return groups.map((g, i) => {
     const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
@@ -103,7 +114,13 @@ export function normalizeMap(raw, { question = '' } = {}) {
       if (id) positions[id] = POSITIONS.includes(String(p).toLowerCase()) ? String(p).toLowerCase() : 'mid';
     }
     for (const v of views) if (!positions[v.id]) positions[v.id] = 'mid';
-    return { question: str(c?.question, 160), left: cap(str(c?.left, 60)), right: cap(str(c?.right, 60)), why: str(c?.why, 240), positions };
+    // Articles on this question itself, each arguing one of its two answers.
+    const reading = (Array.isArray(c?.reading) ? c.reading : []).map((r) => {
+      const src = cleanSource(r);
+      const side = String(r?.side || '').toLowerCase();
+      return src && (side === 'left' || side === 'right') ? { ...src, side, says: str(r?.says, 240) } : null;
+    }).filter(Boolean).slice(0, 6);
+    return { question: str(c?.question, 160), left: cap(str(c?.left, 60)), right: cap(str(c?.right, 60)), why: str(c?.why, 240), positions, reading };
   }).filter((c) => c.question && c.left && c.right);
 
   const splits = (c) => views.some((v) => c.positions[v.id] === 'left') && views.some((v) => c.positions[v.id] === 'right');
@@ -154,4 +171,7 @@ export function closestTo(map, id) {
 export const viewSources = (v) => [...(v.reasons || []).flatMap((r) => r.sources), ...(v.sources || [])];
 
 // Distinct pages linked on the whole map.
-export const SOURCE_COUNT = (map) => new Set(map.views.flatMap((v) => viewSources(v).map((s) => s.url))).size;
+export const SOURCE_COUNT = (map) => new Set([
+  ...map.views.flatMap((v) => viewSources(v).map((s) => s.url)),
+  ...(map.cruxes || []).flatMap((c) => (c.reading || []).map((s) => s.url)),
+]).size;

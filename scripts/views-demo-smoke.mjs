@@ -34,6 +34,13 @@ const llm = async (body) => {
   calls++;
   const sys = body.messages[0].content;
   if (!sys.startsWith('You match')) return { status: 200, json: { choices: [{ message: { content: JSON.stringify(mapReply) } }] } };
+  if (sys.startsWith('You match questions')) return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+    { group: 1, result: 1, side: 'A', outlet: 'Pediatrics', says: 'The article argues that school rules lift uptake.', quote: 'The text of article 41' },
+    { group: 1, result: 2, side: 'B', outlet: 'Op-ed', says: 'Rules breed resentment.' },
+    { group: 1, result: 1, side: 'B', says: 'same page twice' },   // same page → ignored
+    { group: 2, result: 1, side: 'C', says: 'bad side' },          // no such side → ignored
+    { group: 2, result: 2, side: 'A' },                            // no words → ignored
+  ] }) } }] } };
   return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
     { group: 1, result: 1, outlet: 'AAP', reason: 'School rules keep rates high.', quote: 'The text of article 11 which argues' },
     { group: 1, result: 2, outlet: 'NYT', reason: 'r', quote: 'made up words' },
@@ -48,8 +55,12 @@ const check = async (url) => !url.endsWith('/12'); // one picked page is dead
 
 const out = await mapLive('How valuable are vaccines?', { ip: '1.2.3.4', llm, search, check });
 assert.equal(out.status, 'mapped');
-assert.equal(calls, 2, 'two model calls');
-assert.equal(searches, 3, 'one search per view (dupe dropped)');
+assert.equal(calls, 3, 'three model calls: map, view picks, ring picks');
+assert.equal(searches, 5, 'one search per view (dupe dropped) and per split question');
+assert.equal(out.cruxes[0].reading.length, 2, 'ring articles kept, one per side');
+assert.deepEqual(out.cruxes[0].reading.map((r) => r.side), ['left', 'right']);
+assert.equal(out.cruxes[0].reading[0].says, 'School rules lift uptake.'.replace(/^S/, 'S'), 'says tidied');
+assert.equal(out.cruxes[0].reading[0].quote, 'The text of article 41', 'ring quote kept when in the text');
 assert.deepEqual(out.views.map((v) => v.id), ['require', 'encourage'], 'duplicate view dropped, unsourced view dropped');
 assert.equal(out.views[0].reasons.length, 1, 'dead link dropped');
 assert.equal(out.views[0].reasons[0].text, 'School rules keep rates high.');
@@ -63,7 +74,7 @@ assert.ok(!('search' in out.views[0]), 'search strings stripped');
 // cached: no more calls
 const again = await mapLive('how valuable are vaccines', { ip: '1.2.3.4', llm, search, check });
 assert.equal(again.cached, true);
-assert.equal(calls, 2);
+assert.equal(calls, 3);
 
 // a personal question → none, with nearby questions, no dead end
 const noneLLM = async () => ({ status: 200, json: { choices: [{ message: { content: JSON.stringify({ status: 'none', headline: 'Nothing to argue about.', nearby: ['Should cities ban gas stoves?'] }) } }] } });

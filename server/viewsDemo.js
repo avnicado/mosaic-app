@@ -3,9 +3,11 @@
 // per day, and every answer is cached so a question is only ever paid for once.
 //
 //   1 Groq call   maps the question (the views, who holds them, the points they split on)
-//   ≤4 searches   one per view (Tavily, real results only)
-//   1 Groq call   picks, for each view, pieces written by people who hold it, and
-//                 says in a line what each argues; URLs are never model-written
+//   ≤8 searches   one per view and one per split question (Tavily, real results only)
+//   2 Groq calls  side by side: one picks, for each view, pieces written by people
+//                 who hold it; one picks, for each split question, pieces arguing
+//                 each answer. Each says in a line what a piece argues; URLs are
+//                 never model-written
 //   link check    every picked page is opened; one that doesn't load is dropped
 //
 // Store: m2:views-demo  "v:<hash>" → JSON map   "d:<day>" / "ip:<ip>:<hour>" → counts
@@ -16,7 +18,7 @@ import { hashGet, hashUpdate, hashIncr } from './store.js';
 import { safeResultUrl } from './further.js';
 import { hashString } from './corpus.js';
 import { parseJSON, suggestedWaitMs } from '../src/engine/llm.js';
-import { MAP_SYSTEM, PICK_SYSTEM, mapPrompt, pickPrompt, normalizeMap, hostOf } from '../src/engine/viewsDemo.js';
+import { MAP_SYSTEM, PICK_SYSTEM, RING_PICK_SYSTEM, mapPrompt, pickPrompt, ringPickPrompt, normalizeMap, hostOf } from '../src/engine/viewsDemo.js';
 
 export const DEMO_PER_DAY = Number(process.env.VIEWS_DEMO_PER_DAY || 60);
 export const DEMO_PER_HOUR_PER_IP = Number(process.env.VIEWS_DEMO_PER_HOUR || 8);
@@ -101,7 +103,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v3:${hashString(norm(q))}`;
+  const key = `v4:${hashString(norm(q))}`;
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
@@ -120,37 +122,66 @@ export async function mapLive(question, {
   const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
   const map = normalizeMap(raw, { question: q });
 
-  // Search for each view, then let the model pick pages and say what each argues.
+  // Search for each view and each split question, then let the model pick pages
+  // and say what each argues.
   const groups = map.views.map((v) => ({ label: `"${v.name}": ${v.summary}`, search: v.search, ref: v }));
-  const results = await searchAll(groups, search);
+  const rings = map.cruxes.map((c) => ({ crux: c, search: `${c.question} ${map.question}`.slice(0, 200) }));
+  const all = await searchAll([...groups, ...rings], search);
+  const results = all.slice(0, groups.length);
   groups.forEach((g, i) => { g.results = results[i]; g.ref.reasons = []; g.ref.sources = []; });
-  if (results.some((r) => r.length) && Date.now() < deadline - 12_000) {
+  rings.forEach((g, i) => { g.results = all[groups.length + i]; g.crux.reading = []; });
+  const quoteOf = (p, r) => {
+    const quote = String(p?.quote || '').replace(/\s+/g, ' ').trim();
+    return quote && String(r.snippet || '').replace(/\s+/g, ' ').includes(quote.slice(0, 60)) ? quote.slice(0, 200) : '';
+  };
+  const srcOf = (p, r) => ({
+    title: String(r.title).slice(0, 200), url: r.url, outlet: String(p?.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
+    author: '', date: r.published ? String(r.published).slice(0, 7) : '', quote: quoteOf(p, r),
+  });
+  const picked = [];
+  const timeLeft = () => Date.now() < deadline - 12_000;
+  const pickViews = async () => {
+    if (!results.some((r) => r.length) || !timeLeft()) return;
     try {
       const out = await groqJSON({ system: PICK_SYSTEM, prompt: pickPrompt(groups), maxTokens: 1100, deadline, llm });
-      const picked = [];
       for (const p of Array.isArray(out?.picks) ? out.picks : []) {
         const g = groups[Number(p?.group) - 1];
         const r = g?.results?.[Number(p?.result) - 1];
         if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
-        // A quote only counts if it is really in the result text.
-        const quote = String(p.quote || '').replace(/\s+/g, ' ').trim();
-        const inText = quote && String(r.snippet || '').replace(/\s+/g, ' ').includes(quote.slice(0, 60));
-        const src = {
-          title: String(r.title).slice(0, 200), url: r.url, outlet: String(p.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
-          author: '', date: r.published ? String(r.published).slice(0, 7) : '', quote: inText ? quote.slice(0, 200) : '',
-        };
+        const src = srcOf(p, r);
         const text = tidyReason(p.reason);
-        g.ref.reasons.push({ text: text || (inText ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
+        g.ref.reasons.push({ text: text || (src.quote ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
         picked.push(src);
       }
-      // Every picked page must open.
-      const ok = await Promise.all(picked.map((s) => check(s.url)));
-      const dead = new Set(picked.filter((_, i) => !ok[i]).map((s) => s.url));
-      for (const g of groups) g.ref.reasons = g.ref.reasons.filter((x) => !dead.has(x.sources[0].url));
     } catch (e) {
       console.warn('[views-demo] picking sources failed:', e.message);
     }
-  }
+  };
+  const pickRings = async () => {
+    if (!rings.some((g) => g.results.length) || !timeLeft()) return;
+    try {
+      const out = await groqJSON({ system: RING_PICK_SYSTEM, prompt: ringPickPrompt(rings), maxTokens: 1100, deadline, llm });
+      for (const p of Array.isArray(out?.picks) ? out.picks : []) {
+        const g = rings[Number(p?.group) - 1];
+        const r = g?.results?.[Number(p?.result) - 1];
+        const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
+        if (!g || !r || !side || g.crux.reading.some((x) => x.url === r.url) || g.crux.reading.filter((x) => x.side === side).length >= 2) continue;
+        const says = tidyReason(p.says);
+        if (!says) continue;
+        const src = { ...srcOf(p, r), side, says };
+        g.crux.reading.push(src);
+        picked.push(src);
+      }
+    } catch (e) {
+      console.warn('[views-demo] picking ring sources failed:', e.message);
+    }
+  };
+  await Promise.all([pickViews(), pickRings()]);
+  // Every picked page must open.
+  const ok = await Promise.all(picked.map((s) => check(s.url)));
+  const dead = new Set(picked.filter((_, i) => !ok[i]).map((s) => s.url));
+  for (const g of groups) g.ref.reasons = g.ref.reasons.filter((x) => !dead.has(x.sources[0].url));
+  for (const g of rings) g.crux.reading = g.crux.reading.filter((x) => !dead.has(x.url));
 
   // Views must stand on real pieces: keep only sourced views, when enough are.
   // If the sourced views alone no longer disagree on anything, keep them all.
