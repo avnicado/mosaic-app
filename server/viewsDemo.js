@@ -50,8 +50,18 @@ async function groqJSON({ system, prompt, maxTokens, deadline, llm }) {
   throw fail(502, 'views_model', 'The mapping model did not answer just now. Try again in a minute, or open a ready example.');
 }
 
-const BAD_HOST = /(^|\.)(pinterest|facebook|instagram|tiktok|x|twitter|quora|amazon|ebay|linkedin)\.com$/;
-const usable = (r) => r?.url && safeResultUrl(r.url) && !BAD_HOST.test(hostOf(r.url)) && (r.title || '').trim().length >= 8 && (r.snippet || '').trim().length >= 40;
+const BAD_HOST = /(^|\.)(pinterest|facebook|instagram|tiktok|x|twitter|quora|amazon|ebay|linkedin|mapquest|yelp|yellowpages|tripadvisor|bbb|manta|zoominfo|crunchbase|glassdoor|indeed|reddit)\.(com|org)$/;
+// A listing, map or directory page, not an argument: "…, Springfield, IL 62704 - MapQuest".
+const LISTING_TITLE = /\b\d{5}(-\d{4})?\b.*\b(US|USA)\b|\b(MapQuest|Yelp|Yellow Pages|Phone Number)\b/i;
+const usable = (r) => r?.url && safeResultUrl(r.url) && !BAD_HOST.test(hostOf(r.url)) && (r.title || '').trim().length >= 8 && !LISTING_TITLE.test(r.title || '') && (r.snippet || '').trim().length >= 40;
+
+// "The page states that X" → "X": a reason is the view's own point, not a note about a page.
+export function tidyReason(v) {
+  let t = String(v || '').replace(/\s+/g, ' ').trim();
+  t = t.replace(/^(the|this) (page|article|study|review|report|piece|post|site|association|author|organi[sz]ation)\s+(states|says|argues|claims|shows|finds|notes|explains|suggests|contends)( that)?\s*/i, '');
+  if (t) t = t[0].toUpperCase() + t.slice(1);
+  return t.slice(0, 280);
+}
 
 async function searchAll(groups, search) {
   return Promise.all(groups.map(async (g) => {
@@ -91,7 +101,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v:${hashString(norm(q))}`;
+  const key = `v2:${hashString(norm(q))}`;
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
@@ -129,7 +139,7 @@ export async function mapLive(question, {
           title: String(r.title).slice(0, 200), url: r.url, outlet: String(p.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
           author: '', date: r.published ? String(r.published).slice(0, 7) : '', quote: inText ? quote.slice(0, 200) : '',
         };
-        const text = String(p.reason || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+        const text = tidyReason(p.reason);
         g.ref.reasons.push({ text: text || (inText ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
         picked.push(src);
       }
