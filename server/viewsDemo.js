@@ -230,9 +230,12 @@ export async function ringSides(input, {
   const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const q = s(input?.question, 300);
   const crux = { question: s(input?.crux?.question, 240), left: s(input?.crux?.left, 120), right: s(input?.crux?.right, 120) };
+  // The views that give each answer, as "name: summary": what makes a search
+  // land on pages from that side rather than the most-read pages on the topic.
+  const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r1:${hashString([q, crux.question, crux.left, crux.right].map(norm).join('|'))}`;
+  const key = `r2:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -248,8 +251,8 @@ export async function ringSides(input, {
 
   const deadline = now + DEADLINE_MS;
   const [a, b] = await searchAll([
-    { search: `${crux.question} ${crux.left} ${q}`.slice(0, 250) },
-    { search: `${crux.question} ${crux.right} ${q}`.slice(0, 250) },
+    { search: `${crux.question} ${crux.left}. ${holders('left') || q}`.slice(0, 380) },
+    { search: `${crux.question} ${crux.right}. ${holders('right') || q}`.slice(0, 380) },
   ], search);
   // Both answers' results side by side in one list, each page once.
   const seen = new Set();
