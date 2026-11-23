@@ -101,7 +101,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v2:${hashString(norm(q))}`;
+  const key = `v3:${hashString(norm(q))}`;
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
