@@ -32,9 +32,18 @@ function lines(name) {
   return best;
 }
 
+// Where a ring's articles pop up from: the middle of a view's cell on that
+// ring, or the ring's number when no view is picked. In the chart's own units.
+export function anchorPoint(map, viewId, k) {
+  const N = map.views.length, M = map.cruxes.length;
+  const r = HUB + (k + 0.5) * ((RIM - HUB) / M);
+  const i = map.views.findIndex((v) => v.id === viewId);
+  return i < 0 ? pt(r, -90) : pt(r, -90 + (i + 0.5) * (360 / N));
+}
+
 export const answerText = (c, pos) => (pos === 'left' ? c.left : pos === 'right' ? c.right : 'It depends, or in between');
 
-export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf }) {
+export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf, mark }) {
   const { views, cruxes } = map;
   const N = views.length, M = cruxes.length;
   const step = 360 / N;
@@ -103,6 +112,12 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
           </g>
         );
       })}
+      {mark && (
+        <g className="vd-mm-mark" aria-hidden="true">
+          <circle className="ping" cx={mark[0]} cy={mark[1]} r="6" />
+          <circle className="dot" cx={mark[0]} cy={mark[1]} r="5" />
+        </g>
+      )}
       {views.map((v, i) => {
         const mid = -90 + (i + 0.5) * step;
         const [x, y] = pt(RIM + 12, mid);

@@ -4,8 +4,8 @@
 // a slice and that view's reasons and real articles open beside the chart, or
 // in a sheet on a phone. It never rules on the question. Ready examples load
 // instantly; a typed question is mapped live by /api/views-demo when it's on.
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import DemoMandala, { answerText } from './DemoMandala.jsx';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import DemoMandala, { answerText, anchorPoint } from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
 import { closestTo, SOURCE_COUNT, hostOf } from '../engine/viewsDemo.js';
 
@@ -267,31 +267,28 @@ function ChartCaption() {
 }
 
 // One ring's question: the two answers, the views that give each, and real
-// articles arguing each answer. With a view picked, its answer is marked.
-function RingDetail({ map, k, view, onClose, onRing, onView, sheet }) {
+// articles arguing each answer. With a view picked, its answer comes first.
+function RingDetail({ map, k, view, onClose, onRing, onView }) {
   const c = map.cruxes[k];
   const M = map.cruxes.length;
-  const ref = useRef(null);
-  useEffect(() => { ref.current?.scrollTo?.({ top: 0 }); }, [k]);
   const mine = view ? (c.positions[view.id] || 'mid') : null;
   const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]];
   if (mine === 'right') sides.reverse();
   const mids = map.views.filter((v) => (c.positions[v.id] || 'mid') === 'mid');
   return (
-    <div ref={ref} className={`vd-detail vd-ring ${sheet ? 'sheet' : ''}`} style={view ? { '--c': colorOf(map, view.id) } : undefined}
-      role={sheet ? 'dialog' : undefined} aria-label={`Question ${k + 1}: ${c.question}`}>
+    <>
       <div className="vd-detail-head">
-        <button type="button" className="vd-detail-back" onClick={onClose}>{sheet ? 'Close' : '← All views'}</button>
         <span className="vd-detail-step">Ring {k + 1} of {M}</span>
+        <button type="button" className="vd-pop-x" onClick={onClose} aria-label="Close">Close ✕</button>
       </div>
       <h3 className="vd-ring-q"><span className="vd-qi-n">{k + 1}</span>{c.question}</h3>
-      {c.why && <p className="vd-ring-why">{c.why}</p>}
       {view && (
         <p className="vd-ring-mine">
           <b style={{ color: colorOf(map, view.id) }}>{view.name}</b> answers: {answerText(c, mine)}.{' '}
           <button type="button" className="vd-linkish" onClick={() => onView(view.id)}>Its whole case →</button>
         </p>
       )}
+      {c.why && <p className="vd-ring-why">{c.why}</p>}
       {sides.map(([pos, sw, label]) => {
         const items = (c.reading || []).filter((r) => r.side === pos);
         const holders = map.views.filter((v) => c.positions[v.id] === pos);
@@ -325,6 +322,69 @@ function RingDetail({ map, k, view, onClose, onRing, onView, sheet }) {
         <button type="button" onClick={() => onRing((k - 1 + M) % M)}>← Question {((k - 1 + M) % M) + 1}</button>
         <button type="button" onClick={() => onRing((k + 1) % M)}>Question {((k + 1) % M) + 1} →</button>
       </div>
+    </>
+  );
+}
+
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(n, Math.max(lo, hi)));
+
+// A ring's articles, popping out of the tile that was tapped, with a pointer
+// back to it. Beside the tile on a laptop, just under it on a phone.
+function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView }) {
+  const boxRef = useRef(null);
+  const inRef = useRef(null);
+  const [pos, setPos] = useState(null);
+  const [ax, ay] = anchorPoint(map, view?.id, k);
+  useLayoutEffect(() => {
+    const place = () => {
+      const col = chartRef.current, box = boxRef.current;
+      const svg = col?.querySelector('.vd-mm-svg');
+      const m = svg?.getScreenCTM?.();
+      if (!col || !box || !m) return;
+      const p = new DOMPoint(ax, ay).matrixTransform(m); // where the tile is, on screen
+      const cr = col.getBoundingClientRect();
+      const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      const W = box.offsetWidth, H = box.offsetHeight;
+      if (wide) {
+        const side = p.x >= cr.left + cr.width / 2 ? 'right' : 'left';
+        const left = clamp(side === 'right' ? p.x + 14 : p.x - 14 - W, 12, vw - 12 - W);
+        const top = clamp(p.y - 60, 12, vh - 12 - H);
+        setPos({ side, left: left - cr.left, top: top - cr.top, a: clamp(p.y - top, 20, H - 20) });
+      } else {
+        const left = 12;
+        setPos({ side: 'below', left: left - cr.left, top: p.y + 14 - cr.top, a: clamp(p.x - left, 22, W - 22) });
+      }
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [k, view?.id, wide, ax, ay, chartRef]);
+  useEffect(() => {
+    inRef.current?.scrollTo?.({ top: 0 });
+    if (!pos) return;
+    boxRef.current?.focus({ preventScroll: true });
+    if (!wide) boxRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [pos?.top, pos?.left, k, view?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const esc = (e) => { if (e.key === 'Escape') onClose(); };
+    const away = (e) => {
+      if (boxRef.current?.contains(e.target)) return;
+      if (e.target.closest?.('button, a, input, summary, [role="button"]')) return;
+      onClose();
+    };
+    window.addEventListener('keydown', esc);
+    document.addEventListener('pointerdown', away);
+    return () => { window.removeEventListener('keydown', esc); document.removeEventListener('pointerdown', away); };
+  }, [onClose]);
+  const c = map.cruxes[k];
+  const style = { '--c': view ? colorOf(map, view.id) : 'var(--vd-ink)', '--a': `${pos?.a ?? 40}px` };
+  if (pos) { style.left = pos.left; style.top = pos.top; } else { style.visibility = 'hidden'; style.left = 0; style.top = 0; }
+  return (
+    <div ref={boxRef} className={`vd-pop ${pos?.side || ''}`} style={style} role="dialog" tabIndex={-1}
+      aria-label={`Question ${k + 1}: ${c.question}`} key={`${k}-${view?.id || ''}`}>
+      <div ref={inRef} className="vd-pop-in vd-detail vd-ring">
+        <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} />
+      </div>
     </div>
   );
 }
@@ -335,19 +395,23 @@ function Result({ map }) {
   const [show, setShow] = useState(null); // 'view' or 'ring': what the panel or sheet shows
   const [tab, setTab] = useState('views');
   const wide = useWide();
+  const chartRef = useRef(null);
   useEffect(() => { setFocus(null); setRing(null); setShow(null); }, [map]);
   const closeAll = () => { setFocus(null); setRing(null); setShow(null); };
-  const open = show === 'ring' && ring != null ? 'ring' : focus ? 'view' : ring != null ? 'ring' : null;
+  const ringOpen = show === 'ring' && ring != null;
+  const viewOpen = show === 'view' && !!focus;
+  // Closing a ring's pop-up keeps the view that was tapped highlighted.
+  const closeRing = React.useCallback(() => { setRing(null); setShow(null); }, []);
   useEffect(() => {
-    if (!open || wide) return;
+    if (!viewOpen || wide) return;
     const esc = (e) => { if (e.key === 'Escape') closeAll(); };
     window.addEventListener('keydown', esc);
     return () => window.removeEventListener('keydown', esc);
-  }, [open, wide]);
+  }, [viewOpen, wide]);
   // A view's case: tap its name, its row or its tag.
   const pickView = (id) => { setFocus(id); setRing(null); setShow(id ? 'view' : null); };
   // A question: tap its ring number or its card.
-  const pickRing = (k) => { setRing(k); if (k == null) { setShow(focus ? 'view' : null); } else { setShow('ring'); } };
+  const pickRing = (k) => { setRing(k); setShow(k == null ? null : 'ring'); };
   // A cell: that view on that question.
   const pickCell = (id, k) => { setFocus(id); setRing(k); setShow('ring'); };
   // Tags in the question list only highlight; they don't open anything.
@@ -372,9 +436,7 @@ function Result({ map }) {
       <Wording map={map} focus={focus} onFocus={setFocus} />
     </>
   );
-  const detail = (sheet) => (open === 'ring'
-    ? <RingDetail map={map} k={ring} view={fv} onClose={closeAll} onRing={pickRing} onView={pickView} sheet={sheet} />
-    : open === 'view' ? <ViewDetail map={map} view={fv} onFocus={pickView} onRing={pickRing} sheet={sheet} /> : null);
+  const detail = (sheet) => (viewOpen ? <ViewDetail map={map} view={fv} onFocus={pickView} onRing={pickRing} sheet={sheet} /> : null);
 
   return (
     <div className="vd-result">
@@ -393,14 +455,18 @@ function Result({ map }) {
           </aside>
         )}
 
-        <div className="vd-col-chart">
-          <DemoMandala map={map} focus={focus} onFocus={pickView} ring={ring} onRing={pickRing} onCell={pickCell} colorOf={colorOf} />
+        <div className="vd-col-chart" ref={chartRef}>
+          <DemoMandala map={map} focus={focus} onFocus={pickView} ring={ring} onRing={pickRing} onCell={pickCell} colorOf={colorOf}
+            mark={ringOpen && fv ? anchorPoint(map, fv.id, ring) : null} />
           <ChartCaption />
+          {ringOpen && (
+            <RingPop map={map} k={ring} view={fv} chartRef={chartRef} wide={wide} onClose={closeRing} onRing={pickRing} onView={pickView} />
+          )}
         </div>
 
         {wide ? (
           <aside className="vd-col vd-col-panel" aria-live="polite">
-            {open ? detail(false) : (
+            {viewOpen ? detail(false) : (
               <>
                 <h2 className="vd-col-h">The {map.views.length} main views</h2>
                 <p className="vd-col-sub">Tap one to see its reasons and sources.</p>
@@ -421,7 +487,7 @@ function Result({ map }) {
         )}
       </div>
 
-      {!wide && open && (
+      {!wide && viewOpen && (
         <>
           <div className="vd-scrim" onClick={closeAll} aria-hidden="true" />
           {detail(true)}

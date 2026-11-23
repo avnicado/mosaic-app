@@ -306,3 +306,32 @@ a { color: inherit; }
 .vd-read .vd-src { padding: 1px 0; font-size: 14px; }
 .vd-read .vd-src-quote { font-size: 13px; }
 .vd-ring .vd-detail-nav button { --c: var(--vd-soft); }
+
+/* a ring's articles, popping out of the tile that was tapped */
+.vd-col-chart { position: relative; }
+.vd-pop { --c: var(--vd-ink); --a: 40px; position: absolute; z-index: 25; width: min(390px, calc(100vw - 24px)); background: var(--vd-panel); border: 2px solid var(--c); border-radius: 14px; box-shadow: 0 14px 40px rgba(26, 22, 18, .28), 0 2px 6px rgba(26, 22, 18, .12); outline: none; animation: vd-popin .18s ease-out; text-align: left; }
+.vd-pop-in { position: relative; z-index: 1; max-height: min(72vh, 620px); overflow: auto; overscroll-behavior: contain; padding: 10px 14px 12px; border-radius: 12px; scrollbar-width: thin; scrollbar-color: var(--vd-rule) transparent; }
+.vd-pop::before { content: ''; position: absolute; z-index: 2; width: 16px; height: 16px; background: var(--vd-panel); border: 2px solid var(--c); transform: rotate(45deg); }
+.vd-pop.right { transform-origin: 0 var(--a); }
+.vd-pop.right::before { left: -10px; top: calc(var(--a) - 9px); border-top: 0; border-right: 0; }
+.vd-pop.left { transform-origin: 100% var(--a); }
+.vd-pop.left::before { right: -10px; top: calc(var(--a) - 9px); border-bottom: 0; border-left: 0; }
+.vd-pop.below { transform-origin: var(--a) 0; }
+.vd-pop.below::before { top: -10px; left: calc(var(--a) - 9px); border-bottom: 0; border-right: 0; }
+.vd-pop .vd-detail-head { margin-bottom: 2px; }
+.vd-pop-x { border: 1px solid var(--vd-rule); background: var(--vd-bg); border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 600; color: var(--vd-ink); }
+.vd-pop-x:hover { border-color: var(--vd-ink); }
+.vd-pop .vd-ring-q { font-size: 17px; }
+.vd-pop .vd-ring-mine { margin-bottom: 6px; }
+@keyframes vd-popin { from { opacity: 0; transform: scale(.9); } }
+@media (max-width: 759px) {
+  .vd-pop { width: calc(100vw - 24px); }
+  .vd-pop-in { max-height: 64vh; }
+}
+@media (prefers-reduced-motion: reduce) { .vd-pop { animation: none; } .vd-mm-mark .ping { animation: none; } }
+
+/* the tapped tile, marked so the pop-up's pointer has something to point at */
+.vd-mm-mark { pointer-events: none; }
+.vd-mm-mark .dot { fill: var(--vd-panel); stroke: var(--vd-ink); stroke-width: 2.5; }
+.vd-mm-mark .ping { fill: none; stroke: var(--vd-ink); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: vd-ping 1.6s ease-out infinite; }
+@keyframes vd-ping { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(2.8); } }
