@@ -170,8 +170,11 @@ export async function mapLive(question, {
   let status = map.status;
   let thin = false;
   if (status === 'mapped' && (views.length < 2 || !cruxes.length)) { status = 'none'; thin = true; }
+  // The headline counts views; make it match the views that survived sourcing.
+  const WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five'];
+  const headline = String(map.headline || '').replace(/^(One|Two|Three|Four|Five|\d) main views/i, `${WORDS[views.length] || views.length} main views`);
   const out = {
-    ...map, status,
+    ...map, status, headline,
     views: status === 'mapped' ? views : [], cruxes: status === 'mapped' ? cruxes : [],
     wording: { ...map.wording, leansAwayFrom: map.wording.leansAwayFrom.filter((id) => keep.has(id)) },
     question: q, at: now, live: true, ...(thin ? { thin: true } : {}),

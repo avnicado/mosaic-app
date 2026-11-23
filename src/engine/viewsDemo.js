@@ -26,7 +26,7 @@ export const MAX_VIEWS = 4, MAX_CRUXES = 4, MAX_REASONS = 3;
 export const MAP_SYSTEM = `You map the main views people hold on a question, for a reader who knows nothing about the topic. You never answer the question yourself and never say which view is right: you show the views, what each one argues, who holds it, and the specific points they split on, so the reader can judge.
 
 Rules:
-- VIEWS: 3 or 4 positions that real organisations and people hold today. Cover the range, from the mainstream position of major institutions to the strongest dissenting ones; on a scientific question, the view of the major scientific or health bodies is one view, described as theirs. Name each view in 2-4 everyday words by its position ("Keep every routine shot", "Build much more nuclear"), never by party or tribe. "short" is a 1-2 word tag. The summary is one sentence, fair, as its own holders would put it. "who" names the organisations and people who hold it, plainly, so the reader can see how widely it is held. Name only holders you are sure of, with their real titles and countries; fewer and right beats more and wrong.
+- VIEWS: 3 or 4 positions that real organisations and people hold today. Cover the range, from the mainstream position of major institutions to the strongest dissenting ones; on a scientific question, the view of the major scientific or health bodies is one view, described as theirs. Name each view in 2-4 everyday words by its position ("Keep every routine shot", "Build much more nuclear"), never by party or tribe. "short" is a 1-2 word tag. The summary is one sentence, fair, as its own holders would put it. "who" names the organisations and people who hold it, plainly, so the reader can see how widely it is held. Name only holders you are sure of, with their real titles; fewer and right beats more and wrong.
 - NEUTRAL VOICE: describe each view in its holders' terms. No "rightly", "wrongly", "misinformation", "debunked", "the evidence shows" or any ruling in your own voice. The headline is one sentence that names the views and the point they split on most (e.g. "Four main views, from full bans to cleaner cars; they split most on whether bans hurt local shops."), never a restatement of the question and never an answer.
 - CRUXES: 3 or 4 specific, concrete questions the views answer differently (what would happen, what caused it, which evidence holds up, which good gives way). Never "do you care about X". Each is a short plain question a 12-year-old can read, with a left and a right answer of 2-5 words. Every crux must split the views: at least one view left and one right. A view may sit "mid" (in between, or it depends).
 - WORDING: if the question's wording takes something for granted, say what in one neutral sentence, and list the views that reject it. Otherwise null and [].
@@ -55,6 +55,7 @@ export function hostOf(url) {
 }
 
 const str = (v, n = 240) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
+const cap = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
 const kebab = (s, i) => (str(s, 40).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `view-${i + 1}`);
 
 export function cleanSource(s) {
@@ -81,7 +82,7 @@ export function normalizeMap(raw, { question = '' } = {}) {
     while (ids.has(id)) id += '-x';
     ids.add(id);
     return {
-      id, name: str(v?.name, 48), short: str(v?.short, 24) || str(v?.name, 24), summary: str(v?.summary, 280),
+      id, name: str(v?.name, 48), short: cap(str(v?.short, 24) || str(v?.name, 24)), summary: str(v?.summary, 280),
       who: str(v?.who, 320), changeMind: str(v?.changeMind, 280), search: str(v?.search, 120),
       reasons: (Array.isArray(v?.reasons) ? v.reasons : []).map((r) => ({ text: str(r?.text, 280), sources: cleanSources(r?.sources, 2) }))
         .filter((r) => r.text).slice(0, MAX_REASONS),
@@ -102,7 +103,7 @@ export function normalizeMap(raw, { question = '' } = {}) {
       if (id) positions[id] = POSITIONS.includes(String(p).toLowerCase()) ? String(p).toLowerCase() : 'mid';
     }
     for (const v of views) if (!positions[v.id]) positions[v.id] = 'mid';
-    return { question: str(c?.question, 160), left: str(c?.left, 60), right: str(c?.right, 60), why: str(c?.why, 240), positions };
+    return { question: str(c?.question, 160), left: cap(str(c?.left, 60)), right: cap(str(c?.right, 60)), why: str(c?.why, 240), positions };
   }).filter((c) => c.question && c.left && c.right);
 
   const splits = (c) => views.some((v) => c.positions[v.id] === 'left') && views.some((v) => c.positions[v.id] === 'right');
