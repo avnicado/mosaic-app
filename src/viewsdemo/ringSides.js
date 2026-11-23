@@ -15,7 +15,8 @@ export async function fetchRingSides(map, k) {
     body: JSON.stringify({ ring: {
       question: map.question, crux: { question: c.question, left: c.left, right: c.right },
       holders: Object.fromEntries(['left', 'right'].map((pos) => [pos, (map.views || [])
-        .filter((v) => c.positions?.[v.id] === pos).map((v) => `${v.name}: ${v.summary || ''}`.slice(0, 160))])),
+        .filter((v) => c.positions?.[v.id] === pos)
+        .map((v) => [v.who, v.summary || v.name].filter(Boolean).join(' — ').slice(0, 160))])),
       have: (c.reading || []).map((s) => s.url),
     } }),
   });
