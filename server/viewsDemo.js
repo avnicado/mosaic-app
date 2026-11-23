@@ -278,7 +278,7 @@ export async function ringSides(input, {
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r6:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r7:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = input?.debugCandidates ? null : await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -298,10 +298,24 @@ export async function ringSides(input, {
   // A fact-check page states a claim to refute it, so it never argues an answer;
   // left in, it crowds out the pages that do on any contested side.
   const NOT_ARGUING = ['factcheck.org', 'factcheck.afp.com', 'snopes.com', 'politifact.com', 'fullfact.org', 'healthfeedback.org', 'science.feedback.org', 'leadstories.com', 'tavily.com'];
+  // A search for the answer's bare words lands on the most-read pages on the
+  // topic, which on a contested question mostly argue one side. So the model
+  // first writes, for each answer, the search its own advocates' pages would
+  // match, in their words (no names: a name finds pages about those people,
+  // often fact-checks). On failure, the question and answer as they stand.
+  let queries = {};
+  try {
+    const out = await groqJSON({
+      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer one search (at most 12 words) that would find articles, op-eds, reports or papers by people who argue that answer, phrased the way they themselves would put it. Name no person or organisation. Output ONLY valid JSON: {"A":"...","B":"..."}',
+      prompt: `QUESTION: ${crux.question}\nAbout: ${q}\nA: ${crux.left}${holders('left') ? ` (held by: ${holders('left')})` : ''}\nB: ${crux.right}${holders('right') ? ` (held by: ${holders('right')})` : ''}`,
+      maxTokens: 400, deadline, llm,
+    });
+    queries = { left: s(out?.A, 160), right: s(out?.B, 160) };
+  } catch (e) {
+    console.warn('[views-demo] ring queries failed:', e.message);
+  }
   const sideSearch = async (answer, pos) => {
-    // The answer in its holders' own words, not their names: a name finds pages
-    // about those people (often fact-checks), the words find pages making the case.
-    const query = `${crux.question} ${answer}. ${holders(pos) || q}`.slice(0, 380);
+    const query = (queries[pos] && queries[pos].length > 8 ? queries[pos] : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
     try {
       const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
       const hosts = new Set();
@@ -327,7 +341,7 @@ export async function ringSides(input, {
   }
   const reading = [];
   if (input?.debugCandidates && process.env.VERCEL_ENV !== 'production') { // TEMP: see what the searches return
-    return { candidates: { a: a.map((r) => [r.url, r.title]), b: b.map((r) => [r.url, r.title]) } };
+    return { queries, candidates: { a: a.map((r) => [r.url, r.title]), b: b.map((r) => [r.url, r.title]) } };
   }
   if (results.length) {
     const out = await groqJSON({ system: `${RING_PICK_SYSTEM}\n\nNever pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick.`, prompt: ringPickPrompt([{ crux, results }]), maxTokens: 1000, deadline, llm });
