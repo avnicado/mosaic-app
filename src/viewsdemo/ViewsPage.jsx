@@ -63,16 +63,79 @@ function Wording({ map, focus, onFocus }) {
   );
 }
 
+const nameList = (vs) => vs.map((v) => v.name).reduce((acc, n, i, arr) => acc + (i === 0 ? '' : i === arr.length - 1 ? ' and ' : ', ') + n, '');
+const shortWho = (who) => {
+  const first = String(who || '').split(/;\s/)[0];
+  return first.length > 120 ? `${first.slice(0, 117).replace(/[\s,]+\S*$/, '')}…` : first;
+};
+
+// Every view in a line, at the top: what it says, who holds it, and a clear
+// button to highlight it everywhere on the page.
+function Overview({ map, focus, onFocus }) {
+  return (
+    <section className="vd-block" aria-labelledby="vd-overview-h">
+      <h2 id="vd-overview-h">The {map.views.length} main views</h2>
+      <p className="vd-block-sub">What people actually hold on this, and who holds it. Pick one to highlight it everywhere below.</p>
+      <ol className="vd-overview">
+        {map.views.map((v) => {
+          const on = focus === v.id;
+          return (
+            <li key={v.id} className={`vd-ov ${on ? 'on' : ''} ${focus && !on ? 'dim' : ''}`} style={{ '--c': colorOf(map, v.id) }}>
+              <span className="vd-ov-swatch" aria-hidden="true" />
+              <div className="vd-ov-body">
+                <h3 className="vd-ov-name">{v.name}</h3>
+                <p className="vd-ov-sum">{v.summary}</p>
+                {v.who && <p className="vd-ov-who"><span>Held by</span> {shortWho(v.who)}</p>}
+                <div className="vd-ov-actions">
+                  <button type="button" className="vd-ov-pick" aria-pressed={on} onClick={() => onFocus(on ? null : v.id)}>
+                    {on ? '✓ Highlighted' : 'Highlight this view'}
+                  </button>
+                  <a className="vd-ov-more" href={`#view-${v.id}`}>Its full case ↓</a>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function FocusBar({ map, focus, onFocus }) {
+  const v = map.views.find((x) => x.id === focus);
+  if (!v) return null;
+  return (
+    <div className="vd-focusbar" role="status" style={{ '--c': colorOf(map, v.id) }}>
+      <span className="vd-focusbar-dot" aria-hidden="true" />
+      <span className="vd-focusbar-text">Highlighting <b>{v.name}</b></span>
+      <button type="button" onClick={() => onFocus(null)}>Show all views</button>
+    </div>
+  );
+}
+
 function Splits({ map, focus, onFocus }) {
+  const first = map.cruxes[0];
+  const sideOf = (c, pos) => map.views.filter((v) => c.positions[v.id] === pos);
+  const answerOf = (c, id) => (c.positions[id] === 'left' ? c.left : c.positions[id] === 'right' ? c.right : 'It depends, or in between');
+  const fv = map.views.find((v) => v.id === focus);
   return (
     <section className="vd-block" aria-labelledby="vd-splits-h">
       <h2 id="vd-splits-h">Where they split</h2>
-      <p className="vd-block-sub">Each coloured tag is one of the main views. Its place on the line shows how that view answers the question. Tap a tag to follow one view.</p>
-      <ul className="vd-legend" aria-label="The main views">
-        {map.views.map((v) => (
-          <li key={v.id}><Tag map={map} view={v} focus={focus} onFocus={onFocus} small /><span>{v.name}</span></li>
-        ))}
-      </ul>
+      <p className="vd-block-sub">The views don’t just “disagree”. They answer a few specific questions differently, and these are those questions.</p>
+      <div className="vd-howto">
+        <p className="vd-howto-title">How to read it</p>
+        <ul>
+          <li>Each box is <b>one question</b> the views answer differently.</li>
+          <li>The line runs between <b>two opposite answers</b>, one at each end. Each coloured tag is a view, placed at its answer. A tag in the middle means “it depends”.</li>
+          <li>Tags on the <b>same side agree</b> on that question. Tags at <b>opposite ends</b> are where the real disagreement is.</li>
+        </ul>
+        {first && sideOf(first, 'left').length > 0 && sideOf(first, 'right').length > 0 && (
+          <p className="vd-howto-eg">
+            For example, on question 1, {nameList(sideOf(first, 'left'))} {sideOf(first, 'left').length > 1 ? 'answer' : 'answers'} “{first.left}”, while {nameList(sideOf(first, 'right'))} {sideOf(first, 'right').length > 1 ? 'answer' : 'answers'} “{first.right}”.
+          </p>
+        )}
+        <p className="vd-howto-tip">Tap any tag to highlight that view on every question.</p>
+      </div>
       <div className="vd-splits">
         {map.cruxes.map((c, i) => {
           const at = (pos) => map.views.filter((v) => c.positions[v.id] === pos);
@@ -90,6 +153,7 @@ function Splits({ map, focus, onFocus }) {
                   ))}
                 </div>
               </div>
+              {fv && <p className="vd-split-mine" style={{ '--c': colorOf(map, fv.id) }}><b>{fv.name}</b> answers: {answerOf(c, fv.id)}</p>}
               {c.why && <p className="vd-why">{c.why}</p>}
             </article>
           );
@@ -161,14 +225,17 @@ function Result({ map }) {
       )}
       {mapped && (
         <>
+          <Overview map={map} focus={focus} onFocus={setFocus} />
           <Wording map={map} focus={focus} onFocus={setFocus} />
           <Splits map={map} focus={focus} onFocus={setFocus} />
           <section className="vd-block" aria-labelledby="vd-views-h">
-            <h2 id="vd-views-h">The views, in their own words</h2>
+            <h2 id="vd-views-h">Each view’s full case</h2>
+            <p className="vd-block-sub">Its reasons in its own terms, each with the article where it’s made.</p>
             <div className="vd-cards">
               {map.views.map((v) => <ViewCard key={v.id} map={map} view={v} focus={focus} onFocus={setFocus} />)}
             </div>
           </section>
+          <FocusBar map={map} focus={focus} onFocus={setFocus} />
         </>
       )}
       {map.status === 'none' && (

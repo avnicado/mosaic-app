@@ -68,6 +68,40 @@ a { color: inherit; }
 .vd-tag.on { box-shadow: 0 0 0 2px var(--vd-bg), 0 0 0 4px var(--c); }
 .vd-tag:focus-visible { outline: 2px solid var(--vd-ink); outline-offset: 2px; }
 
+/* the views, at the top */
+.vd-overview { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+@media (min-width: 720px) { .vd-overview { grid-template-columns: 1fr 1fr; } }
+.vd-ov { --c: #555; display: flex; gap: 12px; background: var(--vd-panel); border: 1px solid var(--vd-rule); border-radius: 14px; padding: 12px 14px; transition: opacity .15s, box-shadow .15s; }
+.vd-ov.on { box-shadow: 0 0 0 2px var(--c); border-color: var(--c); }
+.vd-ov.dim { opacity: .5; }
+.vd-ov-swatch { flex: none; width: 6px; border-radius: 3px; background: var(--c); }
+.vd-ov-body { min-width: 0; flex: 1; }
+.vd-ov-name { font-family: var(--vd-serif); font-weight: 500; font-size: 19px; line-height: 1.2; margin: 0 0 4px; color: var(--c); }
+.vd-ov-sum { margin: 0 0 6px; font-size: 15px; }
+.vd-ov-who { margin: 0 0 8px; font-size: 13.5px; color: var(--vd-soft); }
+.vd-ov-who span { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--vd-faded); margin-right: 4px; }
+.vd-ov-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.vd-ov-pick { border: 1.5px solid var(--c); background: transparent; color: var(--c); font-weight: 600; font-size: 14px; padding: 6px 12px; border-radius: 999px; }
+.vd-ov-pick[aria-pressed="true"] { background: var(--c); color: #fff; }
+.vd-ov-pick:focus-visible { outline: 2px solid var(--vd-ink); outline-offset: 2px; }
+.vd-ov-more { font-size: 14px; color: var(--vd-soft); text-decoration: underline; text-decoration-color: var(--vd-rule); text-underline-offset: 2px; }
+
+/* the highlight bar */
+.vd-focusbar { --c: #555; position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); background: var(--vd-ink); color: #fff; border-radius: 999px; padding: 8px 8px 8px 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, .22); font-size: 14.5px; }
+.vd-focusbar-dot { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff; }
+.vd-focusbar-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vd-focusbar button { flex: none; border: 0; background: #fff; color: var(--vd-ink); font-weight: 600; font-size: 13.5px; padding: 6px 12px; border-radius: 999px; }
+
+/* how to read the splits */
+.vd-howto { background: var(--vd-panel); border: 1px dashed var(--vd-rule); border-radius: 14px; padding: 12px 16px; margin: 0 0 14px; font-size: 15px; }
+.vd-howto-title { margin: 0 0 4px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: var(--vd-faded); }
+.vd-howto ul { margin: 0; padding-left: 18px; }
+.vd-howto li { margin: 3px 0; }
+.vd-howto-eg { margin: 8px 0 0; padding: 8px 10px; background: var(--vd-bg); border-radius: 10px; font-size: 14.5px; color: var(--vd-soft); }
+.vd-howto-tip { margin: 8px 0 0; font-size: 14px; color: var(--vd-faded); }
+.vd-split-mine { --c: #555; margin: 8px 0 0; padding: 6px 10px; border-left: 4px solid var(--c); background: var(--vd-bg); border-radius: 0 8px 8px 0; font-size: 14.5px; }
+.vd-split-mine b { color: var(--c); }
+
 /* splits */
 .vd-splits { display: grid; gap: 12px; }
 .vd-split { background: var(--vd-panel); border: 1px solid var(--vd-rule); border-radius: 14px; padding: 14px 16px 12px; }
@@ -90,8 +124,6 @@ a { color: inherit; }
 /* view cards */
 .vd-cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
 @media (min-width: 720px) { .vd-cards { grid-template-columns: 1fr 1fr; } }
-.vd-legend { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
-.vd-legend li { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--vd-soft); }
 .vd-card { --c: #555; background: var(--vd-panel); border: 1px solid var(--vd-rule); border-top: 5px solid var(--c); border-radius: 14px; padding: 14px 16px 12px; transition: opacity .15s, box-shadow .15s; }
 .vd-card.dim { opacity: .45; }
 .vd-card.on { box-shadow: 0 0 0 2px var(--c); }
@@ -151,3 +183,5 @@ a { color: inherit; }
   .vd-ends { grid-template-columns: 1fr 1fr; }
   .vd-tag { font-size: 13px; padding: 5px 8px; margin: 2px; }
 }
+.vd-foot { padding-bottom: 64px; }
+.vd-card { scroll-margin-top: 12px; }
