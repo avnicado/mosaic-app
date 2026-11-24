@@ -41,9 +41,13 @@ export const mapPrompt = (question) => `The question: "${String(question).trim()
 
 export const PICK_SYSTEM = `You match views to real web pages found by search. You get numbered groups, one per VIEW. For each, pick up to 2 results written by someone who HOLDS and ARGUES that view: an op-ed, essay, advocacy page, position statement, report or paper making its case. Never a neutral explainer, never a piece arguing another side, and never a business listing, map, directory, shop or profile page. If nothing qualifies, pick none. Never invent a result. For each pick give: the outlet or organisation; "reason", one plain sentence (at most 30 words) stating the argument itself as its holder makes it (e.g. "Car-free streets cut asthma cases in children, says the city's health board."), never "The page states…" or "The article argues…", using only what the result text says and never as your own ruling; and "quote", at most 20 words copied exactly from the result text that shows it.
 
+Each result carries the date it was published, or "date unknown". A page written before the events the question is about cannot argue a view about them; where the question is about something still going on, prefer the most recent.
+
 Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"outlet":"...","reason":"...","quote":"..."}]}`;
 
 export const RING_PICK_SYSTEM = `You match questions to real web pages found by search. You get numbered groups, one per QUESTION, each with two opposite answers, A and B. For each group, pick up to 2 results that argue answer A and up to 2 that argue answer B, on that question itself: an op-ed, essay, position statement, report, paper, or news analysis that makes that case. Never a page that only mentions the topic, never a business listing, map, directory, shop or profile page. If nothing qualifies for a side, pick none for it. Never invent a result. For each pick give: "side" ("A" or "B"); the outlet or organisation; "says", one plain sentence (at most 30 words) stating the argument the page makes on this question as its author makes it, never "The page states…", using only what the result text says and never as your own ruling; "quote", at most 20 words copied exactly from the result text that shows it; and "title_side", which answer the page's TITLE alone argues ("A", "B", or "neither").
+
+Each result carries the date it was published, or "date unknown". The date is part of the judgement, not a detail. A page written before the events the question is about cannot argue about them: a 1997 transcript cannot argue about a war in 2022, and a study of one war cannot argue about a later one. Where the question is about something still going on, prefer the most recent pages, and never pick one that is clearly out of date on it. Where the question is a standing one (a scientific mechanism, a principle, a language's design), an older page is fine. If the date is unknown and the question turns on the period, pick none.
 
 Judge a page by what it argues as a whole, starting from its title, never by one sentence of the snippet. A snippet often states the view the page goes on to reject ("Russia saw NATO enlargement as a threat" in a piece titled "NATO enlargement is not to blame"); such a page argues the OTHER answer. Never place a page under an answer its title argues against.
 
@@ -51,14 +55,19 @@ Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"side":"A","outlet":"...
 
 export function ringPickPrompt(groups) {
   return groups.map((g, i) => {
-    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
-    return `Group ${i + 1} — QUESTION: ${g.crux.question}\n  A: ${g.crux.left}\n  B: ${g.crux.right}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
+    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}${dateOf(r) ? `, ${dateOf(r)}` : ', date unknown'}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
+    // "About" names the question the whole map is on, so a page about a
+    // different war, policy or decade can be refused. Without it the model
+    // placed pieces on Operation Cast Lead (2008) under a ring of the 2023
+    // invasion of Gaza. See docs/views-review-2026-11-24.md.
+    const about = g.about ? `  About: ${g.about}\n` : '';
+    return `Group ${i + 1} — QUESTION: ${g.crux.question}\n${about}  A: ${g.crux.left}\n  B: ${g.crux.right}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
   }).join('\n\n');
 }
 
 export function pickPrompt(groups) {
   return groups.map((g, i) => {
-    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
+    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}${dateOf(r) ? `, ${dateOf(r)}` : ', date unknown'}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
     return `Group ${i + 1} — VIEW: ${g.label}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
   }).join('\n\n');
 }
@@ -73,6 +82,128 @@ export function titleDenies(result, says) {
 
 export function hostOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+}
+
+// ---- when a page is from ---------------------------------------------------
+// Tavily is now asked for `published_date`, but it is a best estimate and it is
+// null for plenty of pages. A date in the URL is the next best thing: a fifth
+// of the results in the 2026-11-24 run carried one. Returns "YYYY" or
+// "YYYY-MM", or '' when nothing reliable is there.
+// A bare year in a title is deliberately NOT read: titles name years they only
+// discuss ("Internal Combustion Engine Bans" mentioned 2035), and a wrong date
+// is worse than none.
+const YEAR = '(19[5-9]\\d|20[0-4]\\d)';
+const MONTHS = 'jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec';
+export function dateOf(result) {
+  const published = String(result?.published || '').trim();
+  if (published) {
+    const t = Date.parse(published);
+    if (Number.isFinite(t)) {
+      const d = new Date(t);
+      // A date in the future is an estimate gone wrong.
+      if (d.getUTCFullYear() >= 1950 && t <= Date.now() + 86400e3) {
+        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+      }
+    }
+    const y = published.match(new RegExp(`\\b${YEAR}\\b`));
+    if (y) return y[1];
+  }
+  const url = String(result?.url || '');
+  let m = url.match(new RegExp(`/${YEAR}[/-](0[1-9]|1[0-2])(?:[/-](0[1-9]|[12]\\d|3[01]))?(?=[/-]|$)`));
+  if (m) return `${m[1]}-${m[2]}`;
+  if ((m = url.match(new RegExp(`/${YEAR}/`)))) return m[1];
+  // A date leading the snippet: "14 Feb 2026 — …" or "2026-02-14 …".
+  const snip = String(result?.snippet || '');
+  if ((m = snip.match(new RegExp(`^\\s*(?:\\d{1,2}\\s+)?(?:${MONTHS})[a-z]*\\.?\\s+(?:\\d{1,2},?\\s+)?${YEAR}\\b`, 'i')))) return m[1];
+  if ((m = snip.match(new RegExp(`^\\s*${YEAR}-(0[1-9]|1[0-2])-\\d\\d\\b`)))) return `${m[1]}-${m[2]}`;
+  if ((m = url.match(new RegExp(`[-_]${YEAR}[-_./]`)))) return m[1];
+  return '';
+}
+
+// ---- what is not an argument, and what standing a page has ----------------
+// A map's pieces are meant to be advocacy: someone making the case for an
+// answer. A live test on 2026-11-24 found four classes of page that cannot be
+// that, however well the model reads them:
+//   - an encyclopaedia entry (Wikipedia's "Passive nuclear safety" was placed
+//     under "Yes, designs are fail-safe")
+//   - a question-and-answer site or forum (a Stack Overflow thread, a Brainly
+//     homework answer)
+//   - a homework, essay-mill or study-notes upload (a student's persuasive
+//     speech outline on Studocu, cited as "studies of car-free districts show…")
+//   - a site's front page, which argues nothing (go.dev was cited for "Go's
+//     fast build times accelerate development speed")
+// Personal publishing platforms are here too, and that is a judgement call: a
+// Medium post can be a real essay, but the map says a view is held by
+// "organisations and people", and an anonymous post supports neither. See
+// docs/views-review-2026-11-24.md.
+const NOT_ARGUMENT_HOST = new RegExp(`(^|\\.)(${[
+  // encyclopaedias and how-to references
+  'wikipedia\\.org', 'wikiwand\\.com', 'britannica\\.com', 'fandom\\.com', 'wikihow\\.com', 'dbpedia\\.org',
+  // questions and answers, forums
+  'stackoverflow\\.com', 'stackexchange\\.com', 'superuser\\.com', 'serverfault\\.com', 'askubuntu\\.com',
+  'brainly\\.(com|in|ph|co\\.id)', 'numerade\\.com', 'answers\\.com', 'doubtnut\\.com', 'toppr\\.com',
+  // homework, essay mills, study notes
+  'studocu\\.com', 'coursehero\\.com', 'coursesidekick\\.com', 'chegg\\.com', 'scribd\\.com', 'quizlet\\.com',
+  'bartleby\\.com', 'studymode\\.com', 'gradesfixer\\.com', 'ivypanda\\.com', 'studycorgi\\.com', 'cram\\.com',
+  'enotes\\.com', 'sparknotes\\.com', 'vaia\\.com', 'studysmarter\\.co\\.uk', 'docsity\\.com', 'studylib\\.net',
+  'papersowl\\.com', 'edubirdie\\.com', 'ukessays\\.com', '123helpme\\.com', 'slideshare\\.net', 'studypool\\.com',
+  'transtutors\\.com', 'homeworklib\\.com', 'vedantu\\.com', 'byjus\\.com', 'shaalaa\\.com',
+  // personal publishing platforms
+  'medium\\.com', 'blogspot\\.com', 'wordpress\\.com', 'tumblr\\.com', 'wixsite\\.com', 'weebly\\.com',
+  'dev\\.to', 'hashnode\\.dev', 'hashmm\\.com', 'squarespace\\.com', 'blogspot\\.co\\.uk',
+].join('|')})$`, 'i');
+
+// A URL with no path of its own: a front page, a tag listing, a rolling index.
+function frontPage(url) {
+  try {
+    const u = new URL(url);
+    const p = u.pathname.replace(/\/+$/, '');
+    return p === '' || /^\/(index|home|en|news|blog|about)$/i.test(p);
+  } catch { return false; }
+}
+
+// True when the page cannot be anyone's argument, whatever the snippet says.
+export function notAnArgument(url) {
+  const h = hostOf(url);
+  return !h || NOT_ARGUMENT_HOST.test(h) || frontPage(url);
+}
+
+// What the reader needs to weigh a page, in one or two words. Mosaic does not
+// rule on a question, so a page of lesser standing is labelled rather than
+// hidden: the live test found the denial side of "Do vaccines cause autism?"
+// carried three pieces — a preprint, an open deposit and a document tabled by
+// one senator at a Senate estimates hearing — against two peer-reviewed
+// meta-analyses, and the tabled document was credited to "Australian
+// Government (APH)". Shown as a tag, the reader sees what each one is.
+const PREPRINT = /(^|\.)(arxiv\.org|biorxiv\.org|medrxiv\.org|psyarxiv\.com|chemrxiv\.org|preprints\.org|authorea\.com|researchsquare\.com|ssrn\.com|papers\.ssrn\.com|osf\.io)$/i;
+const DEPOSIT = /(^|\.)(zenodo\.org|figshare\.com|academia\.edu|researchgate\.net|scribd\.com|archive\.org|hal\.science)$/i;
+const REVIEWED = /(^|\.)(doi\.org|pmc\.ncbi\.nlm\.nih\.gov|pubmed\.ncbi\.nlm\.nih\.gov|nature\.com|science\.org|thelancet\.com|bmj\.com|nejm\.org|cell\.com|link\.springer\.com|sciencedirect\.com|onlinelibrary\.wiley\.com|tandfonline\.com|cambridge\.org|oup\.com|academic\.oup\.com|iopscience\.iop\.org|frontiersin\.org|plos\.org|jamanetwork\.com|annualreviews\.org|nber\.org|jstor\.org)$/i;
+// A submission, a tabled paper or written evidence is one party's case, not the
+// body that hosts it.
+// A submission, a tabled paper, written evidence or one witness's testimony is
+// one party's case, not the body that hosts it. Measured on the 2026-11-24 run:
+// without `testimony` and `committeedocuments`, a witness statement filed with
+// a Kentucky legislature committee came out labelled "Government or official
+// body", which is the same laundering as the Australian tabled document.
+const SUBMITTED_PATH = /(tabled[-_ ]?doc|tableddoc|\bsubmission|written[-_ ]?evidence|\bevidence[-_ ]?submitted|petition|consultation[-_ ]?response|\btestimony\b|committee[-_ ]?documents?)/i;
+// A transcript records what someone said on a day. It is not the hosting body's
+// position, and it is often decades old: a 1997 NATO transcript was cited on a
+// ring about the 2022 invasion of Ukraine.
+const TRANSCRIPT_PATH = /(\btranscripts?\b|\bremarks\b|\bspeeches\b|\bpress[-_ ]?conference)/i;
+
+export function standingOf(url) {
+  const h = hostOf(url);
+  if (!h) return '';
+  let path = '';
+  try { path = new URL(url).pathname; } catch {}
+  if (SUBMITTED_PATH.test(path)) return 'Submitted to a hearing';
+  if (TRANSCRIPT_PATH.test(path)) return 'Transcript of remarks';
+  if (PREPRINT.test(h)) return 'Preprint, not peer reviewed';
+  if (DEPOSIT.test(h)) return 'Posted to an open archive';
+  if (REVIEWED.test(h)) return 'Peer reviewed';
+  if (/\.gov(\.[a-z]{2})?$/i.test(h) || /(^|\.)(europa\.eu|who\.int|un\.org|nato\.int|parliament\.uk)$/i.test(h)) return 'Government or official body';
+  if (/\.(edu|ac\.[a-z]{2})$/i.test(h)) return 'University';
+  return '';
 }
 
 const str = (v, n = 240) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, n);

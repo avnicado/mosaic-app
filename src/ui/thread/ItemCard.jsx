@@ -100,8 +100,14 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
       <h3 className="th-card-title">
         <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(item, () => A.markOpened(item.id))}>{item.title}</a>
       </h3>
+      {/* The year matters and was never shown. Searched items used to carry no
+          publish date at all (the search was never asked for one), so every one
+          of them was stamped with the moment it was found. `published` is only
+          set when it is really known; a timestamp alone is when we found it,
+          not when it was written, so it is not shown as a date. */}
       <div className="th-card-src">
-        {[item.source, host && host !== (item.source || '').toLowerCase() ? host : null].filter(Boolean).join(' · ')}
+        {[item.source, host && host !== (item.source || '').toLowerCase() ? host : null,
+          item.published ? String(item.published).slice(0, 4) : null].filter(Boolean).join(' · ')}
       </div>
       {item.preview && <p className="th-card-preview">{item.preview}</p>}
       <div className="th-card-open">

@@ -166,4 +166,198 @@ for (const f of ['vaccines', 'social', 'nuclear']) {
   for (const v of ex.views) assert.ok(v.reasons.length >= 2 && v.reasons.every((r) => r.sources.length), `${f}/${v.id} has sourced reasons`);
 }
 
+// ---- what cannot be anyone's argument, and what standing a page has --------
+const { notAnArgument, standingOf } = await import('../src/engine/viewsDemo.js');
+for (const u of [
+  'https://en.wikipedia.org/wiki/Passive_nuclear_safety',   // an encyclopaedia entry
+  'https://stackoverflow.com/questions/2976630/how',        // a question-and-answer thread
+  'https://brainly.com/question/52757778',                  // a homework answer
+  'https://www.studocu.com/en-us/document/x/persuasive-speech-outline/1', // a student's upload
+  'https://medium.com/@someone/ban-cars-in-manhattan-401',  // a personal-platform post
+  'https://go.dev',                                         // a site's front page
+  'https://go.dev/',
+  'https://www.crisisgroup.org/',
+]) assert.equal(notAnArgument(u), true, `not an argument: ${u}`);
+for (const u of [
+  'https://www.thelancet.com/journals/lanpub/article/PIIS2468-2667(23)00120-2/fulltext',
+  'https://world-nuclear.org/information-library/nuclear-waste',
+  'https://lieber.westpoint.edu/idf-hamas-duty-to-warn',
+  'https://zenodo.org/records/17451259',
+]) assert.equal(notAnArgument(u), false, `a real argument: ${u}`);
+
+// The model writes the outlet, so it can dress a page up ("Australian
+// Government (APH)" for a document one senator tabled). The standing is read
+// off the URL instead.
+assert.equal(standingOf('https://www.aph.gov.au/-/media/Estimates/ca/add2526/Health/03_TabledDoc_SenatorRobertsAluminumAdjuvants.pdf'), 'Submitted to a hearing');
+assert.equal(standingOf('https://www.authorea.com/doi/full/10.22541/au.173714739/v7'), 'Preprint, not peer reviewed');
+// One witness's testimony filed with a committee is that witness's case, not
+// the legislature's. Without this the Kentucky filing came out labelled
+// "Government or official body".
+assert.equal(standingOf('https://apps.legislature.ky.gov/CommitteeDocuments/362/22848/03%2014%202023%20Testimony%20of%20Matt.pdf'), 'Submitted to a hearing');
+// A transcript is what someone said on a day, not the body's position, and it
+// may be decades old: a 1997 NATO transcript was cited on a ring about 2022.
+assert.equal(standingOf('https://www.nato.int/en/news-and-events/events/transcripts/1997/04/28/political-implications'), 'Transcript of remarks');
+assert.equal(standingOf('https://researchbriefings.files.parliament.uk/documents/CBP-10226/CBP-10226.pdf'), 'Government or official body');
+assert.equal(standingOf('https://zenodo.org/records/17451259'), 'Posted to an open archive');
+assert.equal(standingOf('https://pubmed.ncbi.nlm.nih.gov/24814559'), 'Peer reviewed');
+assert.equal(standingOf('https://www.nrc.gov/docs/ML2519/ML25197A463.pdf'), 'Government or official body');
+assert.equal(standingOf('https://lieber.westpoint.edu/idf-hamas-duty-to-warn'), 'University');
+assert.equal(standingOf('https://world-nuclear.org/information-library/nuclear-waste'), '', 'a trade body carries no label');
+
+// ---- when a page is from ---------------------------------------------------
+// Tavily is asked for published_date now, but it is an estimate and often null,
+// so a date in the URL is the fallback. A bare year in a TITLE is never read:
+// titles name years they only discuss.
+const { dateOf } = await import('../src/engine/viewsDemo.js');
+assert.equal(dateOf({ published: '2026-02-14T00:00:00Z', url: 'https://x.org/a' }), '2026-02');
+assert.equal(dateOf({ published: 'Thu, 13 Feb 2025 13:52:00 GMT', url: 'https://x.org/a' }), '2025-02');
+assert.equal(dateOf({ published: '2099-01-01', url: 'https://x.org/a' }), '', 'a date in the future is an estimate gone wrong');
+assert.equal(dateOf({ url: 'https://twisted.news/2026-01-26-gaza-reports.html' }), '2026-01');
+assert.equal(dateOf({ url: 'https://www.nato.int/en/events/transcripts/1997/04/28/political' }), '1997-04');
+assert.equal(dateOf({ url: 'https://maxmautner.com/2026/02/22/pedestrianization.html' }), '2026-02');
+assert.equal(dateOf({ url: 'https://cepr.net/documents/min-wage-2013-02.pdf' }), '2013');
+assert.equal(dateOf({ url: 'https://x.org/a', snippet: '14 Feb 2026 — the piece begins here' }), '2026');
+assert.equal(dateOf({ url: 'https://escholarship.org/content/qt52j400b1.pdf', title: 'Internal Combustion Engine Bans and Global Oil Use after 2035' }), '', 'a year a title merely mentions is not a date');
+assert.equal(dateOf({ url: 'https://x.org/no-date-here' }), '');
+// The date reaches the model: every line of a pick prompt carries it.
+const { ringPickPrompt } = await import('../src/engine/viewsDemo.js');
+const datedPrompt = ringPickPrompt([{ crux: { question: 'q?', left: 'A', right: 'B' }, about: 'the map question',
+  results: [{ title: 'T', url: 'https://x.org/2019/05/p', snippet: 'a snippet' }, { title: 'U', url: 'https://x.org/p', snippet: 'another' }] }]);
+assert.match(datedPrompt, /\(x\.org, 2019-05\)/, 'a known date is shown');
+assert.match(datedPrompt, /\(x\.org, date unknown\)/, 'an unknown one is said to be unknown');
+assert.match(datedPrompt, /About: the map question/);
+
+// ---- the pieces on one ring's question (ringSides) -------------------------
+const { ringSides, RING_PER_HOUR_PER_IP } = await import('../server/viewsDemo.js');
+const RS = (url, title, snippet) => ({ url, title, snippet: snippet || 'A page that makes its case at some length, with enough words in it to be usable.' });
+const RING_IN = {
+  question: 'Should cities ban cars downtown?',
+  crux: { question: 'Will bans hurt downtown shops?', left: 'Yes, sales drop', right: 'No, foot traffic rises' },
+  holders: { left: ['Keep cars: shops need drivers'], right: ['Full ban: streets for people'] },
+  have: [],
+};
+// Side A gets two pages that cannot be arguments and one that can; side B gets
+// a preprint and a page whose title argues the other answer.
+const RING_RESULTS = {
+  A: [RS('https://en.wikipedia.org/wiki/Pedestrian_zone', 'Pedestrian zone - Wikipedia'),
+      RS('https://brainly.com/question/1', 'Why do car bans hurt shops? - Brainly'),
+      RS('https://retailers.example.org/parking-and-sales', 'Parking fees cut customer visits and sales')],
+  B: [RS('https://www.authorea.com/doi/full/10.1/v1', 'Car-free streets raise retail takings'),
+      RS('https://trade.example.org/no-harm', 'Car-free streets are not a threat to shops')],
+};
+let ringLLM = 0, ringSearches = [];
+const ringCalls = async (body) => {
+  ringLLM++;
+  const sys = body.messages[0].content;
+  if (sys.startsWith('You write web searches')) {
+    assert.match(body.messages[1].content, /About: Should cities ban cars downtown\?/, 'the map question goes into the query call');
+    return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ A: 'parking fees cut shop sales', B: 'car free streets retail takings rise' }) } }] } };
+  }
+  // The pick call sees only the pages that could be an argument, in one list.
+  const prompt = body.messages[1].content;
+  assert.match(prompt, /About: Should cities ban cars downtown\?/, 'the map question goes into the pick call');
+  assert.ok(!/wikipedia|Brainly/i.test(prompt), 'an encyclopaedia entry and a homework answer never reach the model');
+  const urls = [...prompt.matchAll(/^  (\d+)\. (.+?) \(/gm)].map((m) => m[2]);
+  assert.deepEqual(urls, ['Parking fees cut customer visits and sales', 'Car-free streets raise retail takings', 'Car-free streets are not a threat to shops']);
+  return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+    { result: 1, side: 'A', outlet: 'Retailers', says: 'Parking fees cut customer visits and lower sales for shops.', title_side: 'A' },
+    { result: 2, side: 'B', outlet: 'Authorea', says: 'Car-free streets raise retail takings across the district.', title_side: 'B' },
+    { result: 3, side: 'B', outlet: 'Trade body', says: 'Shops do just as well.', title_side: 'A' },  // its title argues A → dropped
+    { result: 1, side: 'B', says: 'the same page on the other side' },                                 // same page → dropped
+  ] }) } }] } };
+};
+const ringSearch = async (q, opts) => {
+  ringSearches.push({ q, excluded: (opts?.excludeDomains || []).length });
+  return /parking/.test(q) ? RING_RESULTS.A : RING_RESULTS.B;
+};
+const r1 = await ringSides(RING_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async () => true });
+assert.equal(ringLLM, 2, 'one call writes the searches, one picks the pages');
+assert.equal(ringSearches.length, 2, 'one search per answer');
+assert.ok(ringSearches.every((x) => x.excluded > 0), 'fact-check sites are excluded at the search');
+assert.deepEqual(r1.reading.map((x) => x.side), ['left', 'right'], 'one piece per side; the wrong-side page is dropped');
+assert.equal(r1.reading[0].url, 'https://retailers.example.org/parking-and-sales');
+assert.equal(r1.reading[1].url, 'https://www.authorea.com/doi/full/10.1/v1');
+
+// Asked again, nothing is paid for twice.
+const r2 = await ringSides(RING_IN, { ip: 'r', unlimited: true, llm: async () => assert.fail('cached'), search: async () => assert.fail('cached'), check: async () => true });
+assert.equal(r2.cached, true);
+assert.equal(r2.reading.length, 2);
+// A page already on the ring is not offered again.
+const r3 = await ringSides({ ...RING_IN, have: ['https://retailers.example.org/parking-and-sales'] }, { ip: 'r', unlimited: true, llm: async () => assert.fail('cached'), search: async () => assert.fail('cached') });
+assert.equal(r3.reading.length, 1, 'a page the ring already shows is left out');
+
+// A ring that found nothing is cached too, so the "Try again" in the pop-up is
+// free for a while. One in five rings comes back empty after a full price of
+// searches and model calls.
+const EMPTY_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Does anything argue this at all?' } };
+let emptyCalls = 0;
+const emptyLLM = async (body) => {
+  emptyCalls++;
+  return body.messages[0].content.startsWith('You write web searches')
+    ? { status: 200, json: { choices: [{ message: { content: JSON.stringify({ A: 'a', B: 'b' }) } }] } }
+    : { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [] }) } }] } };
+};
+const e1 = await ringSides(EMPTY_IN, { ip: 'r', unlimited: true, llm: emptyLLM, search: ringSearch, check: async () => true });
+assert.equal(e1.reading.length, 0);
+const e2 = await ringSides(EMPTY_IN, { ip: 'r', unlimited: true, llm: emptyLLM, search: ringSearch, check: async () => true });
+assert.equal(e2.cached, true, 'an empty ring is held briefly, so a retry is free');
+assert.equal(emptyCalls, 2, 'and costs no further model calls');
+
+// An answer left empty gets a second search, in the other wording the query
+// call wrote, and one more picking call. Half the rings in the live run showed
+// one answer with articles and the other with none.
+const SECOND_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Does the second pass find the other side?' } };
+let qCalls = 0, pickCalls = 0, searched = [], secondSys = '', secondPrompt = '';
+const secondLLM = async (body) => {
+  const sys = body.messages[0].content;
+  if (sys.startsWith('You write web searches')) {
+    qCalls++;
+    return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ A: 'first A words', A2: 'other A words', B: 'first B words', B2: 'other B words' }) } }] } };
+  }
+  pickCalls++;
+  if (pickCalls === 1) {
+    return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+      { result: 1, side: 'A', outlet: 'One', says: 'Only side A turns up on the first wording.', title_side: 'A' },
+    ] }) } }] } };
+  }
+  // Recorded, not asserted here: the second pass is wrapped in a try/catch so a
+  // failure can never cost what the first round found, and an assertion thrown
+  // in here would be swallowed by it.
+  secondSys = sys;
+  secondPrompt = body.messages[1].content;
+  return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+    { result: 1, side: 'A', outlet: 'Ignored', says: 'A page for the side that is already full.', title_side: 'A' },
+    { result: 1, side: 'B', outlet: 'Two', says: 'The other side, found only by the second wording.', title_side: 'B' },
+  ] }) } }] } };
+};
+const secondSearch = async (q) => {
+  searched.push(q);
+  if (/other [AB] words/.test(q)) return [RS('https://b-side.example.org/only-on-the-second-wording', 'Car-free streets lift takings, the second case')];
+  return [RS('https://a-side.example.org/first', 'Parking fees cut shop sales')];
+};
+const sec = await ringSides(SECOND_IN, { ip: 'r', unlimited: true, llm: secondLLM, search: secondSearch, check: async () => true });
+assert.equal(qCalls, 1, 'the fallback wording comes from the one query call, not a second one');
+assert.equal(pickCalls, 2, 'one picking call per round');
+assert.deepEqual(searched, ['first A words', 'first B words', 'other B words'], 'only the empty answer is searched again');
+assert.deepEqual(sec.reading.map((x) => x.side), ['left', 'right'], 'both answers now have a piece');
+assert.equal(sec.reading[1].url, 'https://b-side.example.org/only-on-the-second-wording');
+assert.equal(sec.reading.filter((x) => x.side === 'left').length, 1, 'the full side gains nothing from the second round');
+assert.match(secondSys, /Only these answers are still open: B\b/, 'the second call is told only B is open');
+assert.match(secondPrompt, /Car-free streets lift takings, the second case \(b-side\.example\.org/, 'it sees the page the fallback wording found');
+
+// A dead link never reaches the reader.
+const DEAD_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Is the link alive?' } };
+const dead = await ringSides(DEAD_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async (u) => !u.includes('authorea') });
+assert.deepEqual(dead.reading.map((x) => x.side), ['left'], 'the page that would not open is gone');
+
+// a missing answer → a clear 400, not a crash
+await assert.rejects(() => ringSides({ question: 'x?', crux: { question: 'y?', left: 'a' } }, { ip: 'r', unlimited: true }), (e) => e.status === 400);
+// per-address cap on rings
+await assert.rejects(async () => {
+  for (let i = 0; i < RING_PER_HOUR_PER_IP + 2; i++) {
+    await ringSides({ ...RING_IN, crux: { ...RING_IN.crux, question: `Capped question number ${i}?` } }, { ip: 'capped', llm: emptyLLM, search: ringSearch, check: async () => true });
+  }
+}, (e) => e.status === 429);
+
+
 console.log('views-demo smoke: ok');

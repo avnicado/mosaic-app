@@ -104,6 +104,13 @@
 .vd-src a { font-weight: 600; text-decoration: underline; text-decoration-color: rgba(143, 36, 24, .35); text-underline-offset: 2px; color: var(--vd-accent); overflow-wrap: anywhere; }
 .vd-src a:hover { text-decoration-color: var(--vd-accent); }
 .vd-src-meta { display: block; font-size: 13px; color: var(--vd-faded); }
+/* What the page is: a preprint, an open archive, a hearing submission, a
+   peer-reviewed paper. Read off the URL, not written by the model. */
+.vd-src-standing {
+  display: inline-block; margin-top: 3px; padding: 1px 7px; border-radius: 999px;
+  font-size: 11.5px; letter-spacing: .01em; color: var(--vd-faded);
+  border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+}
 .vd-src-quote { display: block; font-size: 14px; font-style: italic; color: var(--vd-soft); margin-top: 2px; }
 .vd-srcs.inline .vd-src { padding: 2px 0; font-size: 14.5px; }
 

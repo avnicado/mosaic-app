@@ -237,6 +237,11 @@ function toItem(r, target, now) {
     excerpt: r.snippet.replace(/\s+/g, ' ').trim().slice(0, 400),
     url: r.url,
     source: host,
+    // When the page says it was published, kept as its own field. `timestamp`
+    // falls back to "now", which is when we found it, not when it was written:
+    // until the search was asked for `published_date` that fallback was taken
+    // every single time, so every searched item looked like it appeared today.
+    ...(Number.isFinite(ts) && ts <= now ? { published: new Date(ts).toISOString().slice(0, 10) } : {}),
     timestamp: Number.isFinite(ts) && ts <= now ? ts : now,
     // Search results carry no votes or comments; model them the way the RSS
     // items are modelled, and say so.

@@ -7,7 +7,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import DemoMandala, { answerText, anchorPoint } from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
-import { closestTo, SOURCE_COUNT, hostOf, titleDenies } from '../engine/viewsDemo.js';
+import { closestTo, SOURCE_COUNT, hostOf, titleDenies, notAnArgument, standingOf, dateOf } from '../engine/viewsDemo.js';
 import { Icon } from '../ui/icons.jsx';
 import { fetchRingSides } from './ringSides.js';
 
@@ -33,11 +33,23 @@ const fmtDate = (d) => {
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
 };
 
+// The outlet is written by the model, so it can give a page more standing than
+// it has: a document tabled by one senator at a hearing came back credited to
+// "Australian Government (APH)". The standing is read off the URL instead, and
+// shown beside the outlet, so the reader can weigh the page themselves. Mosaic
+// does not rule on a question, so a page of lesser standing is labelled, never
+// hidden. See docs/views-review-2026-11-24.md.
 function SourceLink({ s, withQuote = true }) {
+  const standing = standingOf(s.url);
+  // Maps saved before the search was asked for a publish date carry none, so
+  // the URL is read for one. A piece's year is not a detail here: a 1997
+  // transcript was cited on a question about 2022.
+  const when = s.date || dateOf(s);
   return (
     <li className="vd-src">
       <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title || hostOf(s.url)}<span aria-hidden="true"> ↗</span></a>
-      <span className="vd-src-meta">{[s.author, s.outlet || hostOf(s.url), fmtDate(s.date)].filter(Boolean).join(' · ')}</span>
+      <span className="vd-src-meta">{[s.author, s.outlet || hostOf(s.url), fmtDate(when)].filter(Boolean).join(' · ')}</span>
+      {standing && <span className="vd-src-standing">{standing}</span>}
       {withQuote && s.quote && <q className="vd-src-quote">{s.quote}</q>}
     </li>
   );
@@ -292,7 +304,11 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   // A shown side with fewer than two checked articles: look for pieces arguing it.
   // On a live map, a page whose title argues against the answer it was placed
   // under is left out; maps saved before the server checked that still hold some.
-  const fits = (r) => !map.live || !titleDenies(r, r.says);
+  // A page whose title argues against the answer it was placed under, or that
+  // cannot be anyone's argument at all (an encyclopaedia entry, a Q&A thread, a
+  // homework upload, a site's front page). The server drops both now; maps
+  // saved before it did still hold some, so they are dropped here too.
+  const fits = (r) => !map.live || (!titleDenies(r, r.says) && !notAnArgument(r.url));
   const checked = (pos) => (c.reading || []).filter((r) => r.side === pos && fits(r));
   const short = { left: checked('left').length < 2, right: checked('right').length < 2 };
   const few = shown.some((pos) => short[pos]);
