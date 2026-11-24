@@ -204,3 +204,84 @@ for r in res:
             print(f"      says : {x['says'][:160]}")
             if x.get('quote'):
                 print(f"      quote: {x['quote'][:120]}")
+
+# ---- what the 2026-11-24 changes were meant to do --------------------------
+print()
+print('=' * 78)
+print('DATES (include_published_date + the URL fallback)')
+print('=' * 78)
+import importlib.util, subprocess, json as _json
+# dateOf lives in the engine; ask node for it rather than reimplement the rules.
+urls = []
+for r in res:
+    for s in r['search']:
+        for x in s['results']:
+            urls.append({'url': x['url'], 'published': x.get('published') or '', 'snippet': (x.get('snippet') or '')[:120], 'title': x.get('title') or ''})
+piece_rows = []
+for r in res:
+    for e in r['rings']:
+        for x in (e['reading'] or []):
+            piece_rows.append({'q': r['q'], 'ring': e['question'], 'side': x['side'],
+                               'ans': e['left'] if x['side'] == 'left' else e['right'],
+                               'url': x['url'], 'outlet': x.get('outlet', ''), 'date': x.get('date', ''),
+                               'title': x.get('title', ''), 'says': x.get('says', '')})
+raw = _json.dumps({'results': urls, 'pieces': piece_rows})
+helper = r'''
+let buf=''; process.stdin.on('data',d=>buf+=d).on('end',async()=>{
+  const { dateOf, standingOf } = await import(new URL('../../src/engine/viewsDemo.js', import.meta.url).href);
+  const d = JSON.parse(buf);
+  const withTavily = d.results.filter(r=>r.published).length;
+  const withAny = d.results.filter(r=>dateOf(r)).length;
+  console.log(`  search results: ${d.results.length}`);
+  console.log(`    a date from Tavily:        ${withTavily} (${(100*withTavily/d.results.length).toFixed(0)}%)`);
+  console.log(`    a date after the fallback: ${withAny} (${(100*withAny/d.results.length).toFixed(0)}%)`);
+  const yr=new Map();
+  for (const r of d.results){const h=dateOf(r); if(h) yr.set(h.slice(0,4),(yr.get(h.slice(0,4))||0)+1);}
+  console.log('    by year: '+[...yr].sort().map(([y,n])=>y+':'+n).join(' '));
+  console.log(`  shown pieces: ${d.pieces.length}, with a date ${d.pieces.filter(p=>p.date).length}`);
+  const st=new Map();
+  for (const p of d.pieces){const s=standingOf(p.url)||'(none)'; st.set(s,(st.get(s)||0)+1);}
+  console.log('  standing of the pieces:');
+  for (const [s,n] of [...st].sort((a,b)=>b[1]-a[1])) console.log(`    ${String(n).padStart(3)}  ${s}`);
+  const old=d.pieces.filter(p=>p.date && Number(p.date.slice(0,4))<=2022);
+  console.log(`  pieces dated 2022 or earlier: ${old.length}`);
+  for (const p of old) console.log(`    ${p.date}  ${p.q.slice(0,34).padEnd(34)} | ${p.ring.slice(0,32).padEnd(32)} | ${p.url.slice(0,52)}`);
+});
+'''
+# The helper must sit beside this file, so its relative import of the engine
+# resolves; writing it to /tmp broke that.
+_here = __import__('pathlib').Path(__file__).parent
+_helper = _here / '_dates.tmp.mjs'
+_helper.write_text(helper)
+try:
+    out = subprocess.run(['node', str(_helper)], input=raw, capture_output=True, text=True, cwd=str(_here))
+    print(out.stdout or out.stderr[:900])
+except Exception as e:
+    print('  (could not run the node helper:', e, ')')
+finally:
+    _helper.unlink(missing_ok=True)
+
+print()
+print('=' * 78)
+print('THE SECOND SEARCH FOR AN EMPTY SIDE')
+print('=' * 78)
+print('  A ring that fired it makes 3 searches and 2 picking calls, not 2 and 1.')
+fired2 = filled = 0
+for r in res:
+    for e in r['rings']:
+        if not e['fired']:
+            continue
+        ph = f"ring{e['k']}"
+        srch = [s for s in r['search'] if s['phase'] == ph]
+        picks = [c for c in r['llm'] if c['phase'] == ph and c['stage'] == 'ring-pick']
+        # retries inside groqJSON repeat a stage, so count distinct rounds by searches
+        second = len(srch) >= 3
+        sides = {x['side'] for x in (e['reading'] or [])}
+        both = len(sides) == 2
+        if second:
+            fired2 += 1
+            if both:
+                filled += 1
+        print(f"  {'2nd ' if second else '    '}{'BOTH' if both else ('ONE ' if sides else 'NONE')}  "
+              f"{r['q'][:30]:30} | {e['question'][:40]:40} searches={len(srch)} picks={len(picks)}")
+print(f'  --- the second search ran on {fired2} rings; {filled} of those ended with both sides')

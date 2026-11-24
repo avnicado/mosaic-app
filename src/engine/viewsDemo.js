@@ -151,6 +151,13 @@ const NOT_ARGUMENT_HOST = new RegExp(`(^|\\.)(${[
   // personal publishing platforms
   'medium\\.com', 'blogspot\\.com', 'wordpress\\.com', 'tumblr\\.com', 'wixsite\\.com', 'weebly\\.com',
   'dev\\.to', 'hashnode\\.dev', 'hashmm\\.com', 'squarespace\\.com', 'blogspot\\.co\\.uk',
+  'plainenglish\\.io',
+  // Video and audio hosts. A ring piece is a page with a line quoted from it
+  // and a link the reader opens; a video is neither, and `linkLoads` can only
+  // say that the player loaded. A YouTube video was cited as an argument that
+  // the moon landings were real.
+  'youtube\\.com', 'youtu\\.be', 'vimeo\\.com', 'dailymotion\\.com', 'rumble\\.com', 'odysee\\.com',
+  'soundcloud\\.com', 'podbean\\.com', 'buzzsprout\\.com', 'spotify\\.com',
 ].join('|')})$`, 'i');
 
 // A URL with no path of its own: a front page, a tag listing, a rolling index.

@@ -177,6 +177,11 @@ for (const u of [
   'https://go.dev',                                         // a site's front page
   'https://go.dev/',
   'https://www.crisisgroup.org/',
+  // A ring piece is a page with a line quoted from it. A video is not one, and
+  // a YouTube video was cited as an argument that the moon landings were real.
+  'https://www.youtube.com/watch?v=abc123',
+  'https://youtu.be/abc123',
+  'https://aws.plainenglish.io/rust-vs-go-backend-1234',
 ]) assert.equal(notAnArgument(u), true, `not an argument: ${u}`);
 for (const u of [
   'https://www.thelancet.com/journals/lanpub/article/PIIS2468-2667(23)00120-2/fulltext',

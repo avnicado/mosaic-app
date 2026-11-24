@@ -476,12 +476,110 @@ again; it does not accept a weaker page. A side with nothing is still shown with
 nothing, because the alternative is to put a page under an answer it does not
 argue, which is finding 2 all over again.
 
+## Live verification, 2026-11-24 evening (Haiku backend)
+
+Groq's free tier allows **2,000 tokens a day** on `openai/gpt-oss-120b`, not the
+8K-per-minute the code comment describes, and one probe spends it. A Groq rerun
+came back 89% rate-limited with 13 of 14 maps failing outright. The run below
+went through the local Claude CLI instead
+(`LLM_BACKEND=claude CLAUDE_MODEL=haiku`), on a fresh Tavily key.
+
+**Read this as a check, not a measurement.** Haiku is a stronger model than
+`gpt-oss-120b`, so any change in pick quality is the model and the fixes
+together and the two cannot be separated from one run. The date and
+second-search numbers are plumbing and are not affected by that.
+
+| Measure | Groq, before | Haiku, after |
+|---|---|---|
+| Mapped | 14 of 14 | 14 of 14 |
+| Model calls | 218 | **153** |
+| …429 | 82 (38%) | **0** |
+| Searches | 189 | 209 |
+| Rings tapped | 46 | 42 |
+| …both answers have pieces | 22 (48%) | **16 (38%)** |
+| …one answer only | 15 (33%) | **21 (50%)** |
+| …nothing | 9 (20%) | **5 (12%)** |
+| Pieces shown | 91 | 79 |
+
+### What is fixed, and verified
+
+**The date works.** 1,090 of 1,820 results (60%) came back with a Tavily
+publish date, and 65% have one after the URL fallback. 57 of the 79 shown
+pieces carry a date, where the figure was 0 before. The year spread is sane and
+weighted to the present: 2026:299, 2025:211, 2024:159, 2023:137, tailing back
+to a single 1959.
+
+**The wrong-war failure is gone.** Every one of the seven Gaza pieces is from
+2023–2025 and about this war: Taylor & Francis, the Modern War Institute, the
+Lieber Institute, Brown's Costs of War, OHCHR, the WSJ, the AJC. Operation Cast
+Lead does not appear. The `About:` line in the pick prompt did that.
+
+**Pages that cannot be an argument are gone.** 1 of 79 pieces slipped through
+(`levelupgo.dev`, a tutorial site). Wikipedia, Britannica, Medium, Stack
+Overflow, `go.dev`, `dev.to` and `twisted.news` are all absent, where this
+morning they were cited as sides' advocates.
+
+**The dates kept are the right ones.** A 1990 document on "Did NATO make
+promises not to expand east?" was kept, which is correct — that ring is about
+1990. Mearsheimer 2019 survives on the NATO map, and the 2022 *Science* paper
+on the earliest COVID cases survives on the origins map. The prompt's clause
+allowing an older page for a standing question is holding.
+
+### What is not fixed
+
+**Both sides still do not have pieces.** This was the goal and it is not met.
+The second search ran on **27 of 42 rings and ended with both sides on only
+5 of them**. It mostly converts "nothing" into "one answer" rather than "one
+answer" into "both": empty rings fell from 20% to 12%, but one-sided rings rose
+from 33% to 50%, and both-sides fell from 48% to 38%.
+
+Part of that fall is the new filters doing their job — fewer pieces (91 → 79)
+because the junk and the wrong-period pages are gone. Part of it is real: the
+answers that stay empty are the ones almost nobody writes. "Do missing tapes
+mean a cover-up?", "Do large population studies find a link?", "Do workers get
+more done at home?" — a second wording does not conjure advocates who are not
+there.
+
+So a second search is not enough on its own. The remaining options are a
+judgement call, not a bug fix: say on the ring that nothing arguing an answer
+could be found and that this may be the world rather than the search; or let a
+side stand on a weaker page and label it; or accept one-sided rings.
+
+**45 of the 79 pieces carry no standing label.** `standingOf` can read a
+journal, a government domain, a university, a preprint, an open archive and a
+hearing submission off a hostname. It cannot read an advocacy site, a trade
+body, a content mill or a personal newsletter, and those are now the bulk of
+the unlabelled:
+
+| Piece | What it is | Label shown |
+|---|---|---|
+| `aulis.com` | a moon-hoax publisher | none |
+| `themoonisweird.com` | a hobby site | none |
+| `theunbiasedscipod.substack.com` | a podcast newsletter | none |
+| `koder.ai`, `kore1.com` | an AI tool's blog, a recruiting firm | none |
+| `energyethics.st-andrews.ac.uk` | a university blog | University |
+
+`aulis.com` arguing the moon-hoax side is, under your decision of 2026-11-23,
+the honest source for that view. The problem is that it sits beside a NASA page
+with nothing to tell the reader they are different kinds of thing. That is
+finding 1 again, in a place the URL cannot reach.
+
+**Fixed in this pass:** video and audio hosts are now in `notAnArgument`. A
+YouTube video had been cited as an argument that the moon landings were real,
+and a ring piece is a page with a line quoted from it — `linkLoads` can only
+say the player loaded.
+
 ## Still open
 
 - Source standing beyond the URL. `world-nuclear.org` is a trade body and
   `cato.org`, `epi.org` and `epionline.org` are advocacy organisations; nothing
   says so, and `standingOf` has no honest way to tell from a hostname.
 - Finding 5: a page used to argue against its own side.
+- **Groq's free tier is 2,000 tokens a day on `openai/gpt-oss-120b`.** The
+  comment in `server/viewsDemo.js` says 8K a minute. One live map plus its rings
+  spends the day's budget, so the live site can map roughly one question a day
+  on the free key. That, not the prompt sizes, is the binding limit today.
+- **Standing beyond the URL**, now the largest gap: 45 of 79 pieces unlabelled.
 - Finding 8: the `ring-pick` prompt's size. Cutting it from 10 results to 6, or
   the snippets from 320 characters to 200, is the measured lever on the 429
   rate; neither was changed here, because it trades pick quality for latency and
