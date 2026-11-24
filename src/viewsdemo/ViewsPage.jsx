@@ -7,7 +7,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import DemoMandala, { answerText, anchorPoint } from './DemoMandala.jsx';
 import { EXAMPLES, exampleFor } from './examples.js';
-import { closestTo, SOURCE_COUNT, hostOf } from '../engine/viewsDemo.js';
+import { closestTo, SOURCE_COUNT, hostOf, titleDenies } from '../engine/viewsDemo.js';
 import { Icon } from '../ui/icons.jsx';
 import { fetchRingSides } from './ringSides.js';
 
@@ -290,12 +290,15 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   const only = mine === 'left' || mine === 'right' ? mine : null;
   const shown = only ? [only] : ['left', 'right'];
   // A shown side with fewer than two checked articles: look for pieces arguing it.
-  const checked = (pos) => (c.reading || []).filter((r) => r.side === pos);
+  // On a live map, a page whose title argues against the answer it was placed
+  // under is left out; maps saved before the server checked that still hold some.
+  const fits = (r) => !map.live || !titleDenies(r, r.says);
+  const checked = (pos) => (c.reading || []).filter((r) => r.side === pos && fits(r));
   const short = { left: checked('left').length < 2, right: checked('right').length < 2 };
   const few = shown.some((pos) => short[pos]);
   useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
   const filling = few && !!onItems;
-  const found = (pos) => (filling && short[pos] ? (items?.reading || []).filter((r) => r.side === pos) : []);
+  const found = (pos) => (filling && short[pos] ? (items?.reading || []).filter((r) => r.side === pos && fits(r)) : []);
   const looking = filling && (!items || items.loading);
   const M = map.cruxes.length;
   const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]].filter(([pos]) => shown.includes(pos));
@@ -478,6 +481,13 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
     window.addEventListener('keydown', esc);
     return () => window.removeEventListener('keydown', esc);
   }, [viewOpen, wide]);
+  // On a thread page, the side column's list of questions opens a ring here.
+  useEffect(() => {
+    if (!embedded) return undefined;
+    const open = (e) => { if (e.detail?.question === map.question && map.cruxes[e.detail.k]) { setRing(e.detail.k); setShow('ring'); } };
+    window.addEventListener('mosaic:views-ring', open);
+    return () => window.removeEventListener('mosaic:views-ring', open);
+  }, [embedded, mapKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // A view's case: tap its name, its row or its tag.
   const pickView = (id) => { setFocus(id); setRing(null); setShow(id ? 'view' : null); };
   // A question: tap its ring number or its card.

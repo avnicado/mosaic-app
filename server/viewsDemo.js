@@ -19,7 +19,7 @@ import { hashGet, hashUpdate, hashIncr } from './store.js';
 import { safeResultUrl } from './further.js';
 import { hashString } from './corpus.js';
 import { parseJSON, suggestedWaitMs } from '../src/engine/llm.js';
-import { MAP_SYSTEM, PICK_SYSTEM, RING_PICK_SYSTEM, mapPrompt, pickPrompt, ringPickPrompt, normalizeMap, hostOf } from '../src/engine/viewsDemo.js';
+import { MAP_SYSTEM, PICK_SYSTEM, RING_PICK_SYSTEM, mapPrompt, pickPrompt, ringPickPrompt, normalizeMap, hostOf, titleDenies } from '../src/engine/viewsDemo.js';
 
 export const DEMO_PER_DAY = Number(process.env.VIEWS_DEMO_PER_DAY || 60);
 export const DEMO_PER_HOUR_PER_IP = Number(process.env.VIEWS_DEMO_PER_HOUR || 8);
@@ -90,6 +90,24 @@ export function reportedNotArgued(result, says) {
   return PAGE_REFUTES.test(page) && !SAYS_REFUTES.test(String(says || ''));
 }
 
+// A page whose title denies a claim, placed under the answer that makes the
+// claim. The model read "Russia saw the enlargement of NATO as a threat to its
+// security" in the snippet of an LSE piece titled "NATO enlargement is not to
+// blame for Russia's war in Ukraine" and put it under "Yes, NATO provoked it":
+// the snippet stated the view the page goes on to reject. So when the title
+// denies something and the line it is cited for denies nothing, it is dropped.
+// Like the guard above, this loses some good pages; a page on the wrong side
+// costs more.
+// (titleDenies lives in src/engine/viewsDemo.js: the page uses it too, on maps
+// saved before it existed.)
+// The model also says which answer the title alone argues; a page whose title
+// argues the other answer is never placed under this one.
+const titleAgainst = (p, side) => {
+  const t = String(p?.title_side || '').trim().toUpperCase();
+  return (side === 'left' && t === 'B') || (side === 'right' && t === 'A');
+};
+export const wrongSide = (p, r, side, says) => titleDenies(r, says) || titleAgainst(p, side);
+
 // "The page states that X" → "X": a reason is the view's own point, not a note about a page.
 export function tidyReason(v) {
   let t = String(v || '').replace(/\s+/g, ' ').trim();
@@ -136,7 +154,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v5:${hashString(norm(q))}`; // v5: the picking guards changed what a map may contain
+  const key = `v6:${hashString(norm(q))}`; // v6: pages whose title argues the other answer are dropped
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
@@ -235,7 +253,7 @@ export async function mapLive(question, {
     if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
     const src = srcOf(p, r);
     const text = tidyReason(p.reason);
-    if (reportedNotArgued(r, text || '')) continue;
+    if (reportedNotArgued(r, text || '') || titleDenies(r, text || '')) continue;
     g.ref.reasons.push({ text: text || (src.quote ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
     picked.push(src);
   }
@@ -245,7 +263,7 @@ export async function mapLive(question, {
     const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
     if (!g || !r || !side || g.crux.reading.some((x) => x.url === r.url) || g.crux.reading.filter((x) => x.side === side).length >= 2) continue;
     const says = tidyReason(p.says);
-    if (!says || reportedNotArgued(r, says)) continue;
+    if (!says || reportedNotArgued(r, says) || wrongSide(p, r, side, says)) continue;
     const src = { ...srcOf(p, r), side, says };
     g.crux.reading.push(src);
     picked.push(src);
@@ -321,7 +339,7 @@ export async function ringSides(input, {
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  const key = `r9:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r10:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try { const out = JSON.parse(cached); return { ...out, reading: out.reading.filter((x) => !have.has(x.url)), cached: true }; } catch {}
@@ -391,7 +409,7 @@ export async function ringSides(input, {
       const r = results[Number(p?.result) - 1];
       const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
       const says = tidyReason(p?.says);
-      if (!r || !side || says.length < 12 || reportedNotArgued(r, says) || reading.some((x) => x.url === r.url) || reading.filter((x) => x.side === side).length >= 2) continue;
+      if (!r || !side || says.length < 12 || reportedNotArgued(r, says) || wrongSide(p, r, side, says) || reading.some((x) => x.url === r.url) || reading.filter((x) => x.side === side).length >= 2) continue;
       const quote = String(p?.quote || '').replace(/\s+/g, ' ').trim();
       const hay = String(r.snippet || '').replace(/\s+/g, ' ');
       const parts = quote.split(/\s*(?:\.\.\.|…)\s*/).map((x) => x.trim()).filter((x) => x.length >= 8);

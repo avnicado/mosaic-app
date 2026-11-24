@@ -43,9 +43,11 @@ export const PICK_SYSTEM = `You match views to real web pages found by search. Y
 
 Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"outlet":"...","reason":"...","quote":"..."}]}`;
 
-export const RING_PICK_SYSTEM = `You match questions to real web pages found by search. You get numbered groups, one per QUESTION, each with two opposite answers, A and B. For each group, pick up to 2 results that argue answer A and up to 2 that argue answer B, on that question itself: an op-ed, essay, position statement, report, paper, or news analysis that makes that case. Never a page that only mentions the topic, never a business listing, map, directory, shop or profile page. If nothing qualifies for a side, pick none for it. Never invent a result. For each pick give: "side" ("A" or "B"); the outlet or organisation; "says", one plain sentence (at most 30 words) stating the argument the page makes on this question as its author makes it, never "The page states…", using only what the result text says and never as your own ruling; and "quote", at most 20 words copied exactly from the result text that shows it.
+export const RING_PICK_SYSTEM = `You match questions to real web pages found by search. You get numbered groups, one per QUESTION, each with two opposite answers, A and B. For each group, pick up to 2 results that argue answer A and up to 2 that argue answer B, on that question itself: an op-ed, essay, position statement, report, paper, or news analysis that makes that case. Never a page that only mentions the topic, never a business listing, map, directory, shop or profile page. If nothing qualifies for a side, pick none for it. Never invent a result. For each pick give: "side" ("A" or "B"); the outlet or organisation; "says", one plain sentence (at most 30 words) stating the argument the page makes on this question as its author makes it, never "The page states…", using only what the result text says and never as your own ruling; "quote", at most 20 words copied exactly from the result text that shows it; and "title_side", which answer the page's TITLE alone argues ("A", "B", or "neither").
 
-Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"side":"A","outlet":"...","says":"...","quote":"..."}]}`;
+Judge a page by what it argues as a whole, starting from its title, never by one sentence of the snippet. A snippet often states the view the page goes on to reject ("Russia saw NATO enlargement as a threat" in a piece titled "NATO enlargement is not to blame"); such a page argues the OTHER answer. Never place a page under an answer its title argues against.
+
+Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"side":"A","outlet":"...","says":"...","quote":"...","title_side":"A"}]}`;
 
 export function ringPickPrompt(groups) {
   return groups.map((g, i) => {
@@ -59,6 +61,14 @@ export function pickPrompt(groups) {
     const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
     return `Group ${i + 1} — VIEW: ${g.label}\n${lines.length ? lines.join('\n') : '  (no results)'}`;
   }).join('\n\n');
+}
+
+// A page whose title denies a claim, cited for a line that denies nothing:
+// it argues the other answer (see server/viewsDemo.js).
+const TITLE_DENIES = /\b(not to blame|not the cause|is not|are not|was not|were not|did not|does not|do not|isn['’]t|aren['’]t|wasn['’]t|weren['’]t|didn['’]t|doesn['’]t|don['’]t|myths?|wrong|false|fallacy|fiction|nonsense|overblown|overstated|exaggerated)\b/i;
+const SAYS_DENIES = /\b(not|no|never|n['’]t|unfounded|myths?|wrong|false|rejects?|disputes?|refutes?|denies|deny|exaggerat\w*|overstat\w*)\b|n['’]t\b/i;
+export function titleDenies(result, says) {
+  return TITLE_DENIES.test(String(result?.title || '')) && !SAYS_DENIES.test(String(says || ''));
 }
 
 export function hostOf(url) {
