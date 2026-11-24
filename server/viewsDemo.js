@@ -1,6 +1,7 @@
-// The views page (/views), live path: a typed question mapped on the server.
-// Public (no sign-in), so it is capped: per address per hour, and in total
-// per day, and every answer is cached so a question is only ever paid for once.
+// The views, live path: a question mapped on the server. Open to every
+// signed-in user, so it is capped: per person per hour, and in total per day
+// (the owner is not capped), and every answer is cached so a question is only
+// ever paid for once.
 //
 //   1 Groq call   maps the question (the views, who holds them, the points they split on)
 //   ≤8 searches   one per view and one per split question (Tavily, real results only)
@@ -119,7 +120,7 @@ export async function linkLoads(url, { timeoutMs = 7000, fetchImpl = fetch } = {
 }
 
 export async function mapLive(question, {
-  ip = 'unknown', now = Date.now(), llm = handleLLM,
+  ip = 'unknown', unlimited = false, now = Date.now(), llm = handleLLM,
   search = hasSearchKey() ? tavilySearch : null, check = linkLoads,
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
@@ -134,10 +135,12 @@ export async function mapLive(question, {
   }
 
   const hour = new Date(now).toISOString().slice(0, 13);
-  const mine = await hashIncr(HASH, `ip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
-  if (mine > DEMO_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of new questions in an hour. Try again a little later, or open a ready example.');
-  const used = await hashIncr(HASH, `d:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
-  if (used > DEMO_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough new questions have been mapped today. The ready examples still work.');
+  if (!unlimited) {
+    const mine = await hashIncr(HASH, `ip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
+    if (mine > DEMO_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of new questions in an hour. Try again a little later, or open a ready example.');
+    const used = await hashIncr(HASH, `d:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
+    if (used > DEMO_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough new questions have been mapped today. The ready examples still work.');
+  }
 
   const deadline = now + DEADLINE_MS;
   const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
@@ -263,10 +266,10 @@ export async function mapLive(question, {
 // every kept page opened. Cached per (question, ring, answers), so a ring is
 // paid for once. Capped per address and per day like the map itself.
 export const RING_PER_DAY = Number(process.env.VIEWS_RING_PER_DAY || 300);
-export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 40);
+export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 20);
 
 export async function ringSides(input, {
-  ip = 'unknown', now = Date.now(), llm = handleLLM,
+  ip = 'unknown', unlimited = false, now = Date.now(), llm = handleLLM,
   search = hasSearchKey() ? tavilySearch : null, check = linkLoads,
 } = {}) {
   const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -287,10 +290,12 @@ export async function ringSides(input, {
     throw fail(503, 'live_off', 'Finding pieces is not switched on here yet.');
   }
   const hour = new Date(now).toISOString().slice(0, 13);
-  const mine = await hashIncr(HASH, `rip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
-  if (mine > RING_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of rings in an hour. Try again a little later.');
-  const used = await hashIncr(HASH, `rd:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
-  if (used > RING_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough rings have been looked up today. Try again tomorrow.');
+  if (!unlimited) {
+    const mine = await hashIncr(HASH, `rip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
+    if (mine > RING_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of rings in an hour. Try again a little later.');
+    const used = await hashIncr(HASH, `rd:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
+    if (used > RING_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough rings have been looked up today. Try again tomorrow.');
+  }
 
   const deadline = now + DEADLINE_MS;
   // Content farms re-post others' articles under a "(2026)"-style title.
