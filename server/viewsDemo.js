@@ -59,7 +59,10 @@ async function groqJSON({ system, prompt, maxTokens, deadline, llm }) {
     if (wait === null || Date.now() + wait > deadline - 12_000) break;
     await new Promise((r) => setTimeout(r, wait));
   }
-  console.warn('[views-demo] model gave up:', String(last?.message || '').slice(0, 160));
+  // Not truncated: a rate-limit message ends in the numbers that say which
+  // budget ran out, and cutting it at 160 characters turned "Limit 200000"
+  // into "Limit 2000". That cost an afternoon of reading the wrong limit.
+  console.warn('[views-demo] model gave up:', String(last?.message || '').slice(0, 400));
   const err = fail(502, 'views_model', 'The mapping model did not answer just now. Try again in a minute, or open a ready example.');
   err.busy = /rate.?limit|tokens per minute|TPM|429|Please try again in/i.test(String(last?.message || ''));
   throw err;
