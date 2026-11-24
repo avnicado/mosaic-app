@@ -1,4 +1,4 @@
-// The views on a thread's question (admin only for now), drawn the way the
+// The views on a thread's question, for everyone, drawn the way the
 // views page draws them: the mandala, the pop-ups with real articles for each
 // ring, and each view's case. It replaces the older chart (ViewsPanel.jsx,
 // kept for now) in the same spot under the question.
@@ -6,7 +6,6 @@
 // For a new wording it maps the question by itself once the reading is done;
 // for an older thread there's a button. A ready example opens at once.
 import React, { useCallback, useEffect } from 'react';
-import { isOwner } from '../../session.js';
 import { useBusy } from '../../data/hooks.js';
 import { currentViewsMap, wantsViewsMap, requestViewsMap, setViewsMapOpen, ringItemsFor, requestRingItems } from '../../data/views.js';
 import { Result, Working } from '../../viewsdemo/ViewsPage.jsx';
@@ -14,7 +13,6 @@ import '../../viewsdemo/viewsdemo.css';
 import './views.css';
 
 export default function ThreadViews({ thread }) {
-  const admin = isOwner();
   const busy = useBusy(thread.id);
   const v = currentViewsMap(thread);
   const working = busy.viewsMap;
@@ -25,12 +23,11 @@ export default function ThreadViews({ thread }) {
 
   // The automatic check: a new wording, once, after the reading and the feed.
   useEffect(() => {
-    if (!admin || working || otherWork) return;
+    if (working || otherWork) return;
     if (wantsViewsMap(thread) && thread.reading) requestViewsMap(thread.id);
-  }, [admin, thread.id, thread.articulations?.length, !!thread.reading, !!otherWork, !!working]);
+  }, [thread.id, thread.articulations?.length, !!thread.reading, !!otherWork, !!working]);
 
-  if (!admin || thread.status === 'closed') return null;
-  const tag = <span className="vp-admin" title="Only the admin sees this for now">admin</span>;
+  if (thread.status === 'closed') return null;
 
   if (working) {
     return (
@@ -41,7 +38,6 @@ export default function ThreadViews({ thread }) {
             <h2 className="vp-title">Mapping the views on this question</h2>
           </div>
           <span className="th-spacer" />
-          {tag}
         </div>
         <div className="vd-embed"><Working /></div>
       </section>
@@ -58,7 +54,6 @@ export default function ThreadViews({ thread }) {
             <h2 className="vp-title">How the views split</h2>
           </div>
           <span className="th-spacer" />
-          {tag}
           <button className="btn small" onClick={() => setViewsMapOpen(thread.id, !open)}>{open ? 'Hide' : 'Show the views'}</button>
         </div>
         {open && (
@@ -87,7 +82,6 @@ export default function ThreadViews({ thread }) {
     <section className="vp vp-quiet">
       <button className="btn small ghost" onClick={() => requestViewsMap(thread.id)}>◐ {v ? 'Try mapping the views again' : 'Show the views'}</button>
       {note && <span className="th-hint vp-note">{note}</span>}
-      {tag}
     </section>
   );
 }
