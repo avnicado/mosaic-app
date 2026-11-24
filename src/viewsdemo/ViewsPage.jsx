@@ -623,9 +623,14 @@ export default function ViewsPage() {
     writeUrl({ q: question });
     scrollToResult();
     try {
-      const res = await fetch('/api/views-demo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question }) });
-      const j = await res.json().catch(() => ({}));
+      let res, j;
+      for (let i = 0; i < 4; i++) {
+        res = await fetch('/api/views-demo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question }) });
+        j = await res.json().catch(() => ({}));
+        if (!res.ok || !j?.pending) break;
+      }
       if (!res.ok) throw new Error(j?.error?.message || `Something went wrong (${res.status}).`);
+      if (j?.pending) throw new Error('The mapping model is busy just now. Try again in a minute.');
       setMap(j);
     } catch (e) {
       setError(e.message || String(e));

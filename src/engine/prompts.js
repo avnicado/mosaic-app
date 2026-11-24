@@ -227,7 +227,7 @@ export const knowledgePrompt = (slot, ctx, excludeUrls = [], retry = false) => `
 ${slotContext(slot, ctx)}
 
 ${retry ? 'Your previous suggestion was rejected. Propose a DIFFERENT item.' : ''}
-Propose ONE real, well-known, substantial item that fits this slot — a book, essay, film, talk, or documented case. "url" MUST be its English Wikipedia article: https://en.wikipedia.org/wiki/<Article_Title>. Nothing else is acceptable. ${excludeUrls.length ? 'Already used: ' + excludeUrls.slice(-20).join(', ') : ''}
+Propose ONE real, well-known, substantial WORK that fits this slot and speaks to the question as asked — a book, essay, film, documentary, report or talk that makes an argument about it. Not a general encyclopedia article about an event, war, treaty, country, organisation or concept: those are background, not a piece for this slot. "url" MUST be the work's own English Wikipedia article, at its exact title as it appears on Wikipedia: https://en.wikipedia.org/wiki/<Article_Title>. If you are not sure the article exists under that exact title, choose a better-known work. Nothing else is acceptable. ${excludeUrls.length ? 'Already used: ' + excludeUrls.slice(-20).join(', ') : ''}
 
 Output ONLY valid JSON:
 {
