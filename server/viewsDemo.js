@@ -30,6 +30,14 @@ const DEADLINE_MS = 55_000; // the function may run 60s (vercel.json)
 const fail = (status, type, message) => Object.assign(new Error(message), { status, type });
 const norm = (s) => String(s || '').toLowerCase().replace(/[?!.\s]+/g, ' ').trim();
 
+const MAX_TRIES = 3;
+const DRAFT_TTL_S = 30 * 60;
+const draftGet = (key) => hashGet(HASH, `draft:${key}`);
+// The store's TTL is on the whole hash, not a field, so a short one would wipe
+// every cached map with it. A draft carries its own expiry instead.
+const draftSet = (key, val) => hashUpdate(HASH, val === null ? { del: [`draft:${key}`] } : { set: { [`draft:${key}`]: val }, ttlSeconds: CACHE_TTL_S })
+  .catch((e) => console.warn('[views-demo] draft write failed:', e.message));
+
 export const liveReady = () => (hasKey() || claudeFallbackOn()) && hasSearchKey();
 
 async function groqJSON({ system, prompt, maxTokens, deadline, llm }) {
@@ -51,7 +59,10 @@ async function groqJSON({ system, prompt, maxTokens, deadline, llm }) {
     if (wait === null || Date.now() + wait > deadline - 12_000) break;
     await new Promise((r) => setTimeout(r, wait));
   }
-  throw fail(502, 'views_model', 'The mapping model did not answer just now. Try again in a minute, or open a ready example.');
+  console.warn('[views-demo] model gave up:', String(last?.message || '').slice(0, 160));
+  const err = fail(502, 'views_model', 'The mapping model did not answer just now. Try again in a minute, or open a ready example.');
+  err.busy = /rate.?limit|tokens per minute|TPM|429|Please try again in/i.test(String(last?.message || ''));
+  throw err;
 }
 
 const BAD_HOST = /(^|\.)(pinterest|facebook|instagram|tiktok|x|twitter|quora|amazon|ebay|linkedin|mapquest|yelp|yellowpages|tripadvisor|bbb|manta|zoominfo|crunchbase|glassdoor|indeed|reddit)\.(com|org)$/;
@@ -128,32 +139,55 @@ export async function mapLive(question, {
   const key = `v5:${hashString(norm(q))}`; // v5: the picking guards changed what a map may contain
 
   const cached = await hashGet(HASH, key).catch(() => null);
-  if (cached) { try { return { ...JSON.parse(cached), cached: true }; } catch {} }
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      // A thin answer is held only briefly (see below).
+      if (!c.thin || now - (c.at || 0) < THIN_TTL_S * 1000) return { ...c, cached: true };
+    } catch {}
+  }
 
   if (!search || !(hasKey() || claudeFallbackOn() || llm !== handleLLM)) {
     throw fail(503, 'live_off', 'Live mapping is not switched on here yet. The ready examples work.');
   }
 
+  // A question part-way through (see the stages below) was already counted.
+  let draft = null;
+  try { draft = JSON.parse(await draftGet(key)); } catch {}
+  if (draft && !(now - (draft.at || 0) < DRAFT_TTL_S * 1000)) draft = null;
+
   const hour = new Date(now).toISOString().slice(0, 13);
-  if (!unlimited) {
-    const mine = await hashIncr(HASH, `ip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
+  if (!unlimited && !draft) {
+    const mine = await hashIncr(HASH, `ip:${ip}:${hour}`, 1, CACHE_TTL_S).catch(() => 0);
     if (mine > DEMO_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of new questions in an hour. Try again a little later, or open a ready example.');
-    const used = await hashIncr(HASH, `d:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
+    const used = await hashIncr(HASH, `d:${hour.slice(0, 10)}`, 1, CACHE_TTL_S).catch(() => 0);
     if (used > DEMO_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough new questions have been mapped today. The ready examples still work.');
   }
 
   const deadline = now + DEADLINE_MS;
-  const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
-  const map = normalizeMap(raw, { question: q });
-
-  // Search for each view and each split question, then let the model pick pages
-  // and say what each argues.
-  const groups = map.views.map((v) => ({ label: `"${v.name}": ${v.summary}`, search: v.search, ref: v }));
-  const rings = map.cruxes.map((c) => ({ crux: c, search: `${c.question} ${map.question}`.slice(0, 200) }));
-  const all = await searchAll([...groups, ...rings], search);
-  const results = all.slice(0, groups.length);
-  groups.forEach((g, i) => { g.results = results[i]; g.ref.reasons = []; g.ref.sources = []; });
-  rings.forEach((g, i) => { g.results = all[groups.length + i]; g.crux.reading = []; });
+  // Stage one maps the question and searches; stage two picks the pages. The
+  // Groq key has a small budget of tokens a minute (8K on gpt-oss-120b), shared
+  // with everything else a new thread is doing, and the map and the two picks
+  // together need more than that. Done in one request, the picks hit the limit
+  // with too little time left to wait it out, so both were lost and contested
+  // questions like Gaza or Ukraine came back "not enough articles". Now the
+  // draft is kept, and when a pick can't run in time the answer is
+  // { pending: true }: the client asks again and the picks get a fresh minute.
+  if (!draft) {
+    const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
+    const map = normalizeMap(raw, { question: q });
+    const views = map.views.map((v) => ({ label: `"${v.name}": ${v.summary}`, search: v.search }));
+    const rings = map.cruxes.map((c) => ({ search: `${c.question} ${map.question}`.slice(0, 200) }));
+    const all = await searchAll([...views, ...rings], search);
+    draft = { at: now, map, viewResults: all.slice(0, views.length), ringResults: all.slice(views.length), viewPicks: null, ringPicks: null, tries: 0 };
+  }
+  draft.tries += 1;
+  const map = draft.map;
+  const groups = map.views.map((v, i) => ({ label: `"${v.name}": ${v.summary}`, search: v.search, ref: v, results: draft.viewResults[i] || [] }));
+  const rings = map.cruxes.map((c, i) => ({ crux: c, results: draft.ringResults[i] || [] }));
+  const results = groups.map((g) => g.results);
+  groups.forEach((g) => { g.ref.reasons = []; g.ref.sources = []; });
+  rings.forEach((g) => { g.crux.reading = []; });
   // A quote counts only when every piece of it is in the result's own text. An
   // elided quote ("a … b") used to pass on its first 60 characters alone, which
   // let a made-up second half through.
@@ -168,50 +202,54 @@ export async function mapLive(question, {
     title: String(r.title).slice(0, 200), url: r.url, outlet: String(p?.outlet || '').replace(/\s+/g, ' ').trim().slice(0, 80) || hostOf(r.url),
     author: '', date: r.published ? String(r.published).slice(0, 7) : '', quote: quoteOf(p, r),
   });
-  const picked = [];
+  // A pick that could not run for lack of time or token budget, on a try that
+  // can still be followed by another, leaves the draft waiting.
+  let waiting = false;
+  const lastTry = draft.tries >= MAX_TRIES;
   const timeLeft = () => Date.now() < deadline - 12_000;
-  const pickViews = async () => {
-    if (!results.some((r) => r.length) || !timeLeft()) return;
+  const runPick = async (field, enabled, call) => {
+    if (draft[field] !== null || !enabled) { if (draft[field] === null && !enabled) draft[field] = []; return; }
+    if (!timeLeft()) { if (lastTry) draft[field] = []; else waiting = true; return; }
     try {
-      const out = await groqJSON({ system: PICK_SYSTEM, prompt: pickPrompt(groups), maxTokens: 1100, deadline, llm });
-      for (const p of Array.isArray(out?.picks) ? out.picks : []) {
-        const g = groups[Number(p?.group) - 1];
-        const r = g?.results?.[Number(p?.result) - 1];
-        if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
-        const src = srcOf(p, r);
-        const text = tidyReason(p.reason);
-        if (reportedNotArgued(r, text || '')) continue;
-        g.ref.reasons.push({ text: text || (src.quote ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
-        picked.push(src);
-      }
+      const out = await call();
+      draft[field] = Array.isArray(out?.picks) ? out.picks : [];
     } catch (e) {
-      console.warn('[views-demo] picking sources failed:', e.message);
-    }
-  };
-  const pickRings = async () => {
-    if (!rings.some((g) => g.results.length) || !timeLeft()) return;
-    try {
-      const out = await groqJSON({ system: RING_PICK_SYSTEM, prompt: ringPickPrompt(rings), maxTokens: 1100, deadline, llm });
-      for (const p of Array.isArray(out?.picks) ? out.picks : []) {
-        const g = rings[Number(p?.group) - 1];
-        const r = g?.results?.[Number(p?.result) - 1];
-        const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
-        if (!g || !r || !side || g.crux.reading.some((x) => x.url === r.url) || g.crux.reading.filter((x) => x.side === side).length >= 2) continue;
-        const says = tidyReason(p.says);
-        if (!says || reportedNotArgued(r, says)) continue;
-        const src = { ...srcOf(p, r), side, says };
-        g.crux.reading.push(src);
-        picked.push(src);
-      }
-    } catch (e) {
-      console.warn('[views-demo] picking ring sources failed:', e.message);
+      console.warn(`[views-demo] ${field} failed (try ${draft.tries}):`, e.message);
+      if (e.busy && !lastTry) waiting = true; else draft[field] = [];
     }
   };
   // One after the other, not side by side: run together they collided on the
-  // Groq rate limit and one of the two was regularly lost, which left a map
-  // with no sources at all.
-  await pickViews();
-  await pickRings();
+  // Groq rate limit and one of the two was regularly lost.
+  await runPick('viewPicks', results.some((r) => r.length), () => groqJSON({ system: PICK_SYSTEM, prompt: pickPrompt(groups), maxTokens: 1100, deadline, llm }));
+  await runPick('ringPicks', rings.some((g) => g.results.length), () => groqJSON({ system: RING_PICK_SYSTEM, prompt: ringPickPrompt(rings), maxTokens: 1100, deadline, llm }));
+  if (waiting) {
+    await draftSet(key, JSON.stringify(draft));
+    return { question: q, pending: true, at: now };
+  }
+  await draftSet(key, null);
+
+  const picked = [];
+  for (const p of draft.viewPicks) {
+    const g = groups[Number(p?.group) - 1];
+    const r = g?.results?.[Number(p?.result) - 1];
+    if (!g || !r || g.ref.reasons.some((x) => x.sources[0].url === r.url) || g.ref.reasons.length >= 2) continue;
+    const src = srcOf(p, r);
+    const text = tidyReason(p.reason);
+    if (reportedNotArgued(r, text || '')) continue;
+    g.ref.reasons.push({ text: text || (src.quote ? `“${src.quote}”` : `Makes the case at ${src.outlet}.`), sources: [src] });
+    picked.push(src);
+  }
+  for (const p of draft.ringPicks) {
+    const g = rings[Number(p?.group) - 1];
+    const r = g?.results?.[Number(p?.result) - 1];
+    const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
+    if (!g || !r || !side || g.crux.reading.some((x) => x.url === r.url) || g.crux.reading.filter((x) => x.side === side).length >= 2) continue;
+    const says = tidyReason(p.says);
+    if (!says || reportedNotArgued(r, says)) continue;
+    const src = { ...srcOf(p, r), side, says };
+    g.crux.reading.push(src);
+    picked.push(src);
+  }
   // Every picked page must open.
   const ok = await Promise.all(picked.map((s) => check(s.url)));
   const dead = new Set(picked.filter((_, i) => !ok[i]).map((s) => s.url));
@@ -253,8 +291,10 @@ export async function mapLive(question, {
   };
   // A thin verdict is often a passing failure (a lost model call), so it is
   // held only briefly: long enough that a second click costs nothing, short
-  // enough that trying again later still runs.
-  await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: thin ? THIN_TTL_S : CACHE_TTL_S })
+  // enough that trying again later still runs. That is checked on read; the
+  // store's TTL covers the whole hash, and a short one here used to wipe every
+  // cached map along with it.
+  await hashUpdate(HASH, { set: { [key]: JSON.stringify(out) }, ttlSeconds: CACHE_TTL_S })
     .catch((e) => console.warn('[views-demo] cache write failed:', e.message));
   return out;
 }
@@ -291,9 +331,9 @@ export async function ringSides(input, {
   }
   const hour = new Date(now).toISOString().slice(0, 13);
   if (!unlimited) {
-    const mine = await hashIncr(HASH, `rip:${ip}:${hour}`, 1, 2 * 24 * 3600).catch(() => 0);
+    const mine = await hashIncr(HASH, `rip:${ip}:${hour}`, 1, CACHE_TTL_S).catch(() => 0);
     if (mine > RING_PER_HOUR_PER_IP) throw fail(429, 'views_rate', 'That’s a lot of rings in an hour. Try again a little later.');
-    const used = await hashIncr(HASH, `rd:${hour.slice(0, 10)}`, 1, 3 * 24 * 3600).catch(() => 0);
+    const used = await hashIncr(HASH, `rd:${hour.slice(0, 10)}`, 1, CACHE_TTL_S).catch(() => 0);
     if (used > RING_PER_DAY) throw fail(429, 'views_daily_cap', 'Enough rings have been looked up today. Try again tomorrow.');
   }
 

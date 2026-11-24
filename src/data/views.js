@@ -78,13 +78,20 @@ export async function requestViewsMap(threadId) {
   const text = R.currentArticulation(t);
   setBusy(threadId, { viewsMap: true });
   try {
-    const res = await apiFetch('/api/views-demo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: text }),
-    });
-    const data = await res.json().catch(() => ({}));
+    // The server may answer { pending: true } when picking the pages has to
+    // wait for the model's budget; asking again carries on from where it was.
+    let res, data;
+    for (let i = 0; i < 4; i++) {
+      res = await apiFetch('/api/views-demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text }),
+      });
+      data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.pending) break;
+    }
     if (!res.ok) throw new Error(data?.error?.message || `Views error (${res.status})`);
+    if (data?.pending) throw new Error('The mapping model is busy just now. Try again in a minute.');
     const { cached, ...map } = data;
     R.patchThread(threadId, { viewsMap: { text, status: map.status, map, open: map.status === 'mapped', at: Date.now() } });
   } catch (e) {

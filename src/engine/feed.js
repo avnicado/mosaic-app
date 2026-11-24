@@ -20,7 +20,10 @@ function withTimeout(p) {
 
 // Groq's free tier shares one tokens-per-minute budget across every call and
 // says exactly how long to wait — honor that instead of guessing.
-async function withRetry(fn, attempts = 3) {
+// Four slots fill at once and the views map may run beside them, so a slot
+// often waits its turn: five tries, not three, before it gives up.
+const BUSY = /429|rate.?limit|tokens per minute|try again in|timeout/i;
+async function withRetry(fn, attempts = 5) {
   for (let i = 0; i < attempts; i++) {
     try { return await fn(); } catch (e) {
       const msg = e?.message || '';
@@ -124,15 +127,24 @@ const pick = (it) => ({
 // opts.avoid: titles/sources other slots already hold (people, channels, works to steer clear of).
 export async function fillSlot(slot, ctx, exclude = [], { avoid = [] } = {}) {
   let lastError = 'failed';
-  try {
-    const item = await searchSelect(slot, ctx, exclude, { avoid });
-    const linkCheck = await verifyUrl(item.url);
-    if (linkCheck !== 'dead') return { slot, ...pick(item), query: item.query, ...(item.firstQuery ? { firstQuery: item.firstQuery } : {}), provenance: 'search', linkCheck };
-    lastError = 'dead link from search: ' + item.url;
-  } catch (e) {
-    lastError = e.message;
-    console.warn(`[feed] ${slot} retrieve→select failed:`, e.message);
+  // The search path is the one that finds pieces about the question itself.
+  // When it was lost only because the model was busy, it gets a second go
+  // after a pause; the Wikipedia tier below used to step in instead, and gave
+  // general encyclopedia entries (a war, a treaty) for pointed questions.
+  for (let round = 0; round < 2; round++) {
+    try {
+      const item = await searchSelect(slot, ctx, exclude, { avoid });
+      const linkCheck = await verifyUrl(item.url);
+      if (linkCheck !== 'dead') return { slot, ...pick(item), query: item.query, ...(item.firstQuery ? { firstQuery: item.firstQuery } : {}), provenance: 'search', linkCheck };
+      lastError = 'dead link from search: ' + item.url;
+    } catch (e) {
+      lastError = e.message;
+      console.warn(`[feed] ${slot} retrieve→select failed:`, e.message);
+      if (round === 0 && BUSY.test(lastError)) { await sleep(15000); continue; }
+    }
+    break;
   }
+  const searchError = clip(lastError, 160);
   for (const retry of [false, true]) {
     try {
       const item = parseJSON(await withRetry(() => withTimeout(callLLM({ prompt: knowledgePrompt(slot, ctx, exclude, retry), maxTokens: 1000 }))));
@@ -140,7 +152,7 @@ export async function fillSlot(slot, ctx, exclude = [], { avoid = [] } = {}) {
       if (exclude.includes(item.url)) { lastError = 'duplicate'; continue; }
       const linkCheck = await verifyUrl(item.url);
       if (linkCheck === 'dead') { lastError = 'dead link: ' + item.url; continue; }
-      return { slot, ...pick(item), mediaType: 'reference', provenance: 'knowledge', linkCheck };
+      return { slot, ...pick(item), mediaType: 'reference', provenance: 'knowledge', linkCheck, searchError };
     } catch (e) { lastError = e.message; }
   }
   return { slot, failed: true, error: lastError };
