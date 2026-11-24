@@ -478,11 +478,28 @@ argue, which is finding 2 all over again.
 
 ## Live verification, 2026-11-24 evening (Haiku backend)
 
-Groq's free tier allows **2,000 tokens a day** on `openai/gpt-oss-120b`, not the
-8K-per-minute the code comment describes, and one probe spends it. A Groq rerun
-came back 89% rate-limited with 13 of 14 maps failing outright. The run below
-went through the local Claude CLI instead
-(`LLM_BACKEND=claude CLAUDE_MODEL=haiku`), on a fresh Tavily key.
+A Groq rerun came back 89% rate-limited, with 13 of 14 maps failing outright
+and every call refused in about half a second. The error text read: *"Rate limit
+reached for model `openai/gpt-oss-120b` … service tier `on_demand` on tokens per
+day (TPD): Limit 2000"*. So the run below went through the local Claude CLI
+instead (`LLM_BACKEND=claude CLAUDE_MODEL=haiku`), on a fresh Tavily key.
+
+**That TPD message was transient, and reading the free tier as "2,000 tokens a
+day" was wrong.** Checked a few hours later, the same key answered 200 and
+reported its limits in the response headers:
+
+```
+x-ratelimit-limit-requests: 1000      x-ratelimit-remaining-requests: 928
+x-ratelimit-limit-tokens:   8000      x-ratelimit-remaining-tokens:   7906
+x-ratelimit-reset-requests: 1h43m     x-ratelimit-reset-tokens:       705ms
+```
+
+So the steady limits are **8,000 tokens a minute** — exactly what the comment in
+`server/viewsDemo.js` has always said — and **1,000 requests a day**. A 2,000
+tokens-a-day cap cannot be the standing limit, because roughly 390 Groq calls
+went through earlier the same day. The likeliest reading is a temporary throttle
+on the `on_demand` tier after heavy use, which then cleared. A full 14-question
+probe costs 150–220 requests, so the real ceiling is four to six probes a day.
 
 **Read this as a check, not a measurement.** Haiku is a stronger model than
 `gpt-oss-120b`, so any change in pick quality is the model and the fixes
@@ -575,10 +592,11 @@ say the player loaded.
   `cato.org`, `epi.org` and `epionline.org` are advocacy organisations; nothing
   says so, and `standingOf` has no honest way to tell from a hostname.
 - Finding 5: a page used to argue against its own side.
-- **Groq's free tier is 2,000 tokens a day on `openai/gpt-oss-120b`.** The
-  comment in `server/viewsDemo.js` says 8K a minute. One live map plus its rings
-  spends the day's budget, so the live site can map roughly one question a day
-  on the free key. That, not the prompt sizes, is the binding limit today.
+- **What the free Groq tier really allows**, from the response headers: 8,000
+  tokens a minute and 1,000 requests a day. A heavy run can also draw a
+  temporary `on_demand` throttle that reports a 2,000 tokens-a-day limit and
+  refuses everything until it clears; that is worth recognising rather than
+  reading as the standing limit.
 - **Standing beyond the URL**, now the largest gap: 45 of 79 pieces unlabelled.
 - Finding 8: the `ring-pick` prompt's size. Cutting it from 10 results to 6, or
   the snippets from 320 characters to 200, is the measured lever on the 429
