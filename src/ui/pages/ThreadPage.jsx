@@ -13,6 +13,7 @@ import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
 import { go, threadPath, questPath } from '../router.js';
 import ItemCard, { SkeletonCard, FailedCard, EmptySlotCard, NoteList } from '../thread/ItemCard.jsx';
 import Reading from '../thread/Reading.jsx';
+import RingSummary from '../views/RingSummary.jsx';
 import Timeline, { Verdict, Moves } from '../thread/Timeline.jsx';
 import { setShared } from '../../data/sharing.js';
 import ThreadViews from '../views/ThreadViews.jsx';
@@ -385,11 +386,14 @@ export default function ThreadPage({ id }) {
           </div>
         </div>
         <aside className="th-rail">
-          <div className="th-o-reading">
-            <Reading thread={thread} busy={busy} collapsible={sessions.some((s) => s.closedAt)} />
+          <div className="th-o-rings">
+            <RingSummary thread={thread} />
           </div>
           <div className="th-o-kept" id="th-kept">
             <Kept items={kept} />
+          </div>
+          <div className="th-o-reading">
+            <Reading thread={thread} busy={busy} collapsible={sessions.some((s) => s.closedAt)} />
           </div>
         </aside>
       </div>

@@ -470,6 +470,13 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
     window.addEventListener('keydown', esc);
     return () => window.removeEventListener('keydown', esc);
   }, [viewOpen, wide]);
+  // On a thread page, the side column's list of questions opens a ring here.
+  useEffect(() => {
+    if (!embedded) return undefined;
+    const open = (e) => { if (e.detail?.question === map.question && map.cruxes[e.detail.k]) { setRing(e.detail.k); setShow('ring'); } };
+    window.addEventListener('mosaic:views-ring', open);
+    return () => window.removeEventListener('mosaic:views-ring', open);
+  }, [embedded, mapKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // A view's case: tap its name, its row or its tag.
   const pickView = (id) => { setFocus(id); setRing(null); setShow(id ? 'view' : null); };
   // A question: tap its ring number or its card.
