@@ -270,22 +270,25 @@ function ChartCaption() {
 }
 
 // One ring's question: the two answers, the views that give each, and real
-// articles arguing each answer. With a view picked, its answer comes first.
+// articles arguing each answer. With a view picked that gives one answer, only
+// that answer's side shows (Gil: "Only that side"); a view that says it
+// depends, or no view, shows both.
 function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   const c = map.cruxes[k];
-  // A side with fewer than two checked articles: look for pieces arguing it.
+  const mine = view ? (c.positions[view.id] || 'mid') : null;
+  const only = mine === 'left' || mine === 'right' ? mine : null;
+  const shown = only ? [only] : ['left', 'right'];
+  // A shown side with fewer than two checked articles: look for pieces arguing it.
   const checked = (pos) => (c.reading || []).filter((r) => r.side === pos);
   const short = { left: checked('left').length < 2, right: checked('right').length < 2 };
-  const few = short.left || short.right;
+  const few = shown.some((pos) => short[pos]);
   useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
   const filling = few && !!onItems;
   const found = (pos) => (filling && short[pos] ? (items?.reading || []).filter((r) => r.side === pos) : []);
   const looking = filling && (!items || items.loading);
   const M = map.cruxes.length;
-  const mine = view ? (c.positions[view.id] || 'mid') : null;
-  const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]];
-  if (mine === 'right') sides.reverse();
-  const mids = map.views.filter((v) => (c.positions[v.id] || 'mid') === 'mid');
+  const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]].filter(([pos]) => shown.includes(pos));
+  const mids = only ? [] : map.views.filter((v) => (c.positions[v.id] || 'mid') === 'mid');
   return (
     <>
       <div className="vd-detail-head">
@@ -331,8 +334,8 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
           <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
         ))}</p>
       )}
-      {filling && items && !items.loading && (items.error || short.left && !found('left').length || short.right && !found('right').length) && (
-        <p className="vd-muted">{items.error ? 'Couldn’t look for pieces just now.' : 'Nothing turned up for one of the answers.'}{' '}
+      {filling && items && !items.loading && (items.error || shown.some((pos) => short[pos] && !found(pos).length)) && (
+        <p className="vd-muted">{items.error ? 'Couldn’t look for pieces just now.' : (only ? 'Nothing turned up for this answer.' : 'Nothing turned up for one of the answers.')}{' '}
           <button type="button" className="vd-linkish" onClick={() => onItems(k, { retry: true })}>Try again</button></p>
       )}
       <div className="vd-detail-nav">
