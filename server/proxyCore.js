@@ -200,7 +200,17 @@ export async function handleSearch(body, ip) {
 // Raw Tavily call for server-side callers (the Promenade's "looking further",
 // server/further.js), which keep their own limits. Same key, same verbatim
 // URLs. → [{ title, url, snippet, score, published }]; throws on failure.
-export async function tavilySearch(query, { maxResults = 8, excludeDomains = [], timeoutMs = 10_000 } = {}) {
+// `include_published_date` is what makes `published_date` come back at all.
+// Without it Tavily returns the field only for topic "news", so every result
+// here arrived with no date: the views could not weigh a 1997 transcript
+// against a 2026 question, and server/further.js stamped every searched item
+// with "now". It is the documented flag for a general search, and beta, so a
+// null date stays normal and every caller must cope with one.
+// startDate / endDate / timeRange filter on the publish date, server side.
+export async function tavilySearch(query, {
+  maxResults = 8, excludeDomains = [], timeoutMs = 10_000,
+  startDate = null, endDate = null, timeRange = null,
+} = {}) {
   if (!hasSearchKey()) throw Object.assign(new Error('TAVILY_API_KEY is not configured on the server.'), { type: 'no_search_key' });
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -215,7 +225,11 @@ export async function tavilySearch(query, { maxResults = 8, excludeDomains = [],
         search_depth: 'basic',
         include_answer: false,
         include_raw_content: false,
+        include_published_date: true,
         ...(excludeDomains.length ? { exclude_domains: excludeDomains } : {}),
+        ...(startDate ? { start_date: startDate } : {}),
+        ...(endDate ? { end_date: endDate } : {}),
+        ...(timeRange ? { time_range: timeRange } : {}),
       }),
     });
     const data = await res.json().catch(() => ({}));

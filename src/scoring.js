@@ -277,6 +277,7 @@ export function buildClassifyPrompt(item) {
 ITEM
 Title: ${item.title || ''}
 Source: ${item.source || ''}
+Published: ${item.published || (Number(item.timestamp) ? new Date(Number(item.timestamp)).toISOString().slice(0, 10) : 'unknown')}
 Excerpt: ${(item.excerpt || '').slice(0, 400)}
 
 Return ONLY valid JSON:
