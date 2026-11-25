@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Mosaic — offline</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#f5f0e6" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    /* Self-contained: this page has to render with no network at all, so no
+       webfont and no external stylesheet. */
+    html, body { margin: 0; background: #f5f0e6; color: #1a1612; }
+    body {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px; box-sizing: border-box;
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    main { max-width: 340px; }
+    h1 { font-family: Fraunces, Georgia, serif; font-weight: 400; font-size: 32px; margin: 0 0 10px; }
+    p { color: #6b6054; font-size: 15px; line-height: 1.55; margin: 0 0 10px; }
+    button {
+      margin-top: 16px; min-height: 46px; padding: 10px 18px; font-size: 16px;
+      border: 1px solid #8f2418; background: #8f2418; color: #f5f0e6;
+      border-radius: 3px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>No connection</h1>
+    <p>Mosaic needs the network to compose a session or open a reading.</p>
+    <p>Your threads are kept on this device. They will sync when you are back online.</p>
+    <button type="button" onclick="location.replace('/')">Try again</button>
+  </main>
+  <script>
+    // Go back into the app by itself once the phone is online again.
+    addEventListener('online', () => location.replace('/'));
+  </script>
+</body>
+</html>

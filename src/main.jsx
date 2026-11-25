@@ -154,3 +154,11 @@ function Root() {
 }
 
 createRoot(document.getElementById('root')).render(<Root />);
+
+// public/sw.js: an offline fallback page and a cache of the shell. The Android
+// app (a Trusted Web Activity) needs it — Play treats a Chrome network error
+// on a dead connection as a defect. Production only: in dev the worker would
+// serve a stale shell over Vite's.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+}

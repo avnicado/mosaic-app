@@ -97,13 +97,29 @@ function ReaderPanel({ target }) {
   }, [spotify]);
 
   useEffect(() => { if (target.itemId) A.markOpened(target.itemId); }, [target.itemId]);
+  // Esc closes it on a keyboard. Android has no Esc key, so the reader also
+  // owns one history entry while it is open: the system back button closes the
+  // reader instead of leaving the page. Closing it any other way drops that
+  // entry again, so back never has to be pressed twice.
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') closeReader(); };
     document.addEventListener('keydown', onKey);
+    let popped = false;
+    const onPop = () => { popped = true; closeReader(); };
+    const owns = !window.history.state?.mosaicReader; // false while switching items
+    if (owns) window.history.pushState({ mosaicReader: true }, '', window.location.href);
+    window.addEventListener('popstate', onPop);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     panel.current?.focus();
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('popstate', onPop);
+      document.body.style.overflow = prev;
+      // Not on a switch to another item (getReader is still set), and not when
+      // the route moved on (our entry is no longer the current one).
+      if (owns && !popped && !getReader() && window.history.state?.mosaicReader) window.history.back();
+    };
   }, []);
   useEffect(() => {
     if (embed || !item.url) return undefined;
