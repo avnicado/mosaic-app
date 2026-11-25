@@ -417,7 +417,11 @@ export function composeShelf(scoredPool, { perSlot = 3, userDomains = [], now = 
 //   - live : editorial/staff centers (passed in separately, labeled honestly)
 // If the reader holds no threads, `near` collapses to a second `far` field.
 // ------------------------------------------------------------
-export function composePromenadeShelf(scoredPool, { userDomains = [], editorial = [], perSection = 3, now = Date.now(), ratingFor = null } = {}) {
+// prefer (optional): items it returns true for go first within each section's
+// own rules (the reader's language: Hebrew pieces before English ones in
+// Hebrew). Without it, composition is unchanged.
+export function composePromenadeShelf(scoredPool, { userDomains = [], editorial = [], perSection = 3, now = Date.now(), ratingFor = null, prefer = null } = {}) {
+  const pref = (a, b) => (prefer ? (prefer(b) ? 1 : 0) - (prefer(a) ? 1 : 0) : 0);
   const admitted = scoredPool.filter((it) => (it.scores?.bridging ?? 0) >= BRIDGING_FLOOR);
   const hasThreads = userDomains.length > 0;
   const nearSet = new Set(userDomains);
@@ -426,7 +430,7 @@ export function composePromenadeShelf(scoredPool, { userDomains = [], editorial 
   const pickNear = () => {
     const cands = admitted
       .filter((it) => !used.has(it.url) && nearSet.has(it.domain))
-      .sort((a, b) => sortWithinSection(a, b, nearSet, now, ratingFor));
+      .sort((a, b) => pref(a, b) || sortWithinSection(a, b, nearSet, now, ratingFor));
     return takeMoveVaried(cands, perSection, used);
   };
 
@@ -435,7 +439,7 @@ export function composePromenadeShelf(scoredPool, { userDomains = [], editorial 
   const pickFar = (avoidDomains, n) => {
     const cands = admitted
       .filter((it) => !used.has(it.url) && !avoidDomains.has(it.domain))
-      .sort((a, b) => (withinSlotQuality(b, ratingFor)) - (withinSlotQuality(a, ratingFor))
+      .sort((a, b) => pref(a, b) || (withinSlotQuality(b, ratingFor)) - (withinSlotQuality(a, ratingFor))
         || engagementScore(b, now) - engagementScore(a, now));
     return takeDomainSpread(cands, n, used);
   };
@@ -660,14 +664,16 @@ export const LEAN_SHELF_SIZE = 5;
 export const emptyLean = () => ({ fields: [], parts: {}, ring: null, mood: null, hunch: '' });
 
 const HUNCH_STOP = new Set(['something', 'about', 'thing', 'things', 'that', 'with', 'what', 'when', 'where', 'there', 'this', 'from', 'into', 'some', 'kind', 'like', 'stuff', 'over', 'they', 'them', 'just', 'how', 'why', 'and', 'the', 'out', 'for', 'are', 'was', 'its', 'not', 'you', 'your', 'more', 'less', 'much', 'very', 'really']);
-export const stemWord = (w) => w.toLowerCase().replace(/[^a-z]/g, '').replace(/ies$/, 'y').replace(/(ing|ed|es|s)$/, '');
+// Hebrew letters count as word letters too, so a hunch typed in Hebrew can
+// match Hebrew pieces (English text has none, so English matching is unchanged).
+export const stemWord = (w) => w.toLowerCase().replace(/[^a-z\u05d0-\u05ea]/g, '').replace(/ies$/, 'y').replace(/(ing|ed|es|s)$/, '');
 export function hunchStems(hunch) {
-  const words = (hunch || '').toLowerCase().split(/[^a-z']+/).filter((w) => w && !HUNCH_STOP.has(w));
+  const words = (hunch || '').toLowerCase().split(/[^a-z'\u05d0-\u05ea]+/).filter((w) => w && !HUNCH_STOP.has(w));
   return [...new Set(words.map(stemWord).filter((w) => w.length > 2))];
 }
 function wordsOf(item) {
   const text = `${item.title || ''} ${item.excerpt || ''} ${item.part || ''}`;
-  return new Set(text.split(/[^A-Za-z]+/).map(stemWord).filter((w) => w.length > 2));
+  return new Set(text.split(/[^A-Za-z\u05d0-\u05ea]+/).map(stemWord).filter((w) => w.length > 2));
 }
 export function nearHunch(item, stems) {
   if (!stems.length) return false;

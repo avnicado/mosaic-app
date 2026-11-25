@@ -2,15 +2,24 @@
 // PRODUCE URLS. Primary path is retrieve→select — the model writes a search
 // query, a real search API (/api/search → Tavily) returns real results, and a
 // second call picks one; a pick whose URL isn't in the results is rejected.
-// Fallback: a knowledge tier gated in code to English-Wikipedia article URLs.
+// Fallback: a knowledge tier gated in code to English-Wikipedia article URLs
+// (and Hebrew Wikipedia in Hebrew mode).
+// In Hebrew mode (src/engine/lang.js) each slot first searches in Hebrew for a
+// work written in Hebrew, and falls back to the English search below when the
+// Hebrew results are too few or none fits.
 // Every accepted item passes a liveness check (/api/checkurl).
 
 import { callLLM, parseJSON, apiFetch, sleep, suggestedWaitMs } from './llm.js';
 import { SLOTS, clip, searchQueryPrompt, selectFromResultsPrompt, knowledgePrompt } from './prompts.js';
 import { normalizeMediaType, normalizeField, normalizeTopics } from '../media.js';
+import { inHebrew, isHebrewItem } from './lang.js';
 
 const TIMEOUT_MS = 120000;
 const WIKI_RE = /^https:\/\/en\.wikipedia\.org\/wiki\/[^\s#?]+$/;
+const WIKI_HE_RE = /^https:\/\/he\.wikipedia\.org\/wiki\/[^\s#?]+$/;
+const wikiOk = (url) => WIKI_RE.test(url) || (inHebrew() && WIKI_HE_RE.test(url));
+// Hebrew results needed before the Hebrew search is worth a selection call.
+const HEBREW_ENOUGH = 2;
 
 function withTimeout(p) {
   let timer;
@@ -83,10 +92,35 @@ async function writeQuery(slot, ctx, exclude, opts) {
 // query → search → select. The selector may say honestly that nothing fits;
 // then ONE more query is written with the first result set as feedback, and the
 // second selection must pick (or the slot falls through to the knowledge tier).
+// Hebrew first (Hebrew mode only): one Hebrew query; its Hebrew results go to
+// the selector, which may say none fits. → the pick, or null to fall back.
+async function hebrewSelect(slot, ctx, exclude, { avoid = [] } = {}) {
+  const query = await writeQuery(slot, ctx, exclude, { avoid, lang: 'he' });
+  const { all } = await search(query, exclude);
+  const candidates = all.filter((r) => !isJunkResult(r) && isHebrewItem(r));
+  if (candidates.length < HEBREW_ENOUGH) return null;
+  const sel = parseJSON(await withRetry(() => withTimeout(callLLM({
+    prompt: selectFromResultsPrompt(slot, ctx, candidates, { avoid, allowNone: true }), maxTokens: 1400,
+  }))));
+  if (sel.none || !sel.url) return null;
+  const match = candidates.find((r) => r.url === sel.url)
+    || candidates.find((r) => sel.url && (r.url.startsWith(sel.url) || String(sel.url).startsWith(r.url)));
+  return match ? { ...sel, url: match.url, query } : null;
+}
+
 async function searchSelect(slot, ctx, exclude, { avoid = [] } = {}) {
+  if (inHebrew()) {
+    try {
+      const he = await hebrewSelect(slot, ctx, exclude, { avoid });
+      if (he) return he;
+    } catch (e) {
+      if (e.noSearchKey) throw e;
+      console.warn(`[feed] ${slot} Hebrew search failed, trying English:`, e.message);
+    }
+  }
   let retry = null;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const query = await writeQuery(slot, ctx, exclude, { avoid, retry });
+    const query = await writeQuery(slot, ctx, exclude, { avoid, retry, lang: 'en' });
     const { all, candidates } = await search(query, exclude);
     if (!candidates.length) {
       retry = { query, seen: [], reason: 'the search returned nothing' };
@@ -148,7 +182,7 @@ export async function fillSlot(slot, ctx, exclude = [], { avoid = [] } = {}) {
   for (const retry of [false, true]) {
     try {
       const item = parseJSON(await withRetry(() => withTimeout(callLLM({ prompt: knowledgePrompt(slot, ctx, exclude, retry), maxTokens: 1000 }))));
-      if (!WIKI_RE.test(item.url || '')) { lastError = 'non-Wikipedia URL from knowledge tier'; continue; }
+      if (!wikiOk(item.url || '')) { lastError = 'non-Wikipedia URL from knowledge tier'; continue; }
       if (exclude.includes(item.url)) { lastError = 'duplicate'; continue; }
       const linkCheck = await verifyUrl(item.url);
       if (linkCheck === 'dead') { lastError = 'dead link: ' + item.url; continue; }

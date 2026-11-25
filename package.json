@@ -12,7 +12,8 @@
     "further-smoke": "node scripts/further-smoke.mjs",
     "length-smoke": "node scripts/length-smoke.mjs",
     "release-check": "node scripts/release-check.mjs",
-    "i18n-check": "node scripts/i18n-check.mjs"
+    "i18n-check": "node scripts/i18n-check.mjs",
+    "hebrew-search-smoke": "node scripts/hebrew-search-smoke.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

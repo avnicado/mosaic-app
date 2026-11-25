@@ -5,6 +5,7 @@
 // thread page shapes the next reading, the next feed, and the movement judgement.
 
 import { MEDIA_TYPES, FIELDS, TAG_FIELDS_SPEC, vocabHint } from '../media.js';
+import { inHebrew, hebrewProse } from './lang.js';
 
 const FIELDS_LIST = FIELDS.join(', ');
 
@@ -105,7 +106,7 @@ export function contextBlock(ctx, { includeReading = true } = {}) {
 export function characterizePrompt(ctx) {
   const prior = ctx.reading ? `\n\nYour previous reading of this thread:\n${contextBlock({ reading: ctx.reading })}` : '';
   const rest = contextBlock({ ...ctx, reading: null });
-  return `The thread, as the user holds it now:\n"${ctx.question}"${prior}${rest ? `\n\n${rest}` : ''}\n\nRead it afresh.`;
+  return `The thread, as the user holds it now:\n"${ctx.question}"${prior}${rest ? `\n\n${rest}` : ''}\n\nRead it afresh.${hebrewProse('"domain", "questionType", "presuppositions", "absent" and "openingMove"')}`;
 }
 
 const slotContext = (slot, ctx) => {
@@ -166,7 +167,16 @@ const avoidBlock = (avoid = []) => (avoid.length
   ? `\nOther slots in this feed already use these, so do NOT search for the same person, channel, work or site: ${avoid.slice(0, 8).map((a) => `"${clip(a, 80)}"`).join('; ')}`
   : '');
 
-export const searchQueryPrompt = (slot, ctx, excludeUrls = [], { avoid = [], retry = null } = {}) => `You are writing ONE web-search query to fill a slot in the feed of Mosaic, an inquiry tool.
+// In Hebrew mode the first search for a slot is written in Hebrew, to find
+// works written in Hebrew; the fallback searches are written in English.
+const queryLangLine = (lang) => {
+  if (!inHebrew()) return '';
+  return lang === 'he'
+    ? '\n- Write the query IN HEBREW, to find a work written in Hebrew: an Israeli writer, scholar, outlet, lecture series, podcast or film, or a Hebrew translation. Spell names the way Hebrew sources spell them. Do not add English words except a name with no Hebrew spelling.'
+    : '\n- Write the query in English, even if the question is in Hebrew, to find a work in English.';
+};
+
+export const searchQueryPrompt = (slot, ctx, excludeUrls = [], { avoid = [], retry = null, lang = 'en' } = {}) => `You are writing ONE web-search query to fill a slot in the feed of Mosaic, an inquiry tool.
 
 ${slotContext(slot, ctx)}
 
@@ -176,7 +186,7 @@ How to write it:
 - If you know a specific, well-regarded work that fits (a book chapter, essay, talk, paper, film, documentary), search for it by its title and its author or maker. Otherwise describe the work you want: subject + a form word (essay, talk, lecture, interview, case study, documentary, memoir, forum thread).
 - 4 to 12 plain words. ONE idea per query: no OR, no site:, no lists of several names or alternatives (long, stuffed queries make the search engine return unrelated filler). Use quotation marks only around an exact title. No years unless the question is about a date. No filler words such as "analysis", "personal anecdote", "insights".
 - Add "video" or "youtube" only when a video is clearly the best form for THIS slot (a demonstration, a performance, a walkthrough, a talk). Do not add it by default.
-- The query must not ask for a list ("best", "top", "examples of", "tips").
+- The query must not ask for a list ("best", "top", "examples of", "tips").${queryLangLine(lang)}
 
 ${QUERY_SHAPE_RULES}
 
@@ -218,7 +228,7 @@ Output ONLY valid JSON:
   "preview": "2-3 sentences giving a vivid sense of what's in the item — match the register",
   "why": "2-3 sentences: why this item, in this slot, for this thread — honest about imperfect fit",
 ${TAG_FIELDS_SPEC}
-}${vocabHint(ctx.vocab)}`;
+}${vocabHint(ctx.vocab)}${hebrewProse('"preview" and "why"')}`;
 
 // Last-resort tier: the model proposes a well-known item whose URL must be an
 // English Wikipedia article (enforced in code — see feed.js).
@@ -227,13 +237,13 @@ export const knowledgePrompt = (slot, ctx, excludeUrls = [], retry = false) => `
 ${slotContext(slot, ctx)}
 
 ${retry ? 'Your previous suggestion was rejected. Propose a DIFFERENT item.' : ''}
-Propose ONE real, well-known, substantial WORK that fits this slot and speaks to the question as asked — a book, essay, film, documentary, report or talk that makes an argument about it. Not a general encyclopedia article about an event, war, treaty, country, organisation or concept: those are background, not a piece for this slot. "url" MUST be the work's own English Wikipedia article, at its exact title as it appears on Wikipedia: https://en.wikipedia.org/wiki/<Article_Title>. If you are not sure the article exists under that exact title, choose a better-known work. Nothing else is acceptable. ${excludeUrls.length ? 'Already used: ' + excludeUrls.slice(-20).join(', ') : ''}
+Propose ONE real, well-known, substantial WORK that fits this slot and speaks to the question as asked — a book, essay, film, documentary, report or talk that makes an argument about it. Not a general encyclopedia article about an event, war, treaty, country, organisation or concept: those are background, not a piece for this slot. "url" MUST be the work's own English Wikipedia article, at its exact title as it appears on Wikipedia: https://en.wikipedia.org/wiki/<Article_Title>.${inHebrew() ? ' If you are sure the work has its own Hebrew Wikipedia article and know its exact Hebrew title, give that instead: https://he.wikipedia.org/wiki/<Hebrew_Title>.' : ''} If you are not sure the article exists under that exact title, choose a better-known work. Nothing else is acceptable. ${excludeUrls.length ? 'Already used: ' + excludeUrls.slice(-20).join(', ') : ''}
 
 Output ONLY valid JSON:
 {
   "title": "", "source": "", "url": "https://en.wikipedia.org/wiki/…", "preview": "2-3 sentences", "why": "2-3 sentences: why this item, in this slot, for this thread",
 ${TAG_FIELDS_SPEC}
-}${vocabHint(ctx.vocab)}`;
+}${vocabHint(ctx.vocab)}${hebrewProse('"preview" and "why"')}`;
 
 // Tag items after the fact (records made before items carried a field and
 // topics). items: [{title, source, url, mediaType, preview}] → [{i, field, topics, mediaType}]
@@ -270,4 +280,4 @@ Output ONLY valid JSON:
   ]
 }
 
-Produce 2-4 moves (1 is enough when the verdict is cosmetic).`;
+Produce 2-4 moves (1 is enough when the verdict is cosmetic).${hebrewProse('"verdictWhy" and each move\'s "label" and "content"')}`;

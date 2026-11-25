@@ -19,7 +19,7 @@ const check = (name, ok, extra = '') => { console.log(ok ? 'ok  ' : 'FAIL', name
 
 // ---- stubbed upstreams ----------------------------------------------------------
 const calls = { tavily: [], groq: 0, other: [] };
-let tavilyMode = 'ok', groqMode = 'ok', tavilyDelay = 0, groqDelay = 0;
+let tavilyMode = 'ok', groqMode = 'ok', tavilyDelay = 0, groqDelay = 0, heCount = 3;
 const article = (slug, title, extra = {}) => ({
   url: `https://www.example-journal.org/essays/${slug}`, title,
   content: `A long, careful piece about ${title.toLowerCase()}, with field notes, interviews and the evidence behind it, written for curious readers.`,
@@ -45,6 +45,15 @@ globalThis.fetch = async (url, init = {}) => {
     calls.tavily.push(body);
     if (tavilyDelay) await new Promise((r) => setTimeout(r, tavilyDelay));
     if (tavilyMode === 'down') return new Response(JSON.stringify({ detail: 'down' }), { status: 500 });
+    // A Hebrew query gets Hebrew pieces (heCount of them) plus an English one.
+    if (/[\u05d0-\u05ea]/.test(body.query)) {
+      const n = calls.tavily.length;
+      const hePieces = Array.from({ length: heCount }, (_, i) => ({
+        url: `https://www.example-magazine.co.il/essays/he-${n}-${i}`, title: `מסה על תיקון ושימור, חלק ${n}-${i}`,
+        content: 'מאמר ארוך ומעמיק על תיקון חפצים ישנים, עם ראיונות ועדויות מהשטח, לקוראים סקרנים.', score: 0.8,
+      }));
+      return new Response(JSON.stringify({ results: [...hePieces, article(`en-in-he-${n}`, `An English essay on mending, number ${n}`)] }), { status: 200 });
+    }
     // Each query gets the same mix, plus one result of its own.
     const own = article(`q${calls.tavily.length}`, `A field study of ${body.query.slice(-30)} in practice`);
     return new Response(JSON.stringify({ results: [...RESULTS, own] }), { status: 200 });
@@ -204,6 +213,33 @@ process.env.TAVILY_API_KEY = 'test-tavily';
   // A lean that was already searched still answers from the store when limited.
   const again = await lookFurther(u, L({ fields: ['science'], ring: 0 }));
   check('a searched lean still answers when the person is limited', !again.searched);
+}
+
+// ---- in Hebrew: Hebrew searches first, English only when they find too few ---------------------
+{
+  const lean = L({ fields: ['craft & making'], parts: { 'craft & making': ['repair'] } });
+  const qs = buildQueries(lean, 'he');
+  check('Hebrew queries are written in Hebrew', qs.length > 0 && qs.every((q) => /[\u05d0-\u05ea]/.test(q.q) && !/[A-Za-z]/.test(q.q)), JSON.stringify(qs));
+  check('English queries are unchanged by the Hebrew option', JSON.stringify(buildQueries(lean)) === JSON.stringify(buildQueries(lean, 'en')));
+
+  heCount = 3; // 2 queries × 3 Hebrew pieces: enough, no English search
+  let before = calls.tavily.length;
+  const rich = await lookFurther({ id: 'he-1', name: 'h', role: 'member' }, L({ fields: ['history'], parts: { history: ['objects & archives'] } }), { lang: 'he' });
+  const richQueries = calls.tavily.slice(before).map((b) => b.query);
+  check('enough Hebrew finds: only Hebrew searches run', richQueries.length > 0 && richQueries.every((q) => /[\u05d0-\u05ea]/.test(q)), JSON.stringify(richQueries));
+  check('enough Hebrew finds: every find is Hebrew and marked so', rich.added > 0 && rich.items.every((it) => it.lang === 'he' && /[\u05d0-\u05ea]/.test(it.title)), JSON.stringify(rich.items.map((i) => [i.title, i.lang])));
+
+  heCount = 1; // too few Hebrew pieces: the English searches run too
+  before = calls.tavily.length;
+  const thin = await lookFurther({ id: 'he-2', name: 'h', role: 'member' }, L({ fields: ['nature & environment'] }), { lang: 'he' });
+  const thinQueries = calls.tavily.slice(before).map((b) => b.query);
+  check('too few Hebrew finds: English searches run after the Hebrew ones', thinQueries.some((q) => /[\u05d0-\u05ea]/.test(q)) && thinQueries.some((q) => !/[\u05d0-\u05ea]/.test(q)) && /[\u05d0-\u05ea]/.test(thinQueries[0]), JSON.stringify(thinQueries));
+  check('too few Hebrew finds: Hebrew finds come first, English after', thin.items.length > 1 && thin.items[0].lang === 'he' && thin.items.some((it) => !it.lang), JSON.stringify(thin.items.map((i) => [i.title.slice(0, 30), i.lang])));
+  check('a Hebrew search counts every query it made', thin.calls.search === thinQueries.length, JSON.stringify(thin.calls));
+
+  heCount = 3;
+  const enSame = await lookFurther({ id: 'he-3', name: 'h', role: 'member' }, L({ fields: ['history'], parts: { history: ['objects & archives'] } }));
+  check('the same lean in English is searched apart from the Hebrew one', enSame.searched && enSame.items.every((it) => !it.lang));
 }
 
 globalThis.fetch = realFetch;

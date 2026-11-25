@@ -14,7 +14,8 @@ import {
 import * as R from '../../data/record.js';
 import { apiFetch } from '../../engine/llm.js';
 import { withLength } from '../../length.js';
-import { t } from '../../i18n/index.js';
+import { t, getLang } from '../../i18n/index.js';
+import { isHebrewItem } from '../../engine/lang.js';
 
 // ---- open questions (editorial) ------------------------------------------------
 // Ported from the old app's EDITORIAL_LIVE. They link nowhere; holding one
@@ -190,6 +191,29 @@ async function fetchCorpus() {
   throw new Error(errors.join('; '));
 }
 
+// ---- the pool in the reader's language ---------------------------------------------
+// The day's pool holds English pieces and a smaller set of Hebrew ones
+// (server/corpus.js). In English the Hebrew pieces are left out, so English
+// looks as it always has. In Hebrew, a field with enough Hebrew pieces shows
+// only those; a thinner field keeps its English pieces too, so nothing goes
+// empty; and the shelf takes Hebrew pieces first, English after.
+export const isHebrewPiece = (it) => it.lang === 'he' || isHebrewItem(it);
+const HEBREW_FIELD_ENOUGH = 4;
+let viewCache = { items: null, lang: null, out: [] };
+function inLanguage(items) {
+  const lang = getLang();
+  if (viewCache.items === items && viewCache.lang === lang) return viewCache.out;
+  let out;
+  if (lang !== 'he') out = items.filter((it) => !isHebrewPiece(it));
+  else {
+    const heCount = new Map();
+    for (const it of items) if (isHebrewPiece(it)) heCount.set(it.domain, (heCount.get(it.domain) || 0) + 1);
+    out = items.filter((it) => isHebrewPiece(it) || (heCount.get(it.domain) || 0) < HEBREW_FIELD_ENOUGH);
+  }
+  viewCache = { items, lang, out };
+  return out;
+}
+
 // ---- the visit's shelf (shared store) ---------------------------------------------
 // state: { status:'idle'|'loading'|'ready'|'error', shelf, meta, error, refreshes,
 //          lean, furtherTick }
@@ -207,7 +231,7 @@ function loadLean() {
 }
 function saveLean(lean) { try { localStorage.setItem(LEAN_KEY, JSON.stringify(lean)); } catch {} }
 
-let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), furtherTick: 0 };
+let state = { status: 'idle', shelf: null, meta: null, error: null, refreshes: 0, lean: loadLean(), furtherTick: 0, lang: null };
 const listeners = new Set();
 const set = (patch) => { state = { ...state, ...patch }; listeners.forEach((f) => f()); };
 const seen = new Set();
@@ -221,7 +245,7 @@ function seededShuffle(arr, seed) {
 }
 
 function compose(nonce) {
-  const full = corpus.items;
+  const full = inLanguage(corpus.items);
   let pool = full.filter((it) => !seen.has(it.url));
   if (pool.length < 30) { seen.clear(); pool = full; }
   const threads = R.allThreads();
@@ -235,6 +259,7 @@ function compose(nonce) {
     perSection: 3,
     now: Number.isFinite(gen) ? gen : Date.now(),
     ratingFor: R.getSettings().ratings ? makeRatingFor() : null,
+    ...(getLang() === 'he' ? { prefer: isHebrewPiece } : {}),
   });
   shelf.sections.forEach((sec) => sec.cards.forEach((c) => c.url && seen.add(c.url)));
   return shelf;
@@ -248,7 +273,7 @@ export function heldUrls() {
   for (const i of R.allItems()) if (i.url) out.add(i.url);
   return out;
 }
-const leanKey = (lean) => JSON.stringify([lean.fields, lean.fields.map((d) => lean.parts?.[d] || []), lean.ring, lean.mood, (lean.hunch || '').trim().toLowerCase()]);
+const leanKey = (lean) => JSON.stringify([getLang(), lean.fields, lean.fields.map((d) => lean.parts?.[d] || []), lean.ring, lean.mood, (lean.hunch || '').trim().toLowerCase()]);
 
 export function setLean(next) {
   const lean = typeof next === 'function' ? next(state.lean) : next;
@@ -277,7 +302,9 @@ function maybeLookFurther() {
   waitingKey = null;
   const lean = state.lean;
   if (!corpus || !hasLean(lean) || !searchableLean(lean)) return;
-  if (leanRoom(corpus.items, lean, heldUrls()) >= LEAN_SHELF_SIZE) return; // enough lit here
+  // In Hebrew, only Hebrew pieces count toward "enough lit here".
+  const room = getLang() === 'he' ? corpus.items.filter(isHebrewPiece) : inLanguage(corpus.items);
+  if (leanRoom(room, lean, heldUrls()) >= LEAN_SHELF_SIZE) return; // enough lit here
   const key = leanKey(lean);
   if (looked.has(key)) return;
   looked.set(key, { status: 'waiting' });
@@ -299,7 +326,7 @@ async function lookFurther(lean, key) {
   let entry;
   try {
     const res = await apiFetch('/api/further', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lean }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(getLang() === 'he' ? { lean, lang: 'he' } : { lean }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -323,7 +350,11 @@ export function furtherFor(lean) { return looked.get(leanKey(lean)) || null; }
 
 export async function ensureShelf() {
   if (state.status === 'loading') return;
-  if (state.status === 'ready' && corpus?.day === today()) return;
+  if (state.status === 'ready' && corpus?.day === today()) {
+    // The language changed since the shelf was composed: compose it again.
+    if (state.lang !== getLang()) { seen.clear(); set({ shelf: compose(0), refreshes: 0, lang: getLang() }); maybeLookFurther(); }
+    return;
+  }
   set({ status: 'loading', error: null });
   try {
     if (!corpus || corpus.day !== today()) {
@@ -331,7 +362,7 @@ export async function ensureShelf() {
       corpus = await corpusPromise;
       seen.clear();
     }
-    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0 });
+    set({ status: 'ready', shelf: compose(0), meta: { ...corpus.meta, from: corpus.from }, refreshes: 0, lang: getLang() });
     maybeLookFurther();
   } catch (e) {
     set({ status: 'error', error: e.message || String(e) });
@@ -354,7 +385,7 @@ export const useShelf = () => useSyncExternalStore(subscribe, () => state);
 // The full scored pool behind the shelf (every admitted item, not just the
 // cards chosen for today's sections) — the Mandala reads from this directly,
 // since it composes its own one-pick-per-domain from the whole corpus.
-export const corpusItems = () => corpus?.items || [];
+export const corpusItems = () => (corpus ? inLanguage(corpus.items) : []);
 
 // The Desk's three: the first card of each section, as the Promenade shows them.
 export function deskPicks(shelf) {

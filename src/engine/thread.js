@@ -3,6 +3,7 @@
 // Pure: takes plain data, returns plain data. The data layer (src/data) owns storage.
 
 import { callLLMJSON, MODEL, VISION_MODEL } from './llm.js';
+import { hebrewProse } from './lang.js';
 import { CHARACTERIZE_SYSTEM, ARTIFACT_CANDIDATES_PROMPT, characterizePrompt, diffPrompt, clip, SLOTS } from './prompts.js';
 import { t } from '../i18n/index.js';
 
@@ -64,7 +65,7 @@ export async function readThread(ctx, image = null) {
 export async function analyzeImage(image, note = '') {
   const r = await callLLMJSON({
     system: ARTIFACT_CANDIDATES_PROMPT,
-    messages: [{ role: 'user', content: [imageBlock(image), { type: 'text', text: note ? `What drew me to it: ${note}` : 'Here is the image.' }] }],
+    messages: [{ role: 'user', content: [imageBlock(image), { type: 'text', text: (note ? `What drew me to it: ${note}` : 'Here is the image.') + hebrewProse('"observation", each "angle" and each "question"') }] }],
     model: VISION_MODEL,
     maxTokens: 1200,
   });

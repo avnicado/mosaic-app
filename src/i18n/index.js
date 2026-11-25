@@ -17,6 +17,7 @@
 
 import React, { useSyncExternalStore } from 'react';
 import he from './he/index.js';
+import { setContentLang } from '../engine/lang.js';
 
 const KEY = 'm2:lang'; // synced: follows the person
 const DEVICE_KEY = 'mosaic:lang'; // not synced: keeps sign-in screens in the last language after sign-out
@@ -35,6 +36,7 @@ function readStored() {
 }
 
 let lang = typeof window === 'undefined' ? 'en' : readStored();
+setContentLang(lang);
 const listeners = new Set();
 
 export const getLang = () => lang;
@@ -64,6 +66,7 @@ const HEBREW_FONTS = 'https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:
 
 /** Sets <html lang dir> and, for Hebrew, loads the Hebrew faces that back up the Latin ones. */
 export function applyDocument() {
+  setContentLang(lang); // what Mosaic searches for and writes in (src/engine/lang.js)
   if (typeof document === 'undefined') return;
   const l = byCode(lang);
   const root = document.documentElement;

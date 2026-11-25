@@ -1,4 +1,4 @@
-// POST /api/further { lean } → { items, added, fit, searched, calls, ms }
+// POST /api/further { lean, lang? } → { items, added, fit, searched, calls, ms }
 // When a Promenade lean runs thin, search the web for it, score the results
 // with the corpus scorer and add them to the day's pool (server/further.js).
 // Signed-in people only; limited per person and per day.
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
   const body = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body); } catch { return {}; } })() : (req.body || {});
   try {
-    const out = await lookFurther(user, body.lean);
+    const out = await lookFurther(user, body.lean, { lang: body.lang === 'he' ? 'he' : 'en' });
     res.status(200).json(out);
   } catch (e) {
     if (!e.status) console.error('[further]', e);

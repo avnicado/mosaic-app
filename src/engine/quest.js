@@ -12,6 +12,7 @@
 // Pure module: takes plain data, returns plain data. src/data/quests.js owns storage.
 
 import { callLLMJSON, apiFetch } from './llm.js';
+import { inHebrew, isHebrewItem, hebrewProse } from './lang.js';
 import { clip } from './prompts.js';
 import { verifyUrl } from './feed.js';
 import { MEDIA_TYPES, TAG_FIELDS_SPEC, vocabHint, normalizeMediaType, normalizeField, normalizeTopics } from '../media.js';
@@ -132,7 +133,7 @@ ${transcriptBlock(ctx.transcript) || '(none — this is the start)'}
 
 LEARNER: ${message}
 
-Reply as the guide.`;
+Reply as the guide.${hebrewProse('"title", "reply", the learner phrases, the map regions\' "title" and "why", "find.what" and "question"')}`;
 }
 
 // → { title, reply, learner:{...}, map:{add, focus}, find|null, question }
@@ -167,11 +168,17 @@ ${learnerBlock(ctx.learner)}
 ${need.region ? `The region of the subject: "${need.region}"\n` : ''}What the guide wants found: ${need.what}
 Level that fits them now: ${need.level} (${LEVEL_BLURB[need.level]})`;
 
-const queryPrompt = (ctx, need, tried) => `You are writing ONE web-search query for a learning guide on Mosaic.
+// In Hebrew mode the first query is written in Hebrew, for works written in
+// Hebrew; later ones in English, for when Hebrew finds too few.
+const queryLang = (lang) => (!inHebrew() ? '' : lang === 'he'
+  ? '\nWrite the query IN HEBREW, to find works written in Hebrew (an Israeli scholar, writer, outlet, lecture series or podcast, or a Hebrew translation). Spell names the way Hebrew sources spell them.'
+  : '\nWrite the query in English, even if the quest is in Hebrew, to find works in English.');
+
+const queryPrompt = (ctx, need, tried, lang = 'en') => `You are writing ONE web-search query for a learning guide on Mosaic.
 
 ${findContext(ctx, need)}
 
-Write the query a sharp research librarian would type to surface specific, substantial works (a talk, lecture, essay, chapter, interview, podcast episode) by real people that fit THIS learner at THIS level. Avoid listicles, SEO pages, course-sales pages and generic overviews. For a gentle level prefer clear introductions by people who really know the subject (a good talk or a well-written essay), not textbooks.${tried.length ? `\nAlready tried (write a different query): ${tried.join(' | ')}` : ''}
+Write the query a sharp research librarian would type to surface specific, substantial works (a talk, lecture, essay, chapter, interview, podcast episode) by real people that fit THIS learner at THIS level. Avoid listicles, SEO pages, course-sales pages and generic overviews. For a gentle level prefer clear introductions by people who really know the subject (a good talk or a well-written essay), not textbooks.${queryLang(lang)}${tried.length ? `\nAlready tried (write a different query): ${tried.join(' | ')}` : ''}
 
 Output ONLY valid JSON: {"query": "the search query"}`;
 
@@ -198,7 +205,7 @@ Output ONLY valid JSON:
   "preview": "1-2 sentences: what is in it",
   "why": "1-2 sentences, to the learner: why this one, for you, now",
 ${TAG_FIELDS_SPEC}
-}]}${vocabHint(ctx.vocab)}`;
+}]}${vocabHint(ctx.vocab)}${hebrewProse('"preview" and "why"')}`;
 
 async function search(query) {
   const res = await apiFetch('/api/search', {
@@ -215,11 +222,14 @@ export async function findWorks(ctx, need, exclude = []) {
   const ex = new Set(exclude);
   const out = [];
   const tried = [];
-  for (let round = 0; round < 2 && out.length < need.count; round++) {
-    const { query } = await callLLMJSON({ prompt: queryPrompt(ctx, need, tried), maxTokens: 500 });
-    if (!query || !String(query).trim()) break;
+  // Hebrew mode: one Hebrew round (Hebrew results only), then the usual two in English.
+  const rounds = inHebrew() ? ['he', 'en', 'en'] : ['en', 'en'];
+  for (let round = 0; round < rounds.length && out.length < need.count; round++) {
+    const lang = rounds[round];
+    const { query } = await callLLMJSON({ prompt: queryPrompt(ctx, need, tried, lang), maxTokens: 500 });
+    if (!query || !String(query).trim()) { if (lang === 'he') continue; break; }
     tried.push(String(query));
-    const results = (await search(String(query))).filter((r) => !ex.has(r.url));
+    const results = (await search(String(query))).filter((r) => !ex.has(r.url) && (lang !== 'he' || isHebrewItem(r)));
     if (!results.length) continue;
     const sel = await callLLMJSON({ prompt: selectPrompt(ctx, need, results, need.count - out.length), maxTokens: 1800 });
     for (const p of Array.isArray(sel.picks) ? sel.picks : []) {

@@ -25,6 +25,19 @@ const RSS_SOURCES = [
   { url: 'https://www.smithsonianmag.com/rss/latest_articles/', source: 'Smithsonian', hint: 'history' },
 ];
 
+// Hebrew outlets, for readers who use Mosaic in Hebrew (the Promenade shows
+// them first in Hebrew and never in English). Gathered on top of the English
+// pool, with their own cap, so the English pool is the same as before.
+// Each feed was checked by hand to be a working RSS feed of Hebrew pieces.
+const HE_RSS_SOURCES = [
+  { url: 'https://alaxon.co.il/feed/', source: 'אלכסון', hint: 'philosophy & ideas' },
+  { url: 'https://hashiloach.org.il/feed/', source: 'השילוח', hint: 'philosophy & ideas' },
+  { url: 'https://www.erev-rav.com/feed/', source: 'ערב רב', hint: 'arts & culture' },
+  { url: 'https://www.zman.co.il/feed/', source: 'זמן ישראל', hint: 'society & politics' },
+  { url: 'https://www.ha-makom.co.il/feed/', source: 'המקום הכי חם בגיהנום', hint: 'society & politics' },
+];
+const HE_PER_FEED = Number(process.env.CORPUS_HE_PER_FEED || 20);
+
 // ---- fetch helpers ----------------------------------------------------------
 const UA = { 'user-agent': 'MosaicCorpusBot/1.0 (+https://mosaic.example)' };
 async function getJSON(url) {
@@ -107,7 +120,7 @@ async function pullRSS({ url, source, hint }, cap = 20) {
       id,
       title,
       // Drop WordPress feed boilerplate ("The post X appeared first on Y.").
-      excerpt: desc.replace(/\s*The (post|article) .{0,300}? appeared first on .{0,120}$/i, '').replace(/\s*Do stories and artists like this matter to you\?.*$/i, '').trim().slice(0, 400),
+      excerpt: desc.replace(/\s*The (post|article) .{0,300}? appeared first on .{0,120}$/i, '').replace(/\s*(הפוסט|הכתבה|המאמר) .{0,300}? הופיע(ה)? לראשונה ב.{0,120}$/, '').replace(/\s*Do stories and artists like this matter to you\?.*$/i, '').trim().slice(0, 400),
       url: link,
       source,
       timestamp: Number.isNaN(ts) ? Date.now() : ts,
@@ -201,6 +214,23 @@ export async function buildCorpus({ log = console.log, warn = console.warn } = {
     throw new Error(`Only ${pool.length} items gathered — network likely blocked.`);
   }
 
+  // Hebrew pieces, on top of the English pool (not counted against TARGET).
+  for (const src of HE_RSS_SOURCES) {
+    try {
+      const items = await pullRSS(src, HE_PER_FEED);
+      let added = 0;
+      for (const it of items) {
+        if (!it.url || seen.has(it.url)) continue;
+        seen.add(it.url);
+        pool.push({ ...it, lang: 'he' });
+        added++;
+      }
+      log(`[corpus] ${src.source}: ${added} items (Hebrew)`);
+    } catch (e) {
+      warn(`[corpus] ${src.source} failed: ${e.message}`);
+    }
+  }
+
   // ---- lengths: measure the pages the feeds didn't cover, alongside scoring,
   // inside a fixed budget so it never holds the build up for long. What
   // isn't measured gets an estimate (src/length.js), marked as one.
@@ -243,6 +273,7 @@ export async function buildCorpus({ log = console.log, warn = console.warn } = {
       generatedAt: new Date().toISOString(),
       count: scored.length,
       sources: ['Hacker News', ...RSS_SOURCES.map((s) => s.source)],
+      sourcesHe: HE_RSS_SOURCES.map((s) => s.source),
       domains: DOMAINS,
       slots: SLOTS,
       domainCounts,

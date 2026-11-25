@@ -20,6 +20,11 @@
 //                            "d:<YYYY-MM-DD>" → count           (all-people daily cap)
 // <pool> is the corpus's generatedAt, so the extras belong to one day's pool
 // and stop counting when the daily rebuild replaces it.
+//
+// In Hebrew ({ lang: 'he' }) the lean is searched in Hebrew first and only
+// Hebrew results are kept from those searches; when they leave fewer than
+// HEBREW_ENOUGH candidates, the English searches run as well. A Hebrew lean
+// is remembered apart from the same lean in English.
 
 import crypto from 'node:crypto';
 import net from 'node:net';
@@ -32,8 +37,11 @@ import { makeClassifier, modelEngagement, hashString } from './corpus.js';
 import { getBlob, hashGet, hashGetAll, hashUpdate, hashIncr } from './store.js';
 import { measureMany } from './length.js';
 import { withLength } from '../src/length.js';
+import { isHebrewItem } from '../src/engine/lang.js';
+import HE from '../src/i18n/he/common.js';
 
-export const SEARCH_QUERIES = 3;      // Tavily searches per thin lean
+export const SEARCH_QUERIES = 3;      // Tavily searches per thin lean (per language)
+export const HEBREW_ENOUGH = 4;       // Hebrew candidates that make the English searches unneeded
 export const RESULTS_PER_QUERY = 8;
 export const SCORE_MAX = 10;          // Groq classifier calls per thin lean
 const SCORE_CONCURRENCY = 5;
@@ -135,13 +143,27 @@ export const leanKey = (lean) => JSON.stringify([
 ]);
 const shortHash = (s) => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
 
+// The same, in Hebrew, for the Hebrew searches.
+const DEPTH_HE = [
+  'מבוא קצר וברור בנושא', 'מאמר נגיש על', 'מאמר הגות או קריאה ארוכה על',
+  'מאמר מעמיק על', 'מחקר מפורט ויסודי על',
+];
+const MOOD_HE = {
+  sharpen: 'מאמר שמבחין הבחנה חדה בנושא',
+  complicate: 'מאמר שמסבך את הסיפור המקובל על',
+  bridge: 'מאמר שמחבר את {t} לתחום רחוק',
+  ground: 'מקרה מוחשי או עדות אישית על',
+};
+const he = (k) => HE[k] || k;
+
 // A lean can be searched when it names a field or has a hunch; depth and mood
 // alone say nothing to search for.
 export const searchable = (lean) => !!(lean.fields.length || (lean.hunch || '').trim());
 
 // → [{ q, field|null, part|null }], at most SEARCH_QUERIES.
-export function buildQueries(lean) {
+export function buildQueries(lean, lang = 'en') {
   const hunch = (lean.hunch || '').trim();
+  const H = lang === 'he';
   const targets = [];
   for (const d of lean.fields) {
     const ps = lean.parts?.[d] || [];
@@ -149,22 +171,25 @@ export function buildQueries(lean) {
     else targets.push({ field: d, part: null });
   }
   if (!targets.length && hunch) targets.push({ field: null, part: null });
-  const topicOf = (t) => (t.part ? `${t.part} (${t.field})` : t.field) || hunch;
+  const topicOf = (t) => (H
+    ? (t.part ? `${he(t.part)} (${he(t.field)})` : t.field && he(t.field))
+    : (t.part ? `${t.part} (${t.field})` : t.field)) || hunch;
+  const depth = H ? DEPTH_HE : DEPTH, mood = H ? MOOD_HE : MOOD;
   const lead = (t) => {
     const topic = topicOf(t);
     if (lean.mood) {
-      const m = MOOD[lean.mood];
+      const m = mood[lean.mood];
       return m.includes('{t}') ? m.replace('{t}', topic) : `${m} ${topic}`;
     }
-    return `${lean.ring != null ? DEPTH[lean.ring] : DEPTH[2]} ${topic}`;
+    return `${lean.ring != null ? depth[lean.ring] : depth[2]} ${topic}`;
   };
-  const withHunch = (s, t) => (hunch && t.field ? `${s}, about ${hunch}` : s);
+  const withHunch = (s, t) => (hunch && t.field ? `${s}, ${H ? 'על' : 'about'} ${hunch}` : s);
   const out = targets.slice(0, SEARCH_QUERIES).map((t) => ({ ...t, q: withHunch(lead(t), t) }));
   // One target only: ask a second way, for talks and interviews, so one
   // search engine's idea of the topic doesn't decide the whole shelf.
   if (out.length === 1 && SEARCH_QUERIES > 1) {
     const t = out[0];
-    out.push({ ...t, q: withHunch(`a talk, lecture, interview or podcast episode on ${topicOf(t)}`, t) });
+    out.push({ ...t, q: withHunch(H ? `הרצאה, ראיון או פרק פודקאסט על ${topicOf(t)}` : `a talk, lecture, interview or podcast episode on ${topicOf(t)}`, t) });
   }
   return out;
 }
@@ -281,14 +306,15 @@ async function scoreOne(raw, target, { classify, apiKey, deadline }) {
 // → { items, added, fit, searched, calls:{search, llm}, skipped, ms }
 // items: what this lean found (new now, or found by an earlier search of the
 // same lean against today's pool). Throws {status, type, message} errors.
-export async function lookFurther(user, rawLean, { now = Date.now(), search = tavilySearch, classify = makeClassifier('promenade-further'), measure = measureMany } = {}) {
+export async function lookFurther(user, rawLean, { now = Date.now(), search = tavilySearch, classify = makeClassifier('promenade-further'), measure = measureMany, lang = 'en' } = {}) {
+  const hebrew = lang === 'he';
   const t0 = Date.now();
   const deadline = t0 + DEADLINE_MS;
   const lean = cleanLean(rawLean);
   if (!hasLean(lean) || !searchable(lean)) throw fail(400, 'nothing_to_search', 'Pick a field or write a hunch first.');
 
   const pool = await currentPool();
-  const memoField = `q:${shortHash(leanKey(lean))}`;
+  const memoField = `q:${shortHash(leanKey(lean) + (hebrew ? '|he' : ''))}`;
   const memo = parseJSON(await hashGet(pool.hash, memoField));
   if (memo) {
     const all = await hashGetAll(pool.hash);
@@ -300,47 +326,59 @@ export async function lookFurther(user, rawLean, { now = Date.now(), search = ta
   if (search === tavilySearch && !hasSearchKey()) throw fail(503, 'no_search_key', 'TAVILY_API_KEY is not configured on the server.');
   await checkAndCount(user.id, now);
 
-  // Search. One failed query doesn't sink the others.
-  const queries = buildQueries(lean);
-  const settled = await Promise.allSettled(queries.map((q) => search(q.q, {
-    maxResults: RESULTS_PER_QUERY, excludeDomains: JUNK_DOMAINS.filter((d) => !d.includes('/')), timeoutMs: SEARCH_TIMEOUT_MS,
-  })));
-  const failures = settled.filter((s) => s.status === 'rejected');
-  if (failures.length === settled.length) {
-    const e = failures[0].reason;
-    if (e?.type === 'no_search_key') throw fail(503, 'no_search_key', e.message);
-    throw fail(502, 'search_upstream', `The search didn’t answer: ${e?.message || 'unknown error'}`);
-  }
-
   // Filter and dedupe against the pool and its extras so far.
   const existing = await hashGetAll(pool.hash);
   const extrasCount = Object.keys(existing).filter((k) => k.startsWith('i:')).length;
   const known = new Set([...pool.items.map((it) => normUrl(it.url)), ...Object.values(existing).map(parseJSON).filter((x) => x?.url).map((x) => normUrl(x.url))]);
   const skipped = {};
-  const perQuery = settled.map((s, qi) => (s.status === 'fulfilled' ? s.value : [])
-    .filter((r) => {
-      const why = junkReason(r) || (known.has(normUrl(r.url)) ? 'already-in-pool' : '');
-      if (why) { skipped[why] = (skipped[why] || 0) + 1; return false; }
-      return true;
-    })
-    .sort((a, b) => b.score - a.score)
-    .map((r) => ({ r, target: queries[qi] })));
+
+  // Search. One failed query doesn't sink the others. → { lists, failures, count }
+  const ANY = () => true;
+  const runQueries = async (queries, keep = ANY) => {
+    const settled = await Promise.allSettled(queries.map((q) => search(q.q, {
+      maxResults: RESULTS_PER_QUERY, excludeDomains: JUNK_DOMAINS.filter((d) => !d.includes('/')), timeoutMs: SEARCH_TIMEOUT_MS,
+    })));
+    const lists = settled.map((s, qi) => (s.status === 'fulfilled' ? s.value : [])
+      .filter((r) => {
+        const why = junkReason(r) || (known.has(normUrl(r.url)) ? 'already-in-pool' : '') || (keep(r) ? '' : 'not-hebrew');
+        if (why) { skipped[why] = (skipped[why] || 0) + 1; return false; }
+        return true;
+      })
+      .sort((a, b) => b.score - a.score)
+      .map((r) => ({ r, target: queries[qi], lang: hebrew && keep !== ANY ? 'he' : undefined })));
+    return { lists, failures: settled.filter((s) => s.status === 'rejected').map((s) => s.reason), count: queries.length };
+  };
+  const runs = [];
+  if (hebrew) runs.push(await runQueries(buildQueries(lean, 'he'), isHebrewItem));
+  const heFound = runs.length ? runs[0].lists.reduce((n, l) => n + l.length, 0) : 0;
+  if (!hebrew || (heFound < HEBREW_ENOUGH && Date.now() < deadline - 25_000)) runs.push(await runQueries(buildQueries(lean), ANY));
+  const allFailures = runs.flatMap((r) => r.failures);
+  if (allFailures.length === runs.reduce((n, r) => n + r.count, 0)) {
+    const e = allFailures[0];
+    if (e?.type === 'no_search_key') throw fail(503, 'no_search_key', e.message);
+    throw fail(502, 'search_upstream', `The search didn’t answer: ${e?.message || 'unknown error'}`);
+  }
+  const searchCalls = runs.reduce((n, r) => n + r.count, 0);
+
   // Round-robin across queries so each part of the lean gets its share.
   const cands = [];
   const taken = new Set();
-  for (let i = 0; cands.length < SCORE_MAX && perQuery.some((l) => l.length > i); i++) {
-    for (const list of perQuery) {
-      const c = list[i];
-      if (!c || cands.length >= SCORE_MAX) continue;
-      const k = normUrl(c.r.url);
-      if (taken.has(k)) continue;
-      taken.add(k); cands.push(c);
+  // In Hebrew, the Hebrew finds take their places before the English ones.
+  for (const { lists: perQuery } of runs) {
+    for (let i = 0; cands.length < SCORE_MAX && perQuery.some((l) => l.length > i); i++) {
+      for (const list of perQuery) {
+        const c = list[i];
+        if (!c || cands.length >= SCORE_MAX) continue;
+        const k = normUrl(c.r.url);
+        if (taken.has(k)) continue;
+        taken.add(k); cands.push(c);
+      }
     }
   }
 
   // Score with the corpus's scorer.
   const apiKey = process.env.PERSPECTIVE_API_KEY || null;
-  const raws = cands.map(({ r, target }) => toItem(r, target, now));
+  const raws = cands.map(({ r, target, lang: l }) => ({ ...toItem(r, target, now), ...(l ? { lang: l } : {}) }));
   // Their lengths, measured alongside the scoring (tiles are sized by them).
   const measuring = measure(raws, { budgetMs: Math.max(0, Math.min(LENGTH_BUDGET_MS, deadline - Date.now() - 2000)) }).catch(() => 0);
   const scored = await mapLimit(cands, SCORE_CONCURRENCY, ({ target }, i) => scoreOne(raws[i], target, { classify, apiKey, deadline }));
@@ -363,7 +401,7 @@ export async function lookFurther(user, rawLean, { now = Date.now(), search = ta
     added: good.length,
     fit: good.filter((it) => inLeanArea(it, lean)).length,
     searched: true,
-    calls: { search: queries.length, llm: llmCalls },
+    calls: { search: searchCalls, llm: llmCalls },
     skipped,
     ms: Date.now() - t0,
   };
