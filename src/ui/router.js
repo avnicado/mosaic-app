@@ -1,4 +1,4 @@
-// Tiny hash router: #/ (desk), #/new, #/t/<id>, #/quests, #/q/<id>, #/promenade, #/library, #/settings.
+// Tiny hash router: #/ (desk), #/new, #/t/<id>, #/quests, #/q/<id>, #/promenade, #/library, #/settings, #/whats-new.
 import { useSyncExternalStore } from 'react';
 
 const subscribe = (fn) => { window.addEventListener('hashchange', fn); return () => window.removeEventListener('hashchange', fn); };
