@@ -32,12 +32,6 @@ const at = (r, a) => [C + r * Math.cos(a), C + r * Math.sin(a)];
 const f = (n) => n.toFixed(2);
 const TAU = Math.PI * 2;
 
-function sector(r0, r1, a0, a1) {
-  const large = a1 - a0 > 180 ? 1 : 0;
-  const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0);
-  return `M${f(x0)},${f(y0)} A${r1},${r1} 0 ${large} 1 ${f(x1)},${f(y1)} L${f(x2)},${f(y2)} A${r0},${r0} 0 ${large} 0 ${f(x3)},${f(y3)} Z`;
-}
-
 // Break a short name into at most two lines of about 12 characters.
 function lines(name) {
   const words = String(name).split(/\s+/);
@@ -220,8 +214,13 @@ export function stones(map) {
     }
     return at(rOf(uIn(k) + du / 2), best.a);
   });
-  const radii = cruxes.map((_, k) => [rOf(uIn(k)), rOf(uIn(k + 1))]);
-  const out = { cells, outline, labelAngle, numAt, radii };
+  // A ring's own outline, wavering lines and all, for when it is picked.
+  const ringPath = cruxes.map((_, k) => {
+    const ring = (kb) => { const line = lines[kb]; return [...line, { a: line[0].a + TAU, u: line[0].u }].map((p) => xy(p.a, p.u)); };
+    const outer = ring(k + 1), inner = ring(k).reverse();
+    return `${path(outer)}${path(inner)}`;
+  });
+  const out = { cells, outline, labelAngle, numAt, ringPath };
   cache.set(map, out);
   return out;
 }
@@ -280,7 +279,7 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
         );
       })}
       {ring != null && (
-        <path className="vd-mm-ringon" d={sector(g.radii[ring][0], g.radii[ring][1], -90, 269.99)} />
+        <path className="vd-mm-ringon" d={g.ringPath[ring]} />
       )}
       <circle className="vd-mm-hub" cx={C} cy={C} r={HUB - 2} />
       <text className="vd-mm-hubt" x={C} y={C - 1}>Tap to</text>
