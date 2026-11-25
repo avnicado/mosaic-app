@@ -447,6 +447,120 @@ function drawEnding(t, t0) {
   ending.firstChild.style.transform = `scale(${lerp(1, 1.03, E.inOutSine(prog(t, t0, t0 + 7))).toFixed(4)})`;
 }
 
+// ---------- many questions ----------
+// Asked of the box one after another at the end. Real, varied, and put evenly.
+const OWN_QS = [
+  'Should the voting age be 16?',
+  'Is a four-day week good for business?',
+  'Should university be free?',
+  'Does rent control help renters?',
+  'Should phones be banned in schools?',
+  'Is remote work better for teams?',
+  'Should sugary drinks be taxed?',
+  'Should voting be compulsory?',
+  'Should self-driving cars be on our roads?',
+  'Is lab-grown meat the future?',
+  'Should drug possession be decriminalised?',
+  'Do zoos do more good than harm?',
+  'Should cities ban cars from the centre?',
+  'Should AI art be copyrightable?',
+  'Is a universal basic income affordable?',
+  'Should the minimum wage rise?',
+  'Are electric cars really greener?',
+  'Should tipping be abolished?',
+  'Should wealth be taxed more?',
+  'Is homework worth it?',
+  'Should embryo gene editing be allowed?',
+  'Should daylight saving time end?',
+  'How much immigration is right?',
+  'Is space exploration worth the cost?',
+];
+const qcloud = document.createElement('div');
+qcloud.className = 'dm-qcloud';
+layer.insertBefore(qcloud, cap);
+const veil = document.createElement('div');
+veil.className = 'dm-veil';
+layer.insertBefore(veil, qcloud);
+// Returns when the last question has finished in the box.
+function questionFlash(t0, getInput, getGo, qs) {
+  const slots = [];
+  let t = t0;
+  qs.forEach((q, i) => {
+    const d = i === 0 ? 1.05 : Math.max(0.1, 0.56 * Math.pow(0.76, i - 1));
+    slots.push({ q, a: t, b: t + d, typeFor: i === 0 ? 0.72 : 0.5 });
+    t += d;
+  });
+  const t1 = t;
+  let chips = [], shown = null, el = null;
+  const fly = 0.62;
+  effect(t0 - 0.2, t1 + 8, {
+    arm() {
+      el = getInput();
+      const ir = el.getBoundingClientRect(), gr = getGo().getBoundingClientRect();
+      const keepOut = [
+        { x0: ir.left - 60, y0: ir.top - 46, x1: gr.right + 60, y1: ir.bottom + 46 },
+        { x0: 240, y0: 900, x1: 1680, y1: 1080 },
+      ];
+      const placed = [];
+      const rand = rng(41);
+      // every question but the last lifts out of the box into the cloud
+      chips = slots.slice(0, -1).map((s, i) => {
+        const d = document.createElement('div');
+        d.className = 'dm-q';
+        d.textContent = s.q;
+        qcloud.appendChild(d);
+        const w0 = d.offsetWidth, h0 = d.offsetHeight;
+        let best = null;
+        for (let k = 0; k < 600; k++) {
+          const sc = 0.62 + rand() * 0.5;
+          const w = w0 * sc, h = h0 * sc;
+          const x = 40 + w / 2 + rand() * (W - 80 - w), y = 40 + h / 2 + rand() * (H - 80 - h);
+          const box = { x0: x - w / 2 - 12, y0: y - h / 2 - 12, x1: x + w / 2 + 12, y1: y + h / 2 + 12 };
+          const hit = (r) => !(box.x1 < r.x0 || box.x0 > r.x1 || box.y1 < r.y0 || box.y0 > r.y1);
+          if (keepOut.some(hit) || placed.some(hit)) continue;
+          best = { x, y, sc, box };
+          break;
+        }
+        if (!best) best = { x: 120 + rand() * (W - 240), y: 60 + rand() * 300, sc: 0.6, box: { x0: 0, y0: 0, x1: 0, y1: 0 } };
+        placed.push(best.box);
+        const depth = (best.sc - 0.62) / 0.5;
+        return { d, w0, h0, launch: s.b, x: best.x, y: best.y, sc: best.sc, op: 0.62 + 0.38 * depth, from: null,
+          vx: (best.x - W / 2) * 0.012, vy: (best.y - H / 2) * 0.012 };
+      });
+    },
+    apply(t) {
+      // the box: the current question, typed in, then the next
+      const s = slots.find((x) => t >= x.a && t < x.b) || (t >= t1 ? slots[slots.length - 1] : null);
+      if (s && el) {
+        const p = t >= t1 ? 1 : clamp((t - s.a) / ((s.b - s.a) * s.typeFor));
+        const v = s.q.slice(0, Math.ceil(s.q.length * p));
+        if (v !== shown) { shown = v; typeInto(el, v); el.scrollLeft = el.scrollWidth; }
+      }
+      // a paper veil over the page, the box left clear
+      if (el) {
+        const ir = el.getBoundingClientRect(), gr = getGo().getBoundingClientRect();
+        Object.assign(veil.style, { left: `${ir.left - 10}px`, top: `${ir.top - 10}px`, width: `${gr.right - ir.left + 20}px`, height: `${ir.height + 20}px` });
+        veil.style.opacity = (0.8 * E.inOutSine(prog(t, t0 + 0.3, t0 + 1.5))).toFixed(3);
+      }
+      const ir = el?.getBoundingClientRect();
+      const boxFont = ir ? ir.height * 0.4 : 30;
+      for (const c of chips) {
+        const local = t - c.launch;
+        if (local < 0) { c.d.style.opacity = 0; continue; }
+        if (!c.from && ir) c.from = { x: ir.left + 14 * (ir.height / 40) + c.w0 * 0.5 * (boxFont / 28), y: ir.top + ir.height / 2, sc: boxFont / 28 };
+        const f = c.from || { x: W / 2, y: H / 2, sc: 1 };
+        const p = E.outQuint(clamp(local / fly));
+        const drift = Math.max(0, local - fly * 0.6);
+        const x = lerp(f.x, c.x, p) + c.vx * drift, y = lerp(f.y, c.y, p) + c.vy * drift;
+        const sc = lerp(f.sc, c.sc, p);
+        c.d.style.opacity = lerp(1, c.op, p).toFixed(3);
+        c.d.style.transform = `translate(${(x - c.w0 / 2).toFixed(2)}px, ${(y - c.h0 / 2).toFixed(2)}px) scale(${sc.toFixed(4)})`;
+      }
+    },
+  });
+  return t1;
+}
+
 // ---------- the script ----------
 // Times in seconds. See demo-video/SCRIPT.md for the shot list and captions.
 const events = [];
@@ -549,13 +663,21 @@ function buildScript() {
   const closeView = async () => { const b = document.querySelector('.vd-detail-back'); if (b) await click(b); };
   ev(T.more + 1.0, async () => { await closeView(); await click(chip('kids under 16')()); });
   rain(T.more + 1.1, { dur: 1.3, fall: 0.6, seed: 11, labelsAt: 1.4, hold: 0.2, armAt: T.more + 1.0 });
-  ev(T.more + 4.4, () => click(chip('vaccines')()));
-  rain(T.more + 4.5, { dur: 1.3, fall: 0.6, seed: 23, labelsAt: 1.4, hold: 0.2, armAt: T.more + 4.4 });
-  caption(T.more + 0.2, T.more + 3.9, 'Ready examples, researched and checked by hand.');
-  caption(T.more + 3.9, T.more + 7.4, 'Or ask your own question, mapped from live search.');
+  T.vacc = T.more + 3.7;
+  ev(T.vacc, () => click(chip('vaccines')()));
+  rain(T.vacc + 0.1, { dur: 1.3, fall: 0.6, seed: 23, labelsAt: 1.4, hold: 0.2, armAt: T.vacc });
+  caption(T.more + 0.2, T.vacc + 1.9, 'Ready examples, researched and checked by hand.');
+
+  // 8b. Or ask your own: question after question runs through the box, each
+  // faster than the last, and lifts out into a cloud around it.
+  T.own = T.vacc + 2.5;
+  T.ownClick = T.own - 0.3;
+  ev(T.ownClick, () => click(input()));
+  const flashEnd = questionFlash(T.own + 0.15, input, go, OWN_QS);
+  caption(T.vacc + 1.9, flashEnd + 0.5, 'Or ask your own question, mapped from live search.');
 
   // 9. The end
-  T.end = T.more + 7.6;
+  T.end = flashEnd + 0.6;
   T.duration = T.end + 5.8;
 
   // ---- camera ----
@@ -599,10 +721,11 @@ function buildScript() {
   key(T.viewClick + 9.9, bottomOf(panel, 1.6, 150, 905), 'inOut', T.viewClick + 8.4);
   key(T.viewClick + 10.8, bottomOf(panel, 1.62, 150, 905), 'inOutSine');
   key(T.more + 0.9, at(960, 470, 1.12), 'inOut', T.viewClick + 10.8);
-  key(T.more + 4.4, at(960, 480, 1.15), 'inOutSine');
-  key(T.more + 6.6, mandala(1.42, -20, -40), 'inOut', T.more + 4.6);
-  key(T.end, mandala(1.48, -20, -40), 'inOutSine');
-  key(T.duration, mandala(1.48, -20, -40));
+  key(T.vacc, at(960, 480, 1.15), 'inOutSine');
+  key(T.vacc + 1.7, at(960, 486, 1.16), 'inOutSine');
+  key(T.own, look(input, 1.9, 0, -70), 'inOut', T.vacc + 1.7);
+  key(T.end, look(input, 2.0, 0, -70), 'inOutSine');
+  key(T.duration, look(input, 2.0, 0, -70));
   camTrack = track(C, camMix);
 
   // ---- pointer ----
@@ -625,12 +748,14 @@ function buildScript() {
   pk(T.viewClick + 1.0, ptOf(label(2), 60, 60), 'out', T.viewClick + 0.2);
   pk(T.more + 0.2, ptOf(chip('kids under 16'), 60, 40), 'inOut', T.viewClick + 10.6);
   pk(T.more + 0.95, ptOf(chip('kids under 16'), 0, 2), 'inOut', T.more + 0.2);
-  pk(T.more + 4.35, ptOf(chip('vaccines'), 0, 2), 'inOut', T.more + 3.4);
-  pk(T.more + 5.4, ptOf(chip('vaccines'), 60, 80), 'out', T.more + 4.5);
-  pk(T.duration, ptOf(chip('vaccines'), 60, 80));
+  pk(T.vacc - 0.05, ptOf(chip('vaccines'), 0, 2), 'inOut', T.vacc - 1.0);
+  pk(T.vacc + 1.0, ptOf(chip('vaccines'), 60, 80), 'out', T.vacc + 0.1);
+  pk(T.ownClick - 0.05, ptOf(input, -60, 4), 'inOut', T.vacc + 1.6);
+  pk(T.ownClick + 1.0, ptOf(input, 40, 120), 'out', T.ownClick + 0.15);
+  pk(T.duration, ptOf(input, 40, 120));
   curTrack = track(P, ptMix);
-  curVis = [[T.ask + 0.6, T.mapIt + 1.6], [T.ringClick - 1.4, T.ringClick + 1.8], [T.pull - 1.0, T.viewClick + 1.6], [T.more - 0.3, T.end + 0.2]];
-  clicks = [T.ask + 1.95, T.mapIt, T.ringClick, T.pull + 0.2, T.viewClick, T.more + 1.0, T.more + 4.4];
+  curVis = [[T.ask + 0.6, T.mapIt + 1.6], [T.ringClick - 1.4, T.ringClick + 1.8], [T.pull - 1.0, T.viewClick + 1.6], [T.more - 0.3, T.ownClick + 0.9]];
+  clicks = [T.ask + 1.95, T.mapIt, T.ringClick, T.pull + 0.2, T.viewClick, T.more + 1.0, T.vacc, T.ownClick];
 }
 
 function drawCursor(t) {

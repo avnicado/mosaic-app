@@ -67,3 +67,10 @@ html.demo-pre .vd-ex.on { background: var(--vd-panel); border-color: var(--vd-ru
 .dm-cursor { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -3px 0 0 -6px; opacity: 0; transform-origin: 6px 3px; }
 .dm-cursor svg { width: 34px; height: 34px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(26, 22, 18, 0.28)); }
 .dm-ripple { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 3px solid var(--accent); opacity: 0; }
+
+/* the end: many questions lift out of the box into a cloud around it */
+.dm-qcloud { position: absolute; inset: 0; }
+.dm-q { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; transform-origin: center;
+  font: 500 28px/1.2 var(--sans); color: var(--soft); background: var(--panel); border: 1px solid var(--rule);
+  border-radius: 999px; padding: 11px 24px 12px; box-shadow: 0 8px 22px rgba(26, 22, 18, 0.09), 0 1px 2px rgba(26, 22, 18, 0.06); }
+.dm-veil { position: absolute; border-radius: 999px; opacity: 0; box-shadow: 0 0 0 4000px rgba(245, 240, 230, 1); }
