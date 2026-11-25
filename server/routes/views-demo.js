@@ -7,7 +7,6 @@
 
 import { requireAuth } from '../auth.js';
 import { mapLive, liveReady, ringSides } from '../viewsDemo.js';
-import PROBE_RINGS from '../probe-rings.json' with { type: 'json' };
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');
@@ -15,13 +14,10 @@ export default async function handler(req, res) {
   // lookup for the quality test Gil asked for on 2026-11-25. No sign-in, no
   // cap, and no store: MOSAIC_DATA_DIR turns Redis off for this instance, so
   // nothing is cached or counted in the shared record.
-  if (process.env.VERCEL_ENV === 'preview' && req.query?.probe === '1' && (req.query?.ring || req.query?.id)) {
+  if (process.env.VERCEL_ENV === 'preview' && req.query?.probe === '1' && req.query?.ring) {
     process.env.MOSAIC_DATA_DIR = '/tmp/views-probe';
     try {
-      const ring = req.query.id
-        ? PROBE_RINGS.find((x) => x.id === String(req.query.id))?.ring
-        : JSON.parse(String(req.query.ring));
-      if (!ring) throw Object.assign(new Error('no such probe ring'), { status: 404 });
+      const ring = JSON.parse(String(req.query.ring));
       const t0 = Date.now();
       const out = await ringSides(ring, { ip: 'probe', unlimited: true });
       res.status(200).json({ ms: Date.now() - t0, ...out });
