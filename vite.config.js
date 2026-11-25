@@ -78,5 +78,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), apiPlugin(), releaseCheckPlugin()],
     server: { port: Number(process.env.PORT) || 5200 },
+    // TEMP preview-only page (to be removed): the app on sample data.
+    build: { rollupOptions: { input: { main: resolve(__dirname, 'index.html'), previewHe: resolve(__dirname, 'preview-he.html') } } },
   };
 });
