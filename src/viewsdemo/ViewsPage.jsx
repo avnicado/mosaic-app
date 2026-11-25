@@ -329,7 +329,10 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   // more pieces arguing it. What's found becomes more stones on the mandala.
   const base = ringPieces(map, k, null);
   const all = ringPieces(map, k, items);
-  const short = { left: base.left.length < PER_SIDE, right: base.right.length < PER_SIDE };
+  // A ready example is complete as it stands: it was researched and read by
+  // hand, so it never looks for more.
+  const want = map.live ? PER_SIDE : 2;
+  const short = { left: base.left.length < want, right: base.right.length < want };
   const few = shown.some((pos) => short[pos]);
   useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
   const filling = few && !!onItems;
