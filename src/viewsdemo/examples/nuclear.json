@@ -227,6 +227,12 @@
         "renewables-first": "right",
         "phase-out": "right"
       },
+      "stakes": {
+        "build-more": 3,
+        "keep-existing": 1,
+        "renewables-first": 3,
+        "phase-out": 2
+      },
       "reading": [
         {
           "side": "left",
@@ -280,6 +286,12 @@
         "keep-existing": "mid",
         "renewables-first": "right",
         "phase-out": "right"
+      },
+      "stakes": {
+        "build-more": 2,
+        "keep-existing": 1,
+        "renewables-first": 3,
+        "phase-out": 1
       },
       "reading": [
         {
@@ -335,6 +347,12 @@
         "renewables-first": "mid",
         "phase-out": "right"
       },
+      "stakes": {
+        "build-more": 1,
+        "keep-existing": 1,
+        "renewables-first": 1,
+        "phase-out": 3
+      },
       "reading": [
         {
           "side": "left",
@@ -388,6 +406,12 @@
         "keep-existing": "left",
         "renewables-first": "mid",
         "phase-out": "right"
+      },
+      "stakes": {
+        "build-more": 2,
+        "keep-existing": 3,
+        "renewables-first": 1,
+        "phase-out": 2
       },
       "reading": [
         {

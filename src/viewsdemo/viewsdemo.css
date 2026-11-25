@@ -197,7 +197,7 @@
 @media (max-width: 759px) { .vd-mm-svg { max-height: none; margin: 0 -6px; width: calc(100% + 12px); } }
 .vd-mm-slice { cursor: pointer; outline: none; transition: opacity .15s; }
 .vd-mm-slice.dim { opacity: .3; }
-.vd-mm-cell { stroke: var(--vd-bg); stroke-width: 1.2; transition: opacity .15s; }
+.vd-mm-cell { stroke: var(--vd-bg); stroke-width: 1.8; stroke-linejoin: round; transition: opacity .15s; }
 .vd-mm-cell.rdim { opacity: .28; }
 .vd-mm-edge { fill: none; stroke-width: 0; }
 .vd-mm-slice.on .vd-mm-edge, .vd-mm-slice:focus-visible .vd-mm-edge { stroke-width: 3; }

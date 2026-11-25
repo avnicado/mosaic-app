@@ -160,7 +160,7 @@ export async function mapLive(question, {
 } = {}) {
   const q = String(question || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   if (q.length < 6) throw fail(400, 'bad_request', 'Type a question first.');
-  const key = `v7:${hashString(norm(q))}`; // v7: pages that cannot be anyone's argument are dropped; pieces carry their standing
+  const key = `v8:${hashString(norm(q))}`; // v8: each view's stake in each question (the stone sizes), rings ordered shared to sharpest split
 
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
@@ -198,7 +198,7 @@ export async function mapLive(question, {
   // draft is kept, and when a pick can't run in time the answer is
   // { pending: true }: the client asks again and the picks get a fresh minute.
   if (!draft) {
-    const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 1900, deadline, llm });
+    const raw = await groqJSON({ system: MAP_SYSTEM, prompt: mapPrompt(q), maxTokens: 2000, deadline, llm });
     const map = normalizeMap(raw, { question: q });
     const views = map.views.map((v) => ({ label: `"${v.name}": ${v.summary}`, search: v.search }));
     const rings = map.cruxes.map((c) => ({ search: `${c.question} ${map.question}`.slice(0, 200) }));

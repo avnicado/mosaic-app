@@ -222,6 +222,12 @@
         "fewer-shots-more-choice": "right",
         "end-mandates": "right"
       },
+      "stakes": {
+        "keep-full-schedule": 3,
+        "persuade-not-pressure": 2,
+        "fewer-shots-more-choice": 1,
+        "end-mandates": 3
+      },
       "reading": [
         {
           "side": "left",
@@ -275,6 +281,12 @@
         "persuade-not-pressure": "mid",
         "fewer-shots-more-choice": "right",
         "end-mandates": "right"
+      },
+      "stakes": {
+        "keep-full-schedule": 2,
+        "persuade-not-pressure": 1,
+        "fewer-shots-more-choice": 3,
+        "end-mandates": 1
       },
       "reading": [
         {
@@ -330,6 +342,12 @@
         "fewer-shots-more-choice": "right",
         "end-mandates": "mid"
       },
+      "stakes": {
+        "keep-full-schedule": 2,
+        "persuade-not-pressure": 1,
+        "fewer-shots-more-choice": 3,
+        "end-mandates": 1
+      },
       "reading": [
         {
           "side": "left",
@@ -383,6 +401,12 @@
         "persuade-not-pressure": "right",
         "fewer-shots-more-choice": "right",
         "end-mandates": "right"
+      },
+      "stakes": {
+        "keep-full-schedule": 1,
+        "persuade-not-pressure": 3,
+        "fewer-shots-more-choice": 1,
+        "end-mandates": 2
       },
       "reading": [
         {
