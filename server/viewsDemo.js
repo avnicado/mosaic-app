@@ -355,13 +355,17 @@ export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 20
 // describes the article its advocates would write, not a string of keywords.
 const EXA_QUERY_SYSTEM = 'You describe articles to find with a search engine that matches pages to a description. For one QUESTION with two opposite answers, A and B, describe for each answer the article that argues it: one sentence, as in "An op-ed arguing that…" or "A policy brief making the case that…", naming the specific claim that side makes, in that side\'s own terms. At most 25 words each. Name no person or organisation. Write TWO per answer: the first as above, and a second ("A2", "B2") describing a different kind of piece making the same case by another line of argument (another field, another kind of writer, another country\'s debate). Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}';
 
-// engine: 'tavily' (keyword search, opening snippet) or 'exa' (a search
-// described in a sentence, answered with the passages that fit it). Exa is on
-// trial beside Tavily; VIEWS_RING_SEARCH=exa makes it the default once chosen.
+// engine: 'exa' (a search described in a sentence, answered with the passages
+// that fit it) or 'tavily' (keyword search, opening snippet). Exa is the
+// default wherever its key is set: on 5 rings of the 2026-11-25 test it found
+// 36 pieces to Tavily's 21, with both answers filled on every ring and fewer
+// weak picks. VIEWS_RING_SEARCH=tavily turns it back. When an Exa search
+// fails, that one search is made on Tavily instead (fallback).
 export async function ringSides(input, {
   ip = 'unknown', unlimited = false, now = Date.now(), llm = handleLLM,
-  engine = process.env.VIEWS_RING_SEARCH === 'exa' && hasExaKey() ? 'exa' : 'tavily',
-  search = engine === 'exa' ? (hasExaKey() ? exaSearch : null) : (hasSearchKey() ? tavilySearch : null), check = linkLoads,
+  engine = process.env.VIEWS_RING_SEARCH !== 'tavily' && hasExaKey() ? 'exa' : 'tavily',
+  search = engine === 'exa' ? (hasExaKey() ? exaSearch : null) : (hasSearchKey() ? tavilySearch : null),
+  fallback = engine === 'exa' && hasSearchKey() ? tavilySearch : null, check = linkLoads,
 } = {}) {
   const exa = engine === 'exa';
   const passage = exa ? 800 : 320;
@@ -429,7 +433,14 @@ export async function ringSides(input, {
     const written = queries[alt ? `${pos}2` : pos];
     const query = (written && written.length > 8 ? written : exa ? `An opinion piece arguing ${answer} on: ${crux.question}` : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
     try {
-      const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      let rs;
+      try {
+        rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      } catch (e) {
+        if (!fallback) throw e;
+        console.warn('[views-demo] Exa search failed, using Tavily:', e.message);
+        rs = await fallback(`${crux.question} ${answer}. ${holders(pos) || q}`.slice(0, 380), { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      }
       const hosts = new Set();
       return rs.filter(usable).filter((r) => !copied(r)).filter((r) => {
         const h = hostOf(r.url);

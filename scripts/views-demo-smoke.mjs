@@ -379,6 +379,16 @@ assert.ok(exaQueries[0].startsWith('An op-ed arguing'), 'the Exa search is a sen
 assert.ok(exaPickSaw.length > 0 && longPassage.slice(0, 600).split(' … ')[0].length > 320 && exaPickSaw.includes(longPassage.slice(300, 500)), 'the judge reads well past 320 characters on Exa');
 assert.deepEqual(ex.reading.map((x) => x.side), ['left']);
 
+// An Exa search that fails is made again on Tavily, with keywords.
+const FB_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Do bans hurt shops, Exa down?' } };
+let fbQueries = [];
+const fb = await ringSides(FB_IN, { ip: 'r', unlimited: true, engine: 'exa', llm: exaLLM,
+  search: async () => { throw new Error('Exa 500'); },
+  fallback: async (q) => { fbQueries.push(q); return [RS('https://retailers.example.org/exa-parking', 'Parking loss hits shop takings', longPassage)]; },
+  check: async () => true });
+assert.ok(fbQueries.length >= 2 && fbQueries.every((q) => !q.startsWith('An op-ed')), 'Tavily gets keywords, not the Exa sentence');
+assert.deepEqual(fb.reading.map((x) => x.side), ['left'], 'pieces still come back when Exa is down');
+
 // a missing answer → a clear 400, not a crash
 await assert.rejects(() => ringSides({ question: 'x?', crux: { question: 'y?', left: 'a' } }, { ip: 'r', unlimited: true }), (e) => e.status === 400);
 // per-address cap on rings
