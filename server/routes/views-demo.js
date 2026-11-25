@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         : JSON.parse(String(req.query.ring));
       if (!ring) throw Object.assign(new Error('no such probe ring'), { status: 404 });
       const t0 = Date.now();
-      const out = await ringSides(ring, { ip: 'probe', unlimited: true });
+      const out = await ringSides(ring, { ip: 'probe', unlimited: true, ...(req.query?.engine === 'exa' ? { engine: 'exa' } : {}) });
       res.status(200).json({ ms: Date.now() - t0, ...out });
     } catch (e) {
       res.status(e.status || 502).json({ error: String(e.message || e).slice(0, 300) });
