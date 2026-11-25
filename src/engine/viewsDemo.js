@@ -29,12 +29,13 @@ Rules:
 - VIEWS: 3 or 4 positions that real organisations and people hold today. Cover the range, from the mainstream position of major institutions to the strongest dissenting ones; on a scientific question, the view of the major scientific or health bodies is one view, described as theirs. Name each view in 2-4 everyday words by its position ("Keep every routine shot", "Build much more nuclear"), never by party or tribe. "short" is a 1-2 word tag. The summary is one sentence, fair, as its own holders would put it. "who" names the organisations and people who hold it, plainly, so the reader can see how widely it is held. Name only holders you are sure of, with their real titles; fewer and right beats more and wrong.
 - NEUTRAL VOICE: describe each view in its holders' terms. No "rightly", "wrongly", "misinformation", "debunked", "the evidence shows" or any ruling in your own voice. The headline is one sentence that names the views and the point they split on most (e.g. "Four main views, from full bans to cleaner cars; they split most on whether bans hurt local shops."), never a restatement of the question and never an answer.
 - CRUXES: 3 or 4 specific, concrete questions the views answer differently (what would happen, what caused it, which evidence holds up, which good gives way). Never "do you care about X". Each is a short plain question a 12-year-old can read, with a left and a right answer of 2-5 words. Every crux must split the views: at least one view left and one right. A view may sit "mid" (in between, or it depends).
+- STAKES: for each crux, how much each view's case turns on it: 3 its case turns on this question, 2 it matters to it, 1 a side point for it. Judge each view as its own holders would; a view that sits "mid" can still have a high stake.
 - WORDING: if the question's wording takes something for granted, say what in one neutral sentence, and list the views that reject it. Otherwise null and [].
 - SEARCH: for each view, a web search (5-10 words) likely to find an op-ed, essay, report or position statement written by someone who HOLDS it.
 - STATUS: "mapped" for any question people hold different public views on, including scientific and health questions. "none" only for a personal, practical or trivia question with no public sides (then give "nearby": 2-3 questions close to it that people do hold different views on, if any).
 
 Output ONLY valid JSON:
-{"status":"mapped|none","headline":"one plain sentence","views":[{"id":"kebab-id","name":"2-4 words","short":"1-2 words","summary":"...","who":"named organisations or people who hold it","changeMind":"the specific evidence or event that would move this view","search":"..."}],"cruxes":[{"question":"...","left":"...","right":"...","why":"one plain sentence","positions":{"<view id>":"left|right|mid"}}],"wording":{"assumes":null,"leansAwayFrom":[]},"nearby":[]}
+{"status":"mapped|none","headline":"one plain sentence","views":[{"id":"kebab-id","name":"2-4 words","short":"1-2 words","summary":"...","who":"named organisations or people who hold it","changeMind":"the specific evidence or event that would move this view","search":"..."}],"cruxes":[{"question":"...","left":"...","right":"...","why":"one plain sentence","positions":{"<view id>":"left|right|mid"},"stakes":{"<view id>":1}}],"wording":{"assumes":null,"leansAwayFrom":[]},"nearby":[]}
 Be concise.`;
 
 export const mapPrompt = (question) => `The question: "${String(question).trim()}"`;
@@ -262,13 +263,21 @@ export function normalizeMap(raw, { question = '' } = {}) {
       if (id) positions[id] = POSITIONS.includes(String(p).toLowerCase()) ? String(p).toLowerCase() : 'mid';
     }
     for (const v of views) if (!positions[v.id]) positions[v.id] = 'mid';
+    // How much each view's case turns on this question (1-3): the size of its
+    // stone on this ring. A view the model left out gets the middle size.
+    const stakes = {};
+    for (const [k, w] of Object.entries(c?.stakes || {})) {
+      const id = idOf(k), n = Math.round(Number(w));
+      if (id && Number.isFinite(n)) stakes[id] = Math.min(3, Math.max(1, n));
+    }
+    for (const v of views) if (!stakes[v.id]) stakes[v.id] = 2;
     // Articles on this question itself, each arguing one of its two answers.
     const reading = (Array.isArray(c?.reading) ? c.reading : []).map((r) => {
       const src = cleanSource(r);
       const side = String(r?.side || '').toLowerCase();
       return src && (side === 'left' || side === 'right') ? { ...src, side, says: str(r?.says, 240) } : null;
     }).filter(Boolean).slice(0, 6);
-    return { question: str(c?.question, 160), left: cap(str(c?.left, 60)), right: cap(str(c?.right, 60)), why: str(c?.why, 240), positions, reading };
+    return { question: str(c?.question, 160), left: cap(str(c?.left, 60)), right: cap(str(c?.right, 60)), why: str(c?.why, 240), positions, stakes, reading };
   }).filter((c) => c.question && c.left && c.right);
 
   const splits = (c) => views.some((v) => c.positions[v.id] === 'left') && views.some((v) => c.positions[v.id] === 'right');
@@ -280,6 +289,18 @@ export function normalizeMap(raw, { question = '' } = {}) {
     seen.add(k);
     return true;
   }).map(({ _raw, ...v }) => v);
+
+  // Rings run from the question the views most share, at the centre, to the
+  // one that splits them most sharply, at the rim: further out is deeper, as on
+  // Promenade's Mandala. Ties keep the model's order.
+  const SPLIT = { left: -1, mid: 0, right: 1 };
+  const splitOf = (c) => {
+    const vs = views.map((v) => SPLIT[c.positions[v.id]] ?? 0);
+    let s = 0;
+    for (let a = 0; a < vs.length; a++) for (let b = a + 1; b < vs.length; b++) s += Math.abs(vs[a] - vs[b]);
+    return s;
+  };
+  cruxes = cruxes.map((c, i) => ({ c, i, s: splitOf(c) })).sort((a, b) => a.s - b.s || a.i - b.i).map((x) => x.c);
 
   const keepIds = new Set(views.map((v) => v.id));
   const away = (Array.isArray(raw?.wording?.leansAwayFrom) ? raw.wording.leansAwayFrom : []).map(idOf).filter((id) => id && keepIds.has(id));

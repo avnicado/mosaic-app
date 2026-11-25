@@ -219,6 +219,12 @@
         "support-kids": "right",
         "protect-privacy": "mid"
       },
+      "stakes": {
+        "ban-under-16": 3,
+        "safer-design": 2,
+        "support-kids": 2,
+        "protect-privacy": 1
+      },
       "reading": [
         {
           "side": "left",
@@ -272,6 +278,12 @@
         "safer-design": "mid",
         "support-kids": "mid",
         "protect-privacy": "right"
+      },
+      "stakes": {
+        "ban-under-16": 2,
+        "safer-design": 1,
+        "support-kids": 1,
+        "protect-privacy": 3
       },
       "reading": [
         {
@@ -327,6 +339,12 @@
         "support-kids": "right",
         "protect-privacy": "mid"
       },
+      "stakes": {
+        "ban-under-16": 1,
+        "safer-design": 2,
+        "support-kids": 3,
+        "protect-privacy": 2
+      },
       "reading": [
         {
           "side": "left",
@@ -380,6 +398,12 @@
         "safer-design": "right",
         "support-kids": "right",
         "protect-privacy": "right"
+      },
+      "stakes": {
+        "ban-under-16": 1,
+        "safer-design": 1,
+        "support-kids": 3,
+        "protect-privacy": 1
       },
       "reading": [
         {
