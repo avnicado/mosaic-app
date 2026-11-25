@@ -49,6 +49,17 @@ read-only with the others from its page ("Share with others"). Locally without
 | `src/viewsdemo/`, `src/engine/viewsDemo.js`, `server/viewsDemo.js` | The newer views (mandala, ring pop-ups, real articles), shown under a contested thread's question, **owner only** for now. Three ready examples (`src/viewsdemo/examples/*.json`) cost nothing to show; any other question goes to `/api/views-demo` (owner only): 2 Groq calls, a Tavily search per view, every picked link opened, cached, capped per hour and per day (`VIEWS_DEMO_PER_HOUR`, `VIEWS_DEMO_PER_DAY`). The standalone /views page lives on the `claude/project-thread-3ayker` branch and is not built here. `node scripts/views-demo-smoke.mjs` checks it with stubs. |
 | `api/[route].js`, `server/routes/`, `server/` | Groq proxy (allowlisted models), Tavily search, link checks, record store (Upstash or file), single-password auth, daily Promenade corpus. |
 
+## Releases
+
+Version numbers and release notes live in one place, `src/releases.js`
+(newest first), which the What's new page (`#/whats-new`, in the menu)
+renders. To cut a release, add an entry at the top in plain words for the
+people who use Mosaic, then `npm version <x.y.z> --no-git-tag-version` so
+`package.json` matches. `npm run build` stops if the two disagree
+(`npm run release-check` runs the same check). A gold dot on What's new
+shows until a person has opened the page since the newest version; what
+they've seen syncs with their record (`m2:whatsnew-seen`).
+
 ## Deploy
 
 Deploy as a **new** Vercel project (this folder has no `.vercel` link on purpose):

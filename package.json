@@ -1,16 +1,17 @@
 {
   "name": "mosaic-app",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.7.0",
   "type": "module",
   "description": "Mosaic — hold questions over time; four composed items per session; see what actually moved.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/release-check.mjs && vite build",
     "preview": "vite preview",
     "engine-smoke": "node scripts/engine-smoke.mjs",
     "further-smoke": "node scripts/further-smoke.mjs",
-    "length-smoke": "node scripts/length-smoke.mjs"
+    "length-smoke": "node scripts/length-smoke.mjs",
+    "release-check": "node scripts/release-check.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
