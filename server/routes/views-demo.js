@@ -10,22 +10,6 @@ import { mapLive, liveReady, ringSides } from '../viewsDemo.js';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');
-  // TEMP (to be removed; never on main): a preview-only probe of one ring's
-  // lookup for the quality test Gil asked for on 2026-11-25. No sign-in, no
-  // cap, and no store: MOSAIC_DATA_DIR turns Redis off for this instance, so
-  // nothing is cached or counted in the shared record.
-  if (process.env.VERCEL_ENV === 'preview' && req.query?.probe === '1' && req.query?.ring) {
-    process.env.MOSAIC_DATA_DIR = '/tmp/views-probe';
-    try {
-      const ring = JSON.parse(String(req.query.ring));
-      const t0 = Date.now();
-      const out = await ringSides(ring, { ip: 'probe', unlimited: true });
-      res.status(200).json({ ms: Date.now() - t0, ...out });
-    } catch (e) {
-      res.status(e.status || 502).json({ error: String(e.message || e).slice(0, 300) });
-    }
-    return;
-  }
   const user = await requireAuth(req, res);
   if (!user) return;
   const who = { ip: `u:${user.id}`, unlimited: user.role === 'owner' };
