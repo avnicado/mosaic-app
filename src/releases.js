@@ -11,6 +11,18 @@
 
 export const RELEASES = [
   {
+    version: '0.10.0',
+    date: '2026-11-25',
+    title: 'Mosaic in Hebrew',
+    summary: 'Mosaic can now be used in Hebrew, right to left, and in Hebrew it looks for Hebrew pieces first.',
+    changes: [
+      { kind: 'new', text: 'Settings has a Language choice: English or Hebrew. Hebrew turns the whole app right to left, and your choice follows you to every device.' },
+      { kind: 'new', text: 'In Hebrew, feeds and quests look for pieces written in Hebrew first, and fill in with English ones when Hebrew has too few.' },
+      { kind: 'new', text: 'In Hebrew, the Promenade adds pieces from Hebrew magazines and shows them first.' },
+      { kind: 'better', text: 'In Hebrew, the reading of your question and the notes on why each piece was chosen are written in Hebrew.' },
+    ],
+  },
+  {
     version: '0.9.0',
     date: '2026-11-25',
     title: 'Every stone is a piece',
