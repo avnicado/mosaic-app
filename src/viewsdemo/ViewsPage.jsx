@@ -280,10 +280,11 @@ function Splits({ map, focus, onFocus }) {
 function ChartCaption() {
   return (
     <div className="vd-cap">
-      <p className="vd-cap-how"><b>Tap any cell</b> to read real articles on that ring’s question. <b>Tap a name</b> for that view’s whole case.</p>
+      <p className="vd-cap-how"><b>Tap any stone</b> to read real articles on that ring’s question. <b>Tap a name</b> for that view’s whole case.</p>
       <p className="vd-cap-key">
-        <span><b>Slice</b> = a view</span>
+        <span><b>Colour</b> = a view</span>
         <span><b>Ring</b> = a question, numbered from the centre</span>
+        <span><b>Bigger stones</b> = the question matters more to that view</span>
         <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
         <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>
         <span><i className="vd-sw striped" aria-hidden="true" /> it depends</span>

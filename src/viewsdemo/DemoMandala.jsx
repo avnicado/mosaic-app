@@ -65,13 +65,20 @@ const U0 = (HUB * HUB) / 2, U1 = (RIM * RIM) / 2;
 const rOf = (u) => Math.sqrt(2 * u);
 const cache = new WeakMap();
 
-// The stones of a map: per ring k and view i, its outline, its middle and the
-// angle of each joint. Kept per map object, so it is worked out once.
+// The stones of a map: per ring k and view i, its stones as one path and its
+// middle. Kept per map object, so it is worked out once.
+//
+// Each ring is cut by joints: the ones between views, and inside a long run of
+// one view a few more, so the run is laid as several stones the way a mosaic
+// is, not one long arc. Joints lean, and the line between two rings wavers a
+// little at every corner, so the stones are irregular but still fit exactly.
+// A view's area on a ring still follows its stake, apart from that waver.
 export function stones(map) {
   if (cache.has(map)) return cache.get(map);
   const { views, cruxes } = map;
   const N = views.length, M = cruxes.length;
   const du = (U1 - U0) / M;
+  const uIn = (k) => U0 + k * du;
   // Each view's share of each ring: its stakes, balanced so every ring is full
   // and every view has the same area in all (iterative proportional fitting).
   const W = views.map((v) => cruxes.map((c) => Math.min(3, Math.max(1, Number(c.stakes?.[v.id]) || 2))));
@@ -80,59 +87,138 @@ export function stones(map) {
     W.forEach((row) => { const t = row.reduce((a, b) => a + b, 0); for (let k = 0; k < M; k++) row[k] *= M / N / t; });
   }
   for (let k = 0; k < M; k++) { const t = W.reduce((s, row) => s + row[k], 0); W.forEach((row) => { row[k] /= t; }); }
-  // Joints at each ring, turned so each view's stones sit as near their usual
-  // place (its slice of an even split, view one at the top) as they can.
+  // Where each view's run sits on each ring, turned so each view stays as near
+  // its usual place (its slice of an even split, view one at the top) as it can.
   const bounds = cruxes.map((_, k) => { const b = [0]; W.forEach((row) => b.push(b[b.length - 1] + row[k] * TAU)); return b; });
   const ideal = views.map((_, i) => -Math.PI / 2 + ((i + 0.5) * TAU) / N);
   const turn = bounds.map((b) => views.reduce((s, _, i) => s + (ideal[i] - (b[i] + b[i + 1]) / 2), 0) / N);
-  // Each joint leans a little, the same way for the same map every time.
   const rand = rng(hashStr(map.question || views.map((v) => v.id).join('|')));
-  const lean = bounds.map((b) => views.map((_, j) => {
-    const narrow = Math.min(b[j + 1] - b[j], j ? b[j] - b[j - 1] : b[N] - b[N - 1]);
-    return (rand() - 0.5) * Math.min(0.16, narrow * 0.5);
-  }));
-  const joint = (k, j, u) => bounds[k][j] + turn[k] + lean[k][j % N] * ((u - (U0 + (k + 0.5) * du)) / (du / 2));
-  const uIn = (k) => U0 + k * du;
-  // Walks, as points: up or down a joint, and along a ring's edge.
-  const alongJoint = (k, j, ua, ub, pts) => { for (let t = 0; t <= 4; t++) { const u = ua + ((ub - ua) * t) / 4; pts.push(at(rOf(u), joint(k, j, u))); } };
-  const alongRing = (u, a0, a1, pts) => { const n = Math.max(1, Math.ceil((Math.abs(a1 - a0) * rOf(u)) / 5)); for (let t = 1; t < n; t++) pts.push(at(rOf(u), a0 + ((a1 - a0) * t) / n)); };
-  const path = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${f(p[0])},${f(p[1])}`).join('') + 'Z';
 
-  const cells = cruxes.map((_, k) => views.map((v, i) => {
-    const ua = uIn(k), ub = uIn(k + 1), pts = [];
-    alongJoint(k, i, ua, ub, pts);
-    alongRing(ub, joint(k, i, ub), joint(k, i + 1, ub), pts);
-    alongJoint(k, i + 1, ub, ua, pts);
-    alongRing(ua, joint(k, i + 1, ua), joint(k, i, ua), pts);
-    const um = ua + du / 2;
-    return { d: path(pts), mid: at(rOf(um), (joint(k, i, um) + joint(k, i + 1, um)) / 2) };
+  // Joints per ring: { a: angle at the ring's middle, lean, view (the stone to
+  // its right belongs to it), start (true where a view's run begins) }.
+  const joints = cruxes.map((_, k) => {
+    const rMid = rOf(uIn(k) + du / 2), thick = rOf(uIn(k + 1)) - rOf(uIn(k));
+    const js = [];
+    views.forEach((_, i) => {
+      const a0 = bounds[k][i] + turn[k], w = bounds[k][i + 1] - bounds[k][i];
+      const n = Math.max(1, Math.min(5, Math.round((w * rMid) / (thick * 1.7))));
+      for (let j = 0; j < n; j++) {
+        const frac = j === 0 ? 0 : (j + (rand() - 0.5) * 0.45) / n;
+        js.push({ a: a0 + frac * w, view: i, start: j === 0, width: w / n });
+      }
+    });
+    js.forEach((jt, q) => {
+      const prev = js[(q - 1 + js.length) % js.length];
+      const narrow = Math.min(jt.width, prev.width);
+      jt.lean = (rand() - 0.5) * Math.min(0.5, narrow * 0.6);
+    });
+    return js;
+  });
+  // A joint's angle where it meets the ring's inner (side 0) or outer (side 1) line.
+  const endA = (jt, side) => jt.a + (side ? jt.lean : -jt.lean) / 2;
+
+  // The line between ring kb-1 and ring kb (kb = 0 the hub, kb = M the rim), as
+  // corners { a, u } in order of angle over one turn. Inside lines waver.
+  const lines = [];
+  for (let kb = 0; kb <= M; kb++) {
+    const u = uIn(kb);
+    let as = [];
+    if (kb > 0) joints[kb - 1].forEach((jt) => as.push(endA(jt, 1)));
+    if (kb < M) joints[kb].forEach((jt) => as.push(endA(jt, 0)));
+    as = as.map((a) => a - Math.floor((a - as[0]) / TAU) * TAU).sort((x, y) => x - y);
+    const step = kb === 0 || kb === M ? 0.06 : 0.32;
+    const pts = [];
+    as.forEach((a, q) => {
+      const next = q + 1 < as.length ? as[q + 1] : as[0] + TAU;
+      pts.push(a);
+      const n = Math.floor((next - a) / step);
+      for (let t = 1; t <= n; t++) pts.push(a + ((next - a) * t) / (n + 1));
+    });
+    const wav = kb === 0 || kb === M ? 0 : du * 0.16;
+    lines.push(pts.map((a) => ({ a, u: u + (rand() - 0.5) * 2 * wav })));
+  }
+  // u on line kb at angle a (any turn), and the corners strictly between two angles.
+  const norm = (line, a) => { const base = line[0].a; return a - Math.floor((a - base) / TAU) * TAU; };
+  const uAt = (kb, a) => {
+    const line = lines[kb], x = norm(line, a);
+    for (let q = 0; q < line.length; q++) {
+      const p = line[q], nx = line[q + 1] || { a: line[0].a + TAU, u: line[0].u };
+      if (x >= p.a - 1e-9 && x <= nx.a + 1e-9) return nx.a - p.a < 1e-9 ? p.u : p.u + ((nx.u - p.u) * (x - p.a)) / (nx.a - p.a);
+    }
+    return line[0].u;
+  };
+  const between = (kb, a0, a1) => {
+    const line = lines[kb], out = [];
+    const lo = Math.min(a0, a1), hi = Math.max(a0, a1);
+    for (const sh of [-TAU, 0, TAU, 2 * TAU]) for (const p of line) { const a = p.a + sh; if (a > lo + 1e-7 && a < hi - 1e-7) out.push({ a, u: p.u }); }
+    out.sort((x, y) => x.a - y.a);
+    return a1 >= a0 ? out : out.reverse();
+  };
+  const xy = (a, u) => at(rOf(u), a);
+  // Walk along line kb from angle a0 to a1, adding a1 but not a0.
+  const along = (kb, a0, a1, pts) => { for (const p of between(kb, a0, a1)) pts.push(xy(p.a, p.u)); pts.push(xy(a1, uAt(kb, a1))); };
+  const path = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${f(p[0])},${f(p[1])}`).join('') + 'Z';
+  // One stone: ring k, from joint q to the next one.
+  const stone = (k, q) => {
+    const js = joints[k], A = js[q], B = q + 1 < js.length ? js[q + 1] : { ...js[0], a: js[0].a + TAU };
+    const pts = [xy(endA(A, 0), uAt(k, endA(A, 0)))];
+    pts.push(xy(endA(A, 1), uAt(k + 1, endA(A, 1))));
+    along(k + 1, endA(A, 1), endA(B, 1), pts);
+    pts.push(xy(endA(B, 0), uAt(k, endA(B, 0))));
+    along(k, endA(B, 0), endA(A, 0), pts);
+    pts.pop();
+    return path(pts);
+  };
+  const cells = cruxes.map((_, k) => views.map((_, i) => {
+    const qs = joints[k].map((jt, q) => (jt.view === i ? q : -1)).filter((q) => q >= 0);
+    const um = uIn(k) + du / 2;
+    return { d: qs.map((q) => stone(k, q)).join(''), mid: at(rOf(um), bounds[k][i] + turn[k] + (bounds[k][i + 1] - bounds[k][i]) / 2) };
   }));
   // A view's whole run of stones, outlined, for when it is picked.
+  const firstOf = (k, i) => joints[k].find((jt) => jt.view === i && jt.start);
+  const nextOf = (k, i) => {
+    const js = joints[k], q = js.indexOf(firstOf(k, i));
+    const after = js.slice(q + 1).find((jt) => jt.start);
+    return after || { ...js[0], a: js[0].a + TAU };
+  };
+  const wrapNear = (a, ref) => a + Math.round((ref - a) / TAU) * TAU;
   const outline = views.map((_, i) => {
     const pts = [];
+    let prevOut = null;
     for (let k = 0; k < M; k++) {
-      alongJoint(k, i, uIn(k), uIn(k + 1), pts);
-      if (k < M - 1) alongRing(uIn(k + 1), joint(k, i, uIn(k + 1)), joint(k + 1, i, uIn(k + 1)), pts);
+      const L = firstOf(k, i);
+      const aIn = prevOut == null ? endA(L, 0) : wrapNear(endA(L, 0), prevOut);
+      if (prevOut == null) pts.push(xy(aIn, uAt(k, aIn))); else along(k, prevOut, aIn, pts);
+      const aOut = aIn + L.lean;
+      pts.push(xy(aOut, uAt(k + 1, aOut)));
+      prevOut = aOut;
     }
-    alongRing(U1, joint(M - 1, i, U1), joint(M - 1, i + 1, U1), pts);
+    let R = nextOf(M - 1, i);
+    let aR = wrapNear(endA(R, 1), prevOut + (bounds[M - 1][i + 1] - bounds[M - 1][i]));
+    along(M, prevOut, aR, pts);
     for (let k = M - 1; k >= 0; k--) {
-      alongJoint(k, i + 1, uIn(k + 1), uIn(k), pts);
-      if (k > 0) alongRing(uIn(k), joint(k, i + 1, uIn(k)), joint(k - 1, i + 1, uIn(k)), pts);
+      R = nextOf(k, i);
+      const aOut = k === M - 1 ? aR : wrapNear(endA(R, 1), aR);
+      if (k < M - 1) along(k + 1, aR, aOut, pts);
+      const aIn = aOut - R.lean;
+      pts.push(xy(aIn, uAt(k, aIn)));
+      aR = aIn;
     }
-    alongRing(U0, joint(0, i + 1, U0), joint(0, i, U0), pts);
+    const start = firstOf(0, i);
+    along(0, aR, wrapNear(endA(start, 0), aR - (bounds[0][i + 1] - bounds[0][i])), pts);
+    pts.pop();
     return path(pts);
   });
-  // Where a view's name goes: the middle of its stones, as an angle.
+  // Where a view's name goes: the middle of its runs, as an angle.
   const labelAngle = views.map((_, i) => cruxes.reduce((s, _c, k) => s + (bounds[k][i] + bounds[k][i + 1]) / 2 + turn[k], 0) / M);
   // Ring numbers sit on the joint nearest the top, so they never cover a colour.
   const numAt = cruxes.map((_, k) => {
-    let best = 0, bestD = Infinity;
-    for (let j = 0; j < N; j++) {
-      const a = joint(k, j, uIn(k) + du / 2);
-      const d = Math.abs(Math.atan2(Math.sin(a + Math.PI / 2), Math.cos(a + Math.PI / 2)));
-      if (d < bestD) { bestD = d; best = j; }
+    let best = joints[k][0], bestD = Infinity;
+    for (const jt of joints[k]) {
+      const d = Math.abs(Math.atan2(Math.sin(jt.a + Math.PI / 2), Math.cos(jt.a + Math.PI / 2)));
+      if (d < bestD) { bestD = d; best = jt; }
     }
-    return at(rOf(uIn(k) + du / 2), joint(k, best, uIn(k) + du / 2));
+    return at(rOf(uIn(k) + du / 2), best.a);
   });
   const radii = cruxes.map((_, k) => [rOf(uIn(k)), rOf(uIn(k + 1))]);
   const out = { cells, outline, labelAngle, numAt, radii };
