@@ -13,7 +13,7 @@
 //
 // Store: m2:views-demo  "v:<hash>" → JSON map   "d:<day>" / "ip:<ip>:<hour>" → counts
 
-import { handleLLM, tavilySearch, hasSearchKey, hasKey } from './proxyCore.js';
+import { handleLLM, tavilySearch, hasSearchKey, hasKey, exaSearch, hasExaKey } from './proxyCore.js';
 import { claudeFallbackOn } from './claudeCli.js';
 import { hashGet, hashUpdate, hashIncr } from './store.js';
 import { safeResultUrl } from './further.js';
@@ -351,10 +351,20 @@ Pick every result that qualifies, up to that many: each one you pick is shown, a
 export const RING_PER_DAY = Number(process.env.VIEWS_RING_PER_DAY || 300);
 export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 20);
 
+// Exa matches a sentence that describes the page, so for each answer the model
+// describes the article its advocates would write, not a string of keywords.
+const EXA_QUERY_SYSTEM = 'You describe articles to find with a search engine that matches pages to a description. For one QUESTION with two opposite answers, A and B, describe for each answer the article that argues it: one sentence, as in "An op-ed arguing that…" or "A policy brief making the case that…", naming the specific claim that side makes, in that side\'s own terms. At most 25 words each. Name no person or organisation. Write TWO per answer: the first as above, and a second ("A2", "B2") describing a different kind of piece making the same case by another line of argument (another field, another kind of writer, another country\'s debate). Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}';
+
+// engine: 'tavily' (keyword search, opening snippet) or 'exa' (a search
+// described in a sentence, answered with the passages that fit it). Exa is on
+// trial beside Tavily; VIEWS_RING_SEARCH=exa makes it the default once chosen.
 export async function ringSides(input, {
   ip = 'unknown', unlimited = false, now = Date.now(), llm = handleLLM,
-  search = hasSearchKey() ? tavilySearch : null, check = linkLoads,
+  engine = process.env.VIEWS_RING_SEARCH === 'exa' && hasExaKey() ? 'exa' : 'tavily',
+  search = engine === 'exa' ? (hasExaKey() ? exaSearch : null) : (hasSearchKey() ? tavilySearch : null), check = linkLoads,
 } = {}) {
+  const exa = engine === 'exa';
+  const passage = exa ? 800 : 320;
   const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const q = s(input?.question, 300);
   const crux = { question: s(input?.crux?.question, 240), left: s(input?.crux?.left, 120), right: s(input?.crux?.right, 120) };
@@ -367,7 +377,7 @@ export async function ringSides(input, {
   // r12: up to four pieces an answer, a second search for any answer with
   // fewer than three. (r11: pages that cannot be anyone's argument dropped, and every piece
   // carries the standing of the page it came from.)
-  const key = `r12:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  const key = `r12${exa ? 'x' : ''}:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try {
@@ -407,7 +417,7 @@ export async function ringSides(input, {
   let queries = {};
   try {
     const out = await groqJSON({
-      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Write TWO searches per answer: the first as above, and a second ("A2", "B2") that would find the same side through quite different words — another field\'s vocabulary, another kind of writer, another line of argument, another country\'s debate. The second must share no distinctive word with the first. Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}',
+      system: exa ? EXA_QUERY_SYSTEM : 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Write TWO searches per answer: the first as above, and a second ("A2", "B2") that would find the same side through quite different words — another field\'s vocabulary, another kind of writer, another line of argument, another country\'s debate. The second must share no distinctive word with the first. Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}',
       prompt: `QUESTION: ${crux.question}\nAbout: ${q}\nA: ${crux.left}${holders('left') ? ` (held by: ${holders('left')})` : ''}\nB: ${crux.right}${holders('right') ? ` (held by: ${holders('right')})` : ''}`,
       maxTokens: 500, deadline, llm,
     });
@@ -417,7 +427,7 @@ export async function ringSides(input, {
   }
   const sideSearch = async (answer, pos, alt = false) => {
     const written = queries[alt ? `${pos}2` : pos];
-    const query = (written && written.length > 8 ? written : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
+    const query = (written && written.length > 8 ? written : exa ? `An opinion piece arguing ${answer} on: ${crux.question}` : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
     try {
       const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
       const hosts = new Set();
@@ -467,7 +477,7 @@ export async function ringSides(input, {
     return added;
   };
   if (results.length) {
-    const out = await groqJSON({ system: PICK_EXTRA, prompt: ringPickPrompt([{ crux, about: q, results }]), maxTokens: 1000, deadline, llm });
+    const out = await groqJSON({ system: PICK_EXTRA, prompt: ringPickPrompt([{ crux, about: q, results }], passage), maxTokens: 1000, deadline, llm });
     takePicks(out?.picks, results, ['left', 'right']);
   }
   // Both answers should have something. Half the rings in the 2026-11-24 run
@@ -491,7 +501,7 @@ export async function ringSides(input, {
         }
       }
       if (pool.length && Date.now() < deadline - 13_000) {
-        const second = await groqJSON({ system: `${PICK_EXTRA}\n\nOnly these answers still need pieces: ${emptySides.map((pos) => (pos === 'left' ? 'A' : 'B')).join(' and ')}. Pick nothing for any other answer. If none of these pages argues one of them, return an empty list: a side with fewer pieces is better than a page that does not argue it.`, prompt: ringPickPrompt([{ crux, about: q, results: pool }]), maxTokens: 900, deadline, llm });
+        const second = await groqJSON({ system: `${PICK_EXTRA}\n\nOnly these answers still need pieces: ${emptySides.map((pos) => (pos === 'left' ? 'A' : 'B')).join(' and ')}. Pick nothing for any other answer. If none of these pages argues one of them, return an empty list: a side with fewer pieces is better than a page that does not argue it.`, prompt: ringPickPrompt([{ crux, about: q, results: pool }], passage), maxTokens: 900, deadline, llm });
         takePicks(second?.picks, pool, emptySides);
       }
     } catch (e) {

@@ -357,6 +357,28 @@ const DEAD_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Is the link al
 const dead = await ringSides(DEAD_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async (u) => !u.includes('authorea') });
 assert.deepEqual(dead.reading.map((x) => x.side), ['left'], 'the page that would not open is gone');
 
+// On Exa, the searches are sentences describing the article, and the judge
+// reads the matching passages, not 320 characters of a page's opening.
+const EXA_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Do bans hurt shops, by Exa?' } };
+const longPassage = 'Shop owners say ' + 'the loss of parking cut their takings sharply, '.repeat(12) + 'END-OF-PASSAGE';
+let exaQueries = [], exaPickSaw = '';
+const exaLLM = async (body) => {
+  const sys = body.messages[0].content;
+  if (sys.startsWith('You describe articles to find')) {
+    return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ A: 'An op-ed arguing that parking loss cuts shop sales', B: 'An essay arguing car-free streets raise takings' }) } }] } };
+  }
+  assert.ok(!sys.startsWith('You write web searches'), 'Exa never gets keyword searches');
+  exaPickSaw = body.messages[1].content;
+  return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+    { result: 1, side: 'A', outlet: 'Retailers', says: 'Parking fees cut customer visits and lower sales for shops.', title_side: 'A' },
+  ] }) } }] } };
+};
+const exaSearchStub = async (q) => { exaQueries.push(q); return [RS('https://retailers.example.org/exa-parking', 'Parking loss hits shop takings', longPassage)]; };
+const ex = await ringSides(EXA_IN, { ip: 'r', unlimited: true, engine: 'exa', llm: exaLLM, search: exaSearchStub, check: async () => true });
+assert.ok(exaQueries[0].startsWith('An op-ed arguing'), 'the Exa search is a sentence describing the article');
+assert.ok(exaPickSaw.length > 0 && longPassage.slice(0, 600).split(' … ')[0].length > 320 && exaPickSaw.includes(longPassage.slice(300, 500)), 'the judge reads well past 320 characters on Exa');
+assert.deepEqual(ex.reading.map((x) => x.side), ['left']);
+
 // a missing answer → a clear 400, not a crash
 await assert.rejects(() => ringSides({ question: 'x?', crux: { question: 'y?', left: 'a' } }, { ip: 'r', unlimited: true }), (e) => e.status === 400);
 // per-address cap on rings

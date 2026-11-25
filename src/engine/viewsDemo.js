@@ -54,9 +54,12 @@ Judge a page by what it argues as a whole, starting from its title, never by one
 
 Output ONLY valid JSON: {"picks":[{"group":1,"result":3,"side":"A","outlet":"...","says":"...","quote":"...","title_side":"A"}]}`;
 
-export function ringPickPrompt(groups) {
+// passage: how much of each page the judge reads. 320 characters of a search
+// snippet is mostly a page's opening; a search that returns the passages
+// matching the case (Exa) gets more room.
+export function ringPickPrompt(groups, passage = 320) {
   return groups.map((g, i) => {
-    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}${dateOf(r) ? `, ${dateOf(r)}` : ', date unknown'}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 320)}`);
+    const lines = (g.results || []).map((r, j) => `  ${j + 1}. ${r.title} (${hostOf(r.url)}${dateOf(r) ? `, ${dateOf(r)}` : ', date unknown'}): ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, passage)}`);
     // "About" names the question the whole map is on, so a page about a
     // different war, policy or decade can be refused. Without it the model
     // placed pieces on Operation Cast Lead (2008) under a ring of the 2023
