@@ -280,17 +280,40 @@ function Splits({ map, focus, onFocus }) {
 function ChartCaption() {
   return (
     <div className="vd-cap">
-      <p className="vd-cap-how"><b>Tap any stone</b> to read real articles on that ring’s question. <b>Tap a name</b> for that view’s whole case.</p>
+      <p className="vd-cap-how"><b>Tap any stone</b> to read the pieces on that ring’s question; a ring finds more as you open it. <b>Tap a name</b> for that view’s whole case.</p>
       <p className="vd-cap-key">
         <span><b>Colour</b> = a view</span>
         <span><b>Ring</b> = a question, numbered from the centre</span>
-        <span><b>Bigger stones</b> = the question matters more to that view</span>
+        <span><b>Filled stone</b> = a piece arguing that answer; faint = none found yet</span>
+        <span><b>More room</b> = the question matters more to that view</span>
         <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
         <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>
         <span><i className="vd-sw striped" aria-hidden="true" /> it depends</span>
       </p>
     </div>
   );
+}
+
+// Pieces kept per answer of a ring. Each is a stone on the mandala.
+export const PER_SIDE = 4;
+
+// The pieces arguing each answer of ring k: the ones the map came with, then
+// any found since by a lookup (items), each page once, at most PER_SIDE an
+// answer. On a live map, a page whose title argues against the answer it was
+// placed under, or that cannot be anyone's argument at all (an encyclopaedia
+// entry, a Q&A thread, a homework upload, a site's front page), is left out:
+// the server drops both now, but maps saved before it did still hold some.
+export function ringPieces(map, k, items) {
+  const c = map.cruxes[k];
+  const fits = (r) => !map.live || (!titleDenies(r, r.says) && !notAnArgument(r.url));
+  const out = {};
+  for (const pos of ['left', 'right']) {
+    const seen = new Set();
+    out[pos] = [...(c.reading || []), ...(items?.reading || [])]
+      .filter((r) => r.side === pos && fits(r) && !seen.has(r.url) && seen.add(r.url))
+      .slice(0, PER_SIDE);
+  }
+  return out;
 }
 
 // One ring's question: the two answers, the views that give each, and real
@@ -302,20 +325,17 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   const mine = view ? (c.positions[view.id] || 'mid') : null;
   const only = mine === 'left' || mine === 'right' ? mine : null;
   const shown = only ? [only] : ['left', 'right'];
-  // A shown side with fewer than two checked articles: look for pieces arguing it.
-  // On a live map, a page whose title argues against the answer it was placed
-  // under is left out; maps saved before the server checked that still hold some.
-  // A page whose title argues against the answer it was placed under, or that
-  // cannot be anyone's argument at all (an encyclopaedia entry, a Q&A thread, a
-  // homework upload, a site's front page). The server drops both now; maps
-  // saved before it did still hold some, so they are dropped here too.
-  const fits = (r) => !map.live || (!titleDenies(r, r.says) && !notAnArgument(r.url));
-  const checked = (pos) => (c.reading || []).filter((r) => r.side === pos && fits(r));
-  const short = { left: checked('left').length < 2, right: checked('right').length < 2 };
+  // A shown side the map came with fewer than PER_SIDE pieces for: look for
+  // more pieces arguing it. What's found becomes more stones on the mandala.
+  const base = ringPieces(map, k, null);
+  const all = ringPieces(map, k, items);
+  // A ready example is complete as it stands: it was researched and read by
+  // hand, so it never looks for more.
+  const want = map.live ? PER_SIDE : 2;
+  const short = { left: base.left.length < want, right: base.right.length < want };
   const few = shown.some((pos) => short[pos]);
   useEffect(() => { if (few && onItems) onItems(k); }, [k, few, onItems]);
   const filling = few && !!onItems;
-  const found = (pos) => (filling && short[pos] ? (items?.reading || []).filter((r) => r.side === pos && fits(r)) : []);
   const looking = filling && (!items || items.loading);
   const M = map.cruxes.length;
   const sides = [['left', 'solid', c.left], ['right', 'pale', c.right]].filter(([pos]) => shown.includes(pos));
@@ -335,7 +355,7 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
       )}
       {c.why && <p className="vd-ring-why">{c.why}</p>}
       {sides.map(([pos, sw, label]) => {
-        const items = [...checked(pos), ...found(pos)];
+        const items = all[pos];
         const holders = map.views.filter((v) => c.positions[v.id] === pos);
         return (
           <section key={pos} className={`vd-side ${mine === pos ? 'mine' : ''}`}>
@@ -365,7 +385,7 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
           <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
         ))}</p>
       )}
-      {filling && items && !items.loading && (items.error || shown.some((pos) => short[pos] && !found(pos).length)) && (
+      {filling && items && !items.loading && (items.error || shown.some((pos) => short[pos] && !all[pos].length)) && (
         <p className="vd-muted">{items.error ? 'Couldn’t look for pieces just now.' : (only ? 'Nothing turned up for this answer.' : 'Nothing turned up for one of the answers.')}{' '}
           <button type="button" className="vd-linkish" onClick={() => onItems(k, { retry: true })}>Try again</button></p>
       )}
@@ -556,7 +576,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
 
         <div className="vd-col-chart" ref={chartRef}>
           <DemoMandala map={map} focus={focus} onFocus={pickView} ring={ring} onRing={pickRing} onCell={pickCell} colorOf={colorOf}
-            mark={ringOpen && fv ? anchorPoint(map, fv.id, ring) : null} />
+            mark={ringOpen && fv ? anchorPoint(map, fv.id, ring) : null}
+            pieces={map.cruxes.map((_, k) => ringPieces(map, k, getItems(k)))} />
           <ChartCaption />
           {ringOpen && (
             <RingPop map={map} k={ring} view={fv} chartRef={chartRef} wide={wide} onClose={closeRing} onRing={pickRing} onView={pickView}

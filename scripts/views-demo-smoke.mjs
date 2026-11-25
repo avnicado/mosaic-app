@@ -277,7 +277,7 @@ const ringSearch = async (q, opts) => {
 };
 const r1 = await ringSides(RING_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async () => true });
 assert.equal(ringLLM, 2, 'one call writes the searches, one picks the pages');
-assert.equal(ringSearches.length, 2, 'one search per answer');
+assert.equal(ringSearches.length, 4, 'one search per answer, then a second for each answer with fewer than three pieces');
 assert.ok(ringSearches.every((x) => x.excluded > 0), 'fact-check sites are excluded at the search');
 assert.deepEqual(r1.reading.map((x) => x.side), ['left', 'right'], 'one piece per side; the wrong-side page is dropped');
 assert.equal(r1.reading[0].url, 'https://retailers.example.org/parking-and-sales');
@@ -308,9 +308,10 @@ const e2 = await ringSides(EMPTY_IN, { ip: 'r', unlimited: true, llm: emptyLLM, 
 assert.equal(e2.cached, true, 'an empty ring is held briefly, so a retry is free');
 assert.equal(emptyCalls, 2, 'and costs no further model calls');
 
-// An answer left empty gets a second search, in the other wording the query
-// call wrote, and one more picking call. Half the rings in the live run showed
-// one answer with articles and the other with none.
+// An answer with fewer than three pieces gets a second search, in the other
+// wording the query call wrote, and one more picking call. Each piece is a
+// stone on the mandala, so a thin answer is worth the second go, not only an
+// empty one.
 const SECOND_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Does the second pass find the other side?' } };
 let qCalls = 0, pickCalls = 0, searched = [], secondSys = '', secondPrompt = '';
 const secondLLM = async (body) => {
@@ -331,29 +332,62 @@ const secondLLM = async (body) => {
   secondSys = sys;
   secondPrompt = body.messages[1].content;
   return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
-    { result: 1, side: 'A', outlet: 'Ignored', says: 'A page for the side that is already full.', title_side: 'A' },
-    { result: 1, side: 'B', outlet: 'Two', says: 'The other side, found only by the second wording.', title_side: 'B' },
+    { result: 1, side: 'A', outlet: 'Three', says: 'A second page for side A, from the other wording.', title_side: 'A' },
+    { result: 2, side: 'B', outlet: 'Two', says: 'The other side, found only by the second wording.', title_side: 'B' },
   ] }) } }] } };
 };
 const secondSearch = async (q) => {
   searched.push(q);
-  if (/other [AB] words/.test(q)) return [RS('https://b-side.example.org/only-on-the-second-wording', 'Car-free streets lift takings, the second case')];
+  if (/other A words/.test(q)) return [RS('https://a-side.example.org/second-wording', 'Parking charges drive shoppers out of town')];
+  if (/other B words/.test(q)) return [RS('https://b-side.example.org/only-on-the-second-wording', 'Car-free streets lift takings, the second case')];
   return [RS('https://a-side.example.org/first', 'Parking fees cut shop sales')];
 };
 const sec = await ringSides(SECOND_IN, { ip: 'r', unlimited: true, llm: secondLLM, search: secondSearch, check: async () => true });
 assert.equal(qCalls, 1, 'the fallback wording comes from the one query call, not a second one');
 assert.equal(pickCalls, 2, 'one picking call per round');
-assert.deepEqual(searched, ['first A words', 'first B words', 'other B words'], 'only the empty answer is searched again');
-assert.deepEqual(sec.reading.map((x) => x.side), ['left', 'right'], 'both answers now have a piece');
-assert.equal(sec.reading[1].url, 'https://b-side.example.org/only-on-the-second-wording');
-assert.equal(sec.reading.filter((x) => x.side === 'left').length, 1, 'the full side gains nothing from the second round');
-assert.match(secondSys, /Only these answers are still open: B\b/, 'the second call is told only B is open');
+assert.deepEqual(searched, ['first A words', 'first B words', 'other A words', 'other B words'], 'both thin answers are searched again');
+assert.deepEqual(sec.reading.map((x) => x.side), ['left', 'left', 'right'], 'the thin side gains a piece and the empty side gets one');
+assert.equal(sec.reading[2].url, 'https://b-side.example.org/only-on-the-second-wording');
+assert.match(secondSys, /Only these answers still need pieces: A and B\b/, 'the second call is told which answers need more');
+assert.match(secondSys, /up to 4 results that argue answer A/, 'a ring keeps up to four pieces an answer');
 assert.match(secondPrompt, /Car-free streets lift takings, the second case \(b-side\.example\.org/, 'it sees the page the fallback wording found');
 
 // A dead link never reaches the reader.
 const DEAD_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Is the link alive?' } };
 const dead = await ringSides(DEAD_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async (u) => !u.includes('authorea') });
 assert.deepEqual(dead.reading.map((x) => x.side), ['left'], 'the page that would not open is gone');
+
+// On Exa, the searches are sentences describing the article, and the judge
+// reads the matching passages, not 320 characters of a page's opening.
+const EXA_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Do bans hurt shops, by Exa?' } };
+const longPassage = 'Shop owners say ' + 'the loss of parking cut their takings sharply, '.repeat(12) + 'END-OF-PASSAGE';
+let exaQueries = [], exaPickSaw = '';
+const exaLLM = async (body) => {
+  const sys = body.messages[0].content;
+  if (sys.startsWith('You describe articles to find')) {
+    return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ A: 'An op-ed arguing that parking loss cuts shop sales', B: 'An essay arguing car-free streets raise takings' }) } }] } };
+  }
+  assert.ok(!sys.startsWith('You write web searches'), 'Exa never gets keyword searches');
+  exaPickSaw = body.messages[1].content;
+  return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
+    { result: 1, side: 'A', outlet: 'Retailers', says: 'Parking fees cut customer visits and lower sales for shops.', title_side: 'A' },
+  ] }) } }] } };
+};
+const exaSearchStub = async (q) => { exaQueries.push(q); return [RS('https://retailers.example.org/exa-parking', 'Parking loss hits shop takings', longPassage)]; };
+const ex = await ringSides(EXA_IN, { ip: 'r', unlimited: true, engine: 'exa', llm: exaLLM, search: exaSearchStub, check: async () => true });
+assert.ok(exaQueries[0].startsWith('An op-ed arguing'), 'the Exa search is a sentence describing the article');
+assert.ok(exaPickSaw.length > 0 && longPassage.slice(0, 600).split(' … ')[0].length > 320 && exaPickSaw.includes(longPassage.slice(300, 500)), 'the judge reads well past 320 characters on Exa');
+assert.deepEqual(ex.reading.map((x) => x.side), ['left']);
+
+// An Exa search that fails is made again on Tavily, with keywords.
+const FB_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Do bans hurt shops, Exa down?' } };
+let fbQueries = [];
+const fb = await ringSides(FB_IN, { ip: 'r', unlimited: true, engine: 'exa', llm: exaLLM,
+  search: async () => { throw new Error('Exa 500'); },
+  fallback: async (q) => { fbQueries.push(q); return [RS('https://retailers.example.org/exa-parking', 'Parking loss hits shop takings', longPassage)]; },
+  check: async () => true });
+assert.ok(fbQueries.length >= 2 && fbQueries.every((q) => !q.startsWith('An op-ed')), 'Tavily gets keywords, not the Exa sentence');
+assert.deepEqual(fb.reading.map((x) => x.side), ['left'], 'pieces still come back when Exa is down');
 
 // a missing answer → a clear 400, not a crash
 await assert.rejects(() => ringSides({ question: 'x?', crux: { question: 'y?', left: 'a' } }, { ip: 'r', unlimited: true }), (e) => e.status === 400);

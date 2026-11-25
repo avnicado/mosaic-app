@@ -13,7 +13,7 @@
 //
 // Store: m2:views-demo  "v:<hash>" → JSON map   "d:<day>" / "ip:<ip>:<hour>" → counts
 
-import { handleLLM, tavilySearch, hasSearchKey, hasKey } from './proxyCore.js';
+import { handleLLM, tavilySearch, hasSearchKey, hasKey, exaSearch, hasExaKey } from './proxyCore.js';
 import { claudeFallbackOn } from './claudeCli.js';
 import { hashGet, hashUpdate, hashIncr } from './store.js';
 import { safeResultUrl } from './further.js';
@@ -330,9 +330,17 @@ export async function mapLive(question, {
 // Operation Cast Lead in 2008, and on "Should cities ban cars downtown?" a
 // paper on banning petrol-engine sales after 2035 was placed under "Do bans
 // significantly cut emissions?".
-const PICK_EXTRA = `${RING_PICK_SYSTEM}
+// A ring keeps up to RING_PER_ANSWER pieces an answer: each is a stone on the
+// mandala, so a ring with more pieces reads as more laid (Gil, 2026-11-25:
+// "we need more pieces, maybe the quality bar is too high"). The bar that
+// stays is the one that kept wrong pages off: the right answer, the right
+// event and period, and a page that argues rather than reports. What moved:
+// more pieces an answer, a page may argue as part of a wider case, and more
+// search results to choose from.
+export const RING_PER_ANSWER = 4;
+const PICK_EXTRA = `${RING_PICK_SYSTEM.replace('pick up to 2 results that argue answer A and up to 2 that argue answer B', `pick up to ${RING_PER_ANSWER} results that argue answer A and up to ${RING_PER_ANSWER} that argue answer B`)}
 
-Never pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick. A page counts only if it argues the answer to the QUESTION exactly as asked: a page on something nearby (mild side effects, when the question is about serious ones) is not a pick. A page about a different event, a different war, a different policy or a different decade is not a pick either, however alike it reads: the QUESTION is about the one named in "About". If the page's own subject is not that one, pick none.`;
+Pick every result that qualifies, up to that many: each one you pick is shown, and a side with more real pages is better. Never pick a page from a site that has nothing to do with the topic and only copies other outlets' articles. A news report of what someone decided or said argues that answer only if the page itself makes the case for it; a report that is critical of it, or only relays it, is not a pick. A page counts if it makes the case for that answer to the QUESTION, even as one part of a wider argument: it need not be wholly about this question. A page on a different question nearby (mild side effects, when the question is about serious ones) is not a pick. A page about a different event, a different war, a different policy or a different decade is not a pick either, however alike it reads: the QUESTION is about the one named in "About". If the page's own subject is not that one, pick none.`;
 
 // ---- pieces on one ring's question, from each answer's side ----
 // A ring tapped with too few checked articles: one search per answer
@@ -343,10 +351,24 @@ Never pick a page from a site that has nothing to do with the topic and only cop
 export const RING_PER_DAY = Number(process.env.VIEWS_RING_PER_DAY || 300);
 export const RING_PER_HOUR_PER_IP = Number(process.env.VIEWS_RING_PER_HOUR || 20);
 
+// Exa matches a sentence that describes the page, so for each answer the model
+// describes the article its advocates would write, not a string of keywords.
+const EXA_QUERY_SYSTEM = 'You describe articles to find with a search engine that matches pages to a description. For one QUESTION with two opposite answers, A and B, describe for each answer the article that argues it: one sentence, as in "An op-ed arguing that…" or "A policy brief making the case that…", naming the specific claim that side makes, in that side\'s own terms. At most 25 words each. Name no person or organisation. Write TWO per answer: the first as above, and a second ("A2", "B2") describing a different kind of piece making the same case by another line of argument (another field, another kind of writer, another country\'s debate). Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}';
+
+// engine: 'exa' (a search described in a sentence, answered with the passages
+// that fit it) or 'tavily' (keyword search, opening snippet). Exa is the
+// default wherever its key is set: on 5 rings of the 2026-11-25 test it found
+// 36 pieces to Tavily's 21, with both answers filled on every ring and fewer
+// weak picks. VIEWS_RING_SEARCH=tavily turns it back. When an Exa search
+// fails, that one search is made on Tavily instead (fallback).
 export async function ringSides(input, {
   ip = 'unknown', unlimited = false, now = Date.now(), llm = handleLLM,
-  search = hasSearchKey() ? tavilySearch : null, check = linkLoads,
+  engine = process.env.VIEWS_RING_SEARCH !== 'tavily' && hasExaKey() ? 'exa' : 'tavily',
+  search = engine === 'exa' ? (hasExaKey() ? exaSearch : null) : (hasSearchKey() ? tavilySearch : null),
+  fallback = engine === 'exa' && hasSearchKey() ? tavilySearch : null, check = linkLoads,
 } = {}) {
+  const exa = engine === 'exa';
+  const passage = exa ? 800 : 320;
   const s = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const q = s(input?.question, 300);
   const crux = { question: s(input?.crux?.question, 240), left: s(input?.crux?.left, 120), right: s(input?.crux?.right, 120) };
@@ -356,9 +378,10 @@ export async function ringSides(input, {
   const holders = (pos) => (Array.isArray(input?.holders?.[pos]) ? input.holders[pos] : []).slice(0, 3).map((h) => s(h, 160)).filter(Boolean).join(' ');
   if (q.length < 6 || crux.question.length < 6 || !crux.left || !crux.right) throw fail(400, 'bad_request', 'Missing the ring’s question or answers.');
   const have = new Set((Array.isArray(input?.have) ? input.have : []).slice(0, 20).map(String));
-  // r11: pages that cannot be anyone's argument are dropped, and every piece
-  // carries the standing of the page it came from.
-  const key = `r11:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
+  // r12: up to four pieces an answer, a second search for any answer with
+  // fewer than three. (r11: pages that cannot be anyone's argument dropped, and every piece
+  // carries the standing of the page it came from.)
+  const key = `r12${exa ? 'x' : ''}:${hashString([q, crux.question, crux.left, crux.right, holders('left'), holders('right')].map(norm).join('|'))}`;
   const cached = await hashGet(HASH, key).catch(() => null);
   if (cached) {
     try {
@@ -398,7 +421,7 @@ export async function ringSides(input, {
   let queries = {};
   try {
     const out = await groqJSON({
-      system: 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Write TWO searches per answer: the first as above, and a second ("A2", "B2") that would find the same side through quite different words — another field\'s vocabulary, another kind of writer, another line of argument, another country\'s debate. The second must share no distinctive word with the first. Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}',
+      system: exa ? EXA_QUERY_SYSTEM : 'You write web searches. For one QUESTION with two opposite answers, A and B, write for each answer the search that its own advocates\' articles, op-eds and reports would match. Search engines favour the most-read pages, which often argue only one side, so do not restate the answer or the question: use the specific terms, claims, data and examples that side\'s own writers use (the studies, datasets, harms, costs, cases or programs they cite). At most 10 words each. Name no person or organisation. Write TWO searches per answer: the first as above, and a second ("A2", "B2") that would find the same side through quite different words — another field\'s vocabulary, another kind of writer, another line of argument, another country\'s debate. The second must share no distinctive word with the first. Output ONLY valid JSON: {"A":"...","A2":"...","B":"...","B2":"..."}',
       prompt: `QUESTION: ${crux.question}\nAbout: ${q}\nA: ${crux.left}${holders('left') ? ` (held by: ${holders('left')})` : ''}\nB: ${crux.right}${holders('right') ? ` (held by: ${holders('right')})` : ''}`,
       maxTokens: 500, deadline, llm,
     });
@@ -408,16 +431,23 @@ export async function ringSides(input, {
   }
   const sideSearch = async (answer, pos, alt = false) => {
     const written = queries[alt ? `${pos}2` : pos];
-    const query = (written && written.length > 8 ? written : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
+    const query = (written && written.length > 8 ? written : exa ? `An opinion piece arguing ${answer} on: ${crux.question}` : `${crux.question} ${answer}. ${holders(pos) || q}`).slice(0, 380);
     try {
-      const rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      let rs;
+      try {
+        rs = await search(query, { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      } catch (e) {
+        if (!fallback) throw e;
+        console.warn('[views-demo] Exa search failed, using Tavily:', e.message);
+        rs = await fallback(`${crux.question} ${answer}. ${holders(pos) || q}`.slice(0, 380), { maxResults: 10, timeoutMs: 9000, excludeDomains: NOT_ARGUING });
+      }
       const hosts = new Set();
       return rs.filter(usable).filter((r) => !copied(r)).filter((r) => {
         const h = hostOf(r.url);
         if (hosts.has(h)) return false;
         hosts.add(h);
         return true;
-      }).slice(0, 5);
+      }).slice(0, 7);
     } catch (e) {
       console.warn('[views-demo] ring search failed:', e.message);
       return [];
@@ -433,7 +463,7 @@ export async function ringSides(input, {
     }
   }
   const reading = [];
-  // One page per URL, at most two per answer, and only for the answers asked
+  // One page per URL, at most RING_PER_ANSWER per answer, and only for the answers asked
   // for. Returns how many it added.
   const takePicks = (picks, pool, sides) => {
     let added = 0;
@@ -442,7 +472,7 @@ export async function ringSides(input, {
       const side = String(p?.side || '').trim().toUpperCase() === 'A' ? 'left' : String(p?.side || '').trim().toUpperCase() === 'B' ? 'right' : null;
       const says = tidyReason(p?.says);
       if (!r || !side || !sides.includes(side) || says.length < 12 || reportedNotArgued(r, says) || wrongSide(p, r, side, says)
-        || reading.some((x) => x.url === r.url) || reading.filter((x) => x.side === side).length >= 2) continue;
+        || reading.some((x) => x.url === r.url) || reading.filter((x) => x.side === side).length >= RING_PER_ANSWER) continue;
       const quote = String(p?.quote || '').replace(/\s+/g, ' ').trim();
       const hay = String(r.snippet || '').replace(/\s+/g, ' ');
       const parts = quote.split(/\s*(?:\.\.\.|…)\s*/).map((x) => x.trim()).filter((x) => x.length >= 8);
@@ -458,7 +488,7 @@ export async function ringSides(input, {
     return added;
   };
   if (results.length) {
-    const out = await groqJSON({ system: PICK_EXTRA, prompt: ringPickPrompt([{ crux, about: q, results }]), maxTokens: 1000, deadline, llm });
+    const out = await groqJSON({ system: PICK_EXTRA, prompt: ringPickPrompt([{ crux, about: q, results }], passage), maxTokens: 1000, deadline, llm });
     takePicks(out?.picks, results, ['left', 'right']);
   }
   // Both answers should have something. Half the rings in the 2026-11-24 run
@@ -468,19 +498,21 @@ export async function ringSides(input, {
   // words, another field's vocabulary, another country's debate. One more
   // search per empty answer and one more picking call, and only if there is
   // time left — never at the cost of what the first round already found.
-  const emptySides = ['left', 'right'].filter((pos) => !reading.some((x) => x.side === pos));
+  // Since stones are pieces, an answer with fewer than three gets the second
+  // go too, not only an empty one.
+  const emptySides = ['left', 'right'].filter((pos) => reading.filter((x) => x.side === pos).length < 3);
   if (emptySides.length && Date.now() < deadline - 16_000) {
     try {
       const more = await Promise.all(emptySides.map((pos) => sideSearch(pos === 'left' ? crux.left : crux.right, pos, true)));
       const pool = [];
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 7; i++) {
         for (const rs of more) {
           const r = rs[i];
           if (r && !seen.has(r.url)) { seen.add(r.url); pool.push(r); }
         }
       }
       if (pool.length && Date.now() < deadline - 13_000) {
-        const second = await groqJSON({ system: `${PICK_EXTRA}\n\nOnly these answers are still open: ${emptySides.map((pos) => (pos === 'left' ? 'A' : 'B')).join(' and ')}. Pick nothing for any other answer. If none of these pages argues an open answer, return an empty list: a side with nothing is better than a page that does not argue it.`, prompt: ringPickPrompt([{ crux, about: q, results: pool }]), maxTokens: 900, deadline, llm });
+        const second = await groqJSON({ system: `${PICK_EXTRA}\n\nOnly these answers still need pieces: ${emptySides.map((pos) => (pos === 'left' ? 'A' : 'B')).join(' and ')}. Pick nothing for any other answer. If none of these pages argues one of them, return an empty list: a side with fewer pieces is better than a page that does not argue it.`, prompt: ringPickPrompt([{ crux, about: q, results: pool }], passage), maxTokens: 900, deadline, llm });
         takePicks(second?.picks, pool, emptySides);
       }
     } catch (e) {

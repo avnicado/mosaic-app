@@ -13,10 +13,17 @@
 //   nearer the centre. The rings run from the question the views most share,
 //   at the centre, to the one that splits them most sharply, at the rim
 //   (engine/viewsDemo.js orders them).
-// - A stone's size is how much that question matters to that view's case (the
-//   map's stakes, 1 to 3). Every ring holds the same area and every view the
-//   same area in all, so no view looks bigger than another overall; within
-//   that, a view's stone is bigger on the questions its case turns on.
+// - A view's run on a ring is as big as that question matters to the view's
+//   case (the map's stakes, 1 to 3). Every ring holds the same area and every
+//   view the same area in all, so no view looks bigger than another overall;
+//   within that, a view's run is bigger on the questions its case turns on.
+// - Each stone is a piece: a real page arguing that view's answer on that
+//   ring (Gil: "Stone per piece is the goal"). A ring's pieces argue one of
+//   its two answers, so they are dealt out among the views that give that
+//   answer, the view whose case turns most on the question first. A stone
+//   with no piece yet is faint, so a ring fills in as its pieces are found,
+//   and a run with more pieces than stones breaks into more. "It depends"
+//   stays striped: no page argues it.
 // - The joints between stones lean a little and step from ring to ring, so it
 //   reads as cut stone rather than a pie chart.
 //
@@ -58,6 +65,25 @@ function rng(seed) {
 const U0 = (HUB * HUB) / 2, U1 = (RIM * RIM) / 2;
 const rOf = (u) => Math.sqrt(2 * u);
 const cache = new WeakMap();
+const stakeOf = (c, id) => Math.min(3, Math.max(1, Number(c.stakes?.[id]) || 2));
+
+// Which pieces each view's stones stand for. pieces[k] = { left: [...], right:
+// [...] }, the pages arguing each answer of ring k. Each answer's pieces are
+// dealt out in turn among the views that give it, the view whose case turns
+// most on the question first. Returns, per ring and view, its list of pieces.
+export function dealPieces(map, pieces) {
+  return map.cruxes.map((c, k) => {
+    const out = map.views.map(() => []);
+    for (const pos of ['left', 'right']) {
+      const list = pieces?.[k]?.[pos] || [];
+      const holders = map.views.map((v, i) => ({ v, i })).filter(({ v }) => c.positions[v.id] === pos)
+        .sort((a, b) => stakeOf(c, b.v.id) - stakeOf(c, a.v.id) || a.i - b.i);
+      if (!holders.length) continue;
+      list.forEach((piece, j) => out[holders[j % holders.length].i].push(piece));
+    }
+    return out;
+  });
+}
 
 // The stones of a map: per ring k and view i, its stones as one path and its
 // middle. Kept per map object, so it is worked out once.
@@ -67,15 +93,21 @@ const cache = new WeakMap();
 // is, not one long arc. Joints lean, and the line between two rings wavers a
 // little at every corner, so the stones are irregular but still fit exactly.
 // A view's area on a ring still follows its stake, apart from that waver.
-export function stones(map) {
-  if (cache.has(map)) return cache.get(map);
+//
+// counts[k][i], when given, is how many pieces view i has on ring k: its run
+// is laid in at least that many stones, and otherwise a few by its length.
+export function stones(map, counts = null) {
+  const ckey = counts ? counts.map((row) => row.join('.')).join('/') : '';
+  if (!cache.has(map)) cache.set(map, new Map());
+  const memo = cache.get(map);
+  if (memo.has(ckey)) return memo.get(ckey);
   const { views, cruxes } = map;
   const N = views.length, M = cruxes.length;
   const du = (U1 - U0) / M;
   const uIn = (k) => U0 + k * du;
   // Each view's share of each ring: its stakes, balanced so every ring is full
   // and every view has the same area in all (iterative proportional fitting).
-  const W = views.map((v) => cruxes.map((c) => Math.min(3, Math.max(1, Number(c.stakes?.[v.id]) || 2))));
+  const W = views.map((v) => cruxes.map((c) => stakeOf(c, v.id)));
   for (let it = 0; it < 60; it++) {
     for (let k = 0; k < M; k++) { const t = W.reduce((s, row) => s + row[k], 0); W.forEach((row) => { row[k] /= t; }); }
     W.forEach((row) => { const t = row.reduce((a, b) => a + b, 0); for (let k = 0; k < M; k++) row[k] *= M / N / t; });
@@ -86,16 +118,23 @@ export function stones(map) {
   const bounds = cruxes.map((_, k) => { const b = [0]; W.forEach((row) => b.push(b[b.length - 1] + row[k] * TAU)); return b; });
   const ideal = views.map((_, i) => -Math.PI / 2 + ((i + 0.5) * TAU) / N);
   const turn = bounds.map((b) => views.reduce((s, _, i) => s + (ideal[i] - (b[i] + b[i + 1]) / 2), 0) / N);
-  const rand = rng(hashStr(map.question || views.map((v) => v.id).join('|')));
+  // Each ring's joints, and each line between rings, draw from their own
+  // random stream, so a ring breaking into more stones as its pieces arrive
+  // leaves every other ring exactly as it was.
+  const seed = map.question || views.map((v) => v.id).join('|');
 
   // Joints per ring: { a: angle at the ring's middle, lean, view (the stone to
   // its right belongs to it), start (true where a view's run begins) }.
   const joints = cruxes.map((_, k) => {
+    const rand = rng(hashStr(`${seed}#ring${k}`));
     const rMid = rOf(uIn(k) + du / 2), thick = rOf(uIn(k + 1)) - rOf(uIn(k));
     const js = [];
     views.forEach((_, i) => {
       const a0 = bounds[k][i] + turn[k], w = bounds[k][i + 1] - bounds[k][i];
-      const n = Math.max(1, Math.min(5, Math.round((w * rMid) / (thick * 1.7))));
+      // Laid by length, a few stones to a long run, as a mosaic is; more where
+      // the view has more pieces than that.
+      const byLength = Math.max(1, Math.min(5, Math.round((w * rMid) / (thick * 1.7))));
+      const n = counts ? Math.max(byLength, counts[k][i] || 1) : byLength;
       for (let j = 0; j < n; j++) {
         const frac = j === 0 ? 0 : (j + (rand() - 0.5) * 0.45) / n;
         js.push({ a: a0 + frac * w, view: i, start: j === 0, width: w / n });
@@ -115,6 +154,7 @@ export function stones(map) {
   // corners { a, u } in order of angle over one turn. Inside lines waver.
   const lines = [];
   for (let kb = 0; kb <= M; kb++) {
+    const rand = rng(hashStr(`${seed}#line${kb}`));
     const u = uIn(kb);
     let as = [];
     if (kb > 0) joints[kb - 1].forEach((jt) => as.push(endA(jt, 1)));
@@ -166,7 +206,8 @@ export function stones(map) {
   const cells = cruxes.map((_, k) => views.map((_, i) => {
     const qs = joints[k].map((jt, q) => (jt.view === i ? q : -1)).filter((q) => q >= 0);
     const um = uIn(k) + du / 2;
-    return { d: qs.map((q) => stone(k, q)).join(''), mid: at(rOf(um), bounds[k][i] + turn[k] + (bounds[k][i + 1] - bounds[k][i]) / 2) };
+    const parts = qs.map((q) => stone(k, q));
+    return { parts, d: parts.join(''), mid: at(rOf(um), bounds[k][i] + turn[k] + (bounds[k][i + 1] - bounds[k][i]) / 2) };
   }));
   // A view's whole run of stones, outlined, for when it is picked.
   const firstOf = (k, i) => joints[k].find((jt) => jt.view === i && jt.start);
@@ -221,7 +262,7 @@ export function stones(map) {
     return `${path(outer)}${path(inner)}`;
   });
   const out = { cells, outline, labelAngle, numAt, ringPath };
-  cache.set(map, out);
+  memo.set(ckey, out);
   return out;
 }
 
@@ -236,10 +277,11 @@ export function anchorPoint(map, viewId, k) {
 
 export const answerText = (c, pos) => (pos === 'left' ? c.left : pos === 'right' ? c.right : 'It depends, or in between');
 
-export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf, mark }) {
+export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf, mark, pieces = null }) {
   const { views, cruxes } = map;
   const N = views.length, M = cruxes.length;
-  const g = stones(map);
+  const dealt = dealPieces(map, pieces);
+  const g = stones(map, dealt.map((row) => row.map((list) => Math.max(1, list.length))));
   const pick = (id) => onFocus(focus === id ? null : id);
   const pickRing = (k) => onRing(ring === k ? null : k);
   const keys = (fn) => (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
@@ -264,15 +306,21 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
               const pos = c.positions[v.id] || 'mid';
               const fill = pos === 'mid' ? `url(#vd-hatch-${i})` : col;
               const op = pos === 'left' ? 0.92 : pos === 'right' ? 0.26 : 1;
-              return (
-                <path key={k} className={`vd-mm-cell ${ring != null && ring !== k ? 'rdim' : ''} ${ring === k && on ? 'here' : ''}`}
-                  d={g.cells[k][i].d} fill={fill} fillOpacity={op}
-                  role="button" tabIndex={0}
-                  aria-label={`${v.name} on question ${k + 1}, ${c.question}: ${answerText(c, pos)}. Open what to read on this question.`}
-                  onClick={() => onCell(v.id, k)} onKeyDown={keys(() => onCell(v.id, k))}>
-                  <title>{`${v.short || v.name} on question ${k + 1}: ${answerText(c, pos)}`}</title>
-                </path>
-              );
+              const mine = dealt[k][i];
+              return g.cells[k][i].parts.map((d, j) => {
+                const piece = mine[j];
+                const empty = pos !== 'mid' && !piece;
+                const what = piece ? `${piece.title}${piece.outlet ? ` (${piece.outlet})` : ''}` : pos === 'mid' ? answerText(c, pos) : 'no piece found yet';
+                return (
+                  <path key={`${k}-${j}`} className={`vd-mm-cell ${empty ? 'empty' : ''} ${ring != null && ring !== k ? 'rdim' : ''} ${ring === k && on ? 'here' : ''}`}
+                    d={d} fill={fill} fillOpacity={empty ? op * 0.32 : op}
+                    role="button" tabIndex={0}
+                    aria-label={`${v.name} on question ${k + 1}, ${c.question}: ${answerText(c, pos)}. ${piece ? `Piece: ${what}.` : ''} Open what to read on this question.`}
+                    onClick={() => onCell(v.id, k)} onKeyDown={keys(() => onCell(v.id, k))}>
+                    <title>{`${v.short || v.name} on question ${k + 1}, ${answerText(c, pos)}: ${what}`}</title>
+                  </path>
+                );
+              });
             })}
             <path className="vd-mm-edge" d={g.outline[i]} style={{ stroke: col }} />
           </g>

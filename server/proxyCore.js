@@ -246,6 +246,49 @@ export async function tavilySearch(query, {
   }
 }
 
+// Exa: a search you describe in a sentence ("an op-ed arguing that…"), which
+// answers with the passages of each page that fit the search, not only its
+// opening lines. Same result shape as tavilySearch, so the ring lookup can use
+// either. The key lives server-side in EXA_API_KEY.
+const EXA_URL = 'https://api.exa.ai/search';
+
+export function hasExaKey() {
+  return !!process.env.EXA_API_KEY;
+}
+
+export async function exaSearch(query, {
+  maxResults = 8, excludeDomains = [], timeoutMs = 10_000, passageChars = 900,
+} = {}) {
+  if (!hasExaKey()) throw Object.assign(new Error('EXA_API_KEY is not configured on the server.'), { type: 'no_search_key' });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(EXA_URL, {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'content-type': 'application/json', 'x-api-key': process.env.EXA_API_KEY },
+      body: JSON.stringify({
+        query: String(query).slice(0, 400),
+        type: 'auto',
+        numResults: Math.min(Math.max(Number(maxResults) || 8, 1), 10),
+        ...(excludeDomains.length ? { excludeDomains } : {}),
+        contents: { highlights: { maxCharacters: passageChars } },
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || data?.message || `Exa error ${res.status}`);
+    return (data.results || []).map((r) => ({
+      title: String(r.title || ''),
+      url: String(r.url || ''),
+      snippet: (Array.isArray(r.highlights) ? r.highlights : []).map((h) => String(h).replace(/\s+/g, ' ').trim()).filter(Boolean).join(' … ').slice(0, passageChars),
+      score: Number(r.score) || 0,
+      published: r.publishedDate || null,
+    })).filter((r) => r.url);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // --- URL liveness check (shared by api/checkurl.js and the dev server) ------
 // A feed item whose link 404s is worse than no item: the marginalia invariant
 // promises the reader can inspect the source. LLM-produced URLs (especially
