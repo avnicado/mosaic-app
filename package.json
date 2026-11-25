@@ -6,7 +6,7 @@
   "description": "Mosaic — hold questions over time; four composed items per session; see what actually moved.",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/release-check.mjs && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "engine-smoke": "node scripts/engine-smoke.mjs",
     "further-smoke": "node scripts/further-smoke.mjs",

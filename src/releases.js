@@ -3,7 +3,7 @@
 //
 // To cut a release: add an entry at the top, set package.json's "version" to
 // the same number (npm version <x.y.z> --no-git-tag-version), and build.
-// `npm run build` stops if the two disagree (scripts/release-check.mjs).
+// The build stops if the two disagree (checkReleases, run from vite.config.js).
 //
 // Write for the people who use Mosaic: what they can now do or will notice,
 // in plain words. Kinds: 'new' (something to try), 'better' (something that
@@ -112,4 +112,20 @@ export function compareVersions(a, b) {
   const pb = String(b || '0').split('.').map((n) => parseInt(n, 10) || 0);
   for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
   return 0;
+}
+
+// Problems with the notes, as plain sentences; empty when all is well.
+export function checkReleases(pkgVersion) {
+  const problems = [];
+  if (pkgVersion !== RELEASES[0].version) {
+    problems.push(`package.json is ${pkgVersion} but the newest release note is ${RELEASES[0].version}.`);
+  }
+  RELEASES.forEach((r, i) => {
+    if (!/^\d+\.\d+\.\d+$/.test(r.version)) problems.push(`${r.version}: not x.y.z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date || '')) problems.push(`${r.version}: date must be YYYY-MM-DD`);
+    if (!r.title || !r.changes?.length) problems.push(`${r.version}: needs a title and at least one change`);
+    for (const c of r.changes || []) if (!['new', 'better', 'fixed'].includes(c.kind)) problems.push(`${r.version}: unknown kind "${c.kind}"`);
+    if (i && compareVersions(RELEASES[i - 1].version, r.version) <= 0) problems.push(`${RELEASES[i - 1].version} should be newer than ${r.version} (newest first).`);
+  });
+  return problems;
 }

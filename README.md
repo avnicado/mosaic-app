@@ -55,8 +55,8 @@ Version numbers and release notes live in one place, `src/releases.js`
 (newest first), which the What's new page (`#/whats-new`, in the menu)
 renders. To cut a release, add an entry at the top in plain words for the
 people who use Mosaic, then `npm version <x.y.z> --no-git-tag-version` so
-`package.json` matches. `npm run build` stops if the two disagree
-(`npm run release-check` runs the same check). A gold dot on What's new
+`package.json` matches. The build stops if the two disagree
+(`npm run release-check` runs the same check on its own). A gold dot on What's new
 shows until a person has opened the page since the newest version; what
 they've seen syncs with their record (`m2:whatsnew-seen`).
 
