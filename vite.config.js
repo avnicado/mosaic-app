@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 import fs from 'node:fs';
+import { checkReleases } from './src/releases.js';
 
 // Dev-server middleware: mounts the real route handlers (server/routes/*.js,
 // served on Vercel through api/[route].js) with a
@@ -45,6 +46,19 @@ function apiPlugin() {
   };
 }
 
+// Stops a build whose release notes (src/releases.js) and package.json version disagree.
+function releaseCheckPlugin() {
+  return {
+    name: 'mosaic-release-check',
+    apply: 'build',
+    buildStart() {
+      const pkg = JSON.parse(fs.readFileSync(resolve(__dirname, 'package.json'), 'utf8'));
+      const problems = checkReleases(pkg.version);
+      if (problems.length) this.error('Release notes check failed:\n- ' + problems.join('\n- '));
+    },
+  };
+}
+
 const SERVER_ENV = [
   'GROQ_API_KEY', 'TAVILY_API_KEY', 'APP_PASSWORD', 'SESSION_SECRET', 'CRON_SECRET',
   'KV_REST_API_URL', 'KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN',
@@ -62,7 +76,7 @@ export default defineConfig(({ mode }) => {
     else if (fromFile.has(k)) { delete process.env[k]; fromFile.delete(k); } // removed from .env
   }
   return {
-    plugins: [react(), apiPlugin()],
+    plugins: [react(), apiPlugin(), releaseCheckPlugin()],
     server: { port: Number(process.env.PORT) || 5200 },
   };
 });

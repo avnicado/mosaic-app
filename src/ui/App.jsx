@@ -12,6 +12,10 @@ import Settings from './pages/Settings.jsx';
 import Quests from './pages/Quests.jsx';
 import QuestPage from './pages/QuestPage.jsx';
 import SharedThread from './pages/SharedThread.jsx';
+import WhatsNew from './pages/WhatsNew.jsx';
+import './pages/whatsnew.css';
+import { useHasUnseen } from '../data/whatsnew.js';
+import { CURRENT_VERSION } from '../releases.js';
 import { startSharing, subscribeShared, getSharedVersion, getOthers } from '../data/sharing.js';
 import { getSessionInfo } from '../session.js';
 import { Icon } from './icons.jsx';
@@ -74,11 +78,23 @@ function Sidebar({ route, onNavigate }) {
       <div className="side-foot">
         {link('promenade', '/promenade', 'Promenade', 'promenade')}
         {link('library', '/library', 'Library', 'library')}
+        <WhatsNewLink active={route.name === 'whats-new'} onNavigate={onNavigate} />
         <FeedbackButton page={route.name} />
         {link('settings', '/settings', 'Settings', 'settings', unreadFeedback)}
         <SignedInAs />
       </div>
     </nav>
+  );
+}
+
+function WhatsNewLink({ active, onNavigate }) {
+  const unseen = useHasUnseen();
+  return (
+    <a href="#/whats-new" className={`side-link ${active ? 'active' : ''}`} onClick={onNavigate}
+      title={unseen ? `Version ${CURRENT_VERSION} is new since you last looked` : `Version ${CURRENT_VERSION}`}>
+      <Icon name="news" size={17} />What’s new
+      <span className="wn-side">{unseen && <span className="wn-dot" aria-label="new" />}{CURRENT_VERSION}</span>
+    </a>
   );
 }
 
@@ -115,6 +131,7 @@ function SignedInAs() {
 export default function App() {
   useEffect(() => { startSharing(); }, []);
   const route = useRoute();
+  const unseen = useHasUnseen();
   const [drawer, setDrawer] = useState(false);
   useEffect(() => { setDrawer(false); window.scrollTo(0, 0); }, [route.name, route.id]);
   const exists = useRecord(() => (route.name === 'thread' ? !!R.getThread(route.id) : route.name === 'quest' ? !!R.getQuest(route.id) : true), [route.name, route.id]);
@@ -130,6 +147,7 @@ export default function App() {
     case 'promenade': page = <Promenade />; break;
     case 'library': page = <Library />; break;
     case 'settings': page = <Settings />; break;
+    case 'whats-new': page = <WhatsNew />; break;
     default: page = <Desk />;
   }
   return (
@@ -137,7 +155,7 @@ export default function App() {
       <Sidebar route={route} onNavigate={() => setDrawer(false)} />
       <div className="main" onClick={() => drawer && setDrawer(false)}>
         <header className="topbar">
-          <button className="menu-btn" aria-label="Menu" onClick={(e) => { e.stopPropagation(); setDrawer(true); }}><Icon name="menu" size={20} /></button>
+          <button className="menu-btn" aria-label="Menu" onClick={(e) => { e.stopPropagation(); setDrawer(true); }}><Icon name="menu" size={20} />{unseen && <span className="wn-dot" />}</button>
           <a className="brand" href="#/"><Icon name="mosaic" size={18} className="brand-ic" />Mosaic</a>
         </header>
         {page}

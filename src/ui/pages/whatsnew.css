@@ -1,0 +1,37 @@
+/* What's new: one release per section, newest first. */
+.wn { max-width: 720px; }
+.wn h1 { margin-bottom: 10px; }
+.wn-lede { font-family: var(--serif); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 8px; }
+.wn-ver { font-family: var(--mono); font-size: 0.82em; letter-spacing: 0.04em; color: var(--ink); }
+
+.wn-release { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
+.wn-release.unseen + .wn-release.unseen { margin-top: 16px; }
+.wn-release.unseen { border-top: none; padding: 16px 18px 6px; background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--gold); border-radius: 4px; }
+
+.wn-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); }
+.wn-meta .wn-ver { font-size: 11px; color: var(--accent); }
+.wn-tag { color: var(--gold); }
+.wn-tag::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-right: 6px; vertical-align: 1px; }
+
+.wn-release h2 { margin-bottom: 6px; }
+.wn-summary { font-family: var(--serif); font-size: 17px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 12px; }
+
+.wn-group { margin: 12px 0; }
+.wn-kind { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.wn-kind.new { color: var(--accent); }
+.wn-kind.better { color: var(--sage); }
+.wn-kind.fixed { color: var(--ink-faded); }
+.wn-group ul { margin: 0; padding-left: 18px; }
+.wn-group li { font-size: 15px; line-height: 1.55; color: var(--ink); margin: 3px 0; }
+.wn-group li::marker { color: var(--ink-faded); }
+
+@media (max-width: 760px) {
+  .wn-release.unseen { padding: 14px 14px 4px; }
+  .wn-lede, .wn-summary { font-size: 16px; }
+}
+
+/* Sidebar entry: the version, and a gold dot while there's one you haven't read about. */
+.side-link .wn-side { margin-left: auto; display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-faded); }
+.wn-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.menu-btn { position: relative; }
+.menu-btn .wn-dot { position: absolute; top: 5px; right: 5px; box-shadow: 0 0 0 2px var(--panel); }
