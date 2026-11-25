@@ -73,7 +73,7 @@ export const RELEASES = [
       { kind: 'new', text: 'The coral reef: one colony for each thread, which grows only from sessions where your question really moved.' },
       { kind: 'new', text: 'The Mandala on the Promenade shows the day’s pieces by field and by how dense they are.' },
       { kind: 'new', text: 'A thread left untouched for 30 days goes quiet. Nothing is lost, and Mosaic offers a quiet thread back now and then.' },
-      { kind: 'new', text: 'Feedback in the menu, to send a note from any page.' },
+      { kind: 'new', text: 'Send feedback in the menu, for a note from any page.' },
       { kind: 'new', text: 'Anyone can create an account from the sign-in screen, with a name and a password.' },
     ],
   },

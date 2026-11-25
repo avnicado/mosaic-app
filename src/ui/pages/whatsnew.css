@@ -5,6 +5,7 @@
 .wn-ver { font-family: var(--mono); font-size: 0.82em; letter-spacing: 0.04em; color: var(--ink); }
 
 .wn-release { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
+.wn-release.unseen + .wn-release.unseen { margin-top: 16px; }
 .wn-release.unseen { border-top: none; padding: 16px 18px 6px; background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--gold); border-radius: 4px; }
 
 .wn-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); }
