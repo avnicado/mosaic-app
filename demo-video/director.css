@@ -74,3 +74,15 @@ html.demo-pre .vd-ex.on { background: var(--vd-panel); border-color: var(--vd-ru
   font: 500 28px/1.2 var(--sans); color: var(--soft); background: var(--panel); border: 1px solid var(--rule);
   border-radius: 999px; padding: 11px 24px 12px; box-shadow: 0 8px 22px rgba(26, 22, 18, 0.09), 0 1px 2px rgba(26, 22, 18, 0.06); }
 .dm-veil { position: absolute; border-radius: 999px; opacity: 0; box-shadow: 0 0 0 4000px rgba(245, 240, 230, 1); }
+
+/* the Hebrew cut (?lang=he): the layer's words read right to left */
+#demo-layer.he .dm-cap-in, #demo-layer.he .dm-card, #demo-layer.he .dm-call { direction: rtl; }
+#demo-layer.he .dm-cap-text { font-size: 38px; line-height: 1.25; }
+#demo-layer.he .dm-cap-eye, #demo-layer.he .dm-card-eye, #demo-layer.he .dm-call-eye { letter-spacing: 0.04em; font-family: var(--sans); font-weight: 500; }
+#demo-layer.he .dm-card-line { font-size: 92px; line-height: 1.12; }
+#demo-layer.he .dm-end-tag { font-size: 62px; }
+#demo-layer.he .dm-brand { direction: ltr; }
+#demo-layer.he .dm-call { border-left: 1px solid var(--rule); border-right: 4px solid var(--c, var(--ink)); }
+#demo-layer.he .dm-call-title .n { margin: 0 0 0 12px; }
+#demo-layer.he .dm-tag { margin: 0 0 4px 6px; }
+html.demo-he .vd-ask input { font-family: 'Heebo', var(--vd-sans); }

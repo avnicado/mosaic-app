@@ -11,6 +11,9 @@ const W = 1920, H = 1080;
 const NUCLEAR = EXAMPLES.find((e) => e.id === 'nuclear');
 const COLORS = ['#4f8079', '#b84a3c', '#3d5875', '#8a6a1f'];
 const params = new URLSearchParams(location.search);
+// ?lang=he gives the Hebrew cut: Hebrew captions, cards and questions, right to left.
+const HE = params.get('lang') === 'he';
+const tr = (en, he) => (HE ? he : en);
 const OPTS = { captions: params.get('captions') !== '0', callouts: params.get('callouts') !== '0' };
 
 // ---------- maths ----------
@@ -41,6 +44,7 @@ const root = document.getElementById('root');
 const layer = document.createElement('div');
 layer.id = 'demo-layer';
 document.body.appendChild(layer);
+if (HE) { layer.classList.add('he'); html.classList.add('demo-he'); }
 const mk = (cls, inner = '', parent = layer) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = inner; parent.appendChild(d); return d; };
 
 // ---------- camera ----------
@@ -389,13 +393,16 @@ const viewCard = (map, i) => () => {
   return `<p class="dm-call-eye">View ${i + 1} of ${map.views.length}</p><p class="dm-call-title">${esc(v.name)}</p>
     <p class="dm-call-body">${esc(v.summary)}</p>${who ? `<p class="dm-call-who"><b>Held by</b>${esc(who)}</p>` : ''}`;
 };
+// The one ring the video opens, in Hebrew. The view tags stay as the page labels them.
+const RING_HE = { nuclear: { 3: { q: 'אם כור פעיל נסגר, האם הזיהום עולה?', left: 'כן, גז ממלא את החסר', right: 'לא, אנרגיה מתחדשת ממלאת את החסר' } } };
 const ringCard = (map, k, withAnswers) => () => {
   const c = map.cruxes[k];
   const at = (pos) => map.views.filter((v) => (c.positions[v.id] || 'mid') === pos);
   const row = (pos, sw, label) => { const vs = at(pos); return vs.length ? `<li><i class="dm-sw ${sw}"></i><span>${esc(label)}<span class="dm-tags">${vs.map((v) => tag(map, v.id)).join('')}</span></span></li>` : ''; };
-  return `<p class="dm-call-eye">Ring ${k + 1} of ${map.cruxes.length}${k === 0 ? ' · the centre' : k === map.cruxes.length - 1 ? ' · the rim' : ''}</p>
-    <p class="dm-call-title"><span class="n">${k + 1}</span>${esc(c.question)}</p>
-    ${withAnswers ? `<ul class="dm-rows">${row('left', '', c.left)}${row('right', 'pale', c.right)}${row('mid', 'striped', 'It depends')}</ul>` : ''}`;
+  const heq = HE && RING_HE[map.id]?.[k];
+  return `<p class="dm-call-eye">${tr('Ring', 'טבעת')} ${k + 1} ${tr('of', 'מתוך')} ${map.cruxes.length}${k === 0 ? tr(' · the centre', ' · המרכז') : k === map.cruxes.length - 1 ? tr(' · the rim', ' · השוליים') : ''}</p>
+    <p class="dm-call-title"><span class="n">${k + 1}</span>${esc(heq ? heq.q : c.question)}</p>
+    ${withAnswers ? `<ul class="dm-rows">${row('left', '', heq ? heq.left : c.left)}${row('right', 'pale', heq ? heq.right : c.right)}${row('mid', 'striped', tr('It depends', 'תלוי'))}</ul>` : ''}`;
 };
 
 // ---------- cards ----------
@@ -403,12 +410,12 @@ const TESSERAE = ['M3 4h7.5l-1 7H3z', 'M12 3.5l8.5 1.5-1.5 6.5-8-1z', 'M3 12.5h6
 const TESS_COLORS = ['#8f2418', '#b8923a', '#6b7559', '#4a4038'];
 function buildCards() {
   const words = (s) => s.split(' ').map((w) => `<span class="w">${esc(w)}</span>`).join(' ');
-  opening.innerHTML = `<p class="dm-card-eye">Mosaic · Views</p>
-    <p class="dm-card-line">${words('Hard questions have')}<br>${words('more than two sides.')}</p>`;
+  opening.innerHTML = `<p class="dm-card-eye">${tr('Mosaic · Views', 'מוזאיקה')}</p>
+    <p class="dm-card-line">${words(tr('Hard questions have', 'לשאלות קשות יש'))}<br>${words(tr('more than two sides.', 'יותר משני צדדים.'))}</p>`;
   ending.innerHTML = `<div class="dm-brand"><svg viewBox="0 0 24 24">${TESSERAE.map((d, i) => `<path d="${d}" fill="${TESS_COLORS[i]}" style="transform-box:fill-box;transform-origin:center"/>`).join('')}</svg>
     <span class="dm-brand-name">Mosaic</span><span class="dm-brand-sub">Views</span></div>
     <div class="dm-rule"></div>
-    <p class="dm-end-tag">Earn your opinion.</p>`;
+    <p class="dm-end-tag">${tr('Earn your opinion.', 'את הדעה צריך להרוויח.')}</p>`;
 }
 function drawOpening(t, t0, t1) {
   const out = E.inOutSine(prog(t, t1 - 0.7, t1));
@@ -475,6 +482,32 @@ const OWN_QS = [
   'How much immigration is right?',
   'Is space exploration worth the cost?',
 ];
+const OWN_QS_HE = [
+  'האם להוריד את גיל ההצבעה ל־16?',
+  'האם שבוע עבודה של ארבעה ימים טוב לעסקים?',
+  'האם לימודים באוניברסיטה צריכים להיות חינם?',
+  'האם פיקוח על שכר הדירה עוזר לשוכרים?',
+  'האם לאסור טלפונים בבתי הספר?',
+  'האם עבודה מהבית טובה לצוותים?',
+  'האם להטיל מס על משקאות ממותקים?',
+  'האם הצבעה צריכה להיות חובה?',
+  'האם להתיר מכוניות אוטונומיות בכבישים?',
+  'האם בשר מתורבת הוא העתיד?',
+  'האם להפסיק להפליל החזקת סמים?',
+  'האם גני חיות מועילים יותר משהם מזיקים?',
+  'האם לאסור מכוניות במרכזי הערים?',
+  'האם יצירות של בינה מלאכותית ראויות לזכויות יוצרים?',
+  'האם הכנסה בסיסית אוניברסלית אפשרית?',
+  'האם להעלות את שכר המינימום?',
+  'האם מכוניות חשמליות באמת ירוקות יותר?',
+  'האם לבטל את הטיפים?',
+  'האם להטיל מס על עושר?',
+  'האם שיעורי בית שווים את זה?',
+  'האם להתיר עריכה גנטית של עוברים?',
+  'האם לבטל את שעון הקיץ?',
+  'כמה הגירה זה נכון?',
+  'האם חקר החלל שווה את המחיר?',
+];
 const qcloud = document.createElement('div');
 qcloud.className = 'dm-qcloud';
 layer.insertBefore(qcloud, cap);
@@ -508,6 +541,7 @@ function questionFlash(t0, getInput, getGo, qs) {
         const d = document.createElement('div');
         d.className = 'dm-q';
         d.textContent = s.q;
+        if (HE) d.dir = 'rtl';
         qcloud.appendChild(d);
         const w0 = d.offsetWidth, h0 = d.offsetHeight;
         let best = null;
@@ -534,7 +568,7 @@ function questionFlash(t0, getInput, getGo, qs) {
       if (s && el) {
         const p = t >= t1 ? 1 : clamp((t - s.a) / ((s.b - s.a) * s.typeFor));
         const v = s.q.slice(0, Math.ceil(s.q.length * p));
-        if (v !== shown) { shown = v; typeInto(el, v); el.scrollLeft = el.scrollWidth; }
+        if (v !== shown) { shown = v; if (HE) el.dir = 'rtl'; typeInto(el, v); el.scrollLeft = HE ? -el.scrollWidth : el.scrollWidth; }
       }
       // a paper veil over the page, the box left clear
       if (el) {
@@ -547,7 +581,7 @@ function questionFlash(t0, getInput, getGo, qs) {
       for (const c of chips) {
         const local = t - c.launch;
         if (local < 0) { c.d.style.opacity = 0; continue; }
-        if (!c.from && ir) c.from = { x: ir.left + 14 * (ir.height / 40) + c.w0 * 0.5 * (boxFont / 28), y: ir.top + ir.height / 2, sc: boxFont / 28 };
+        if (!c.from && ir) { const k = boxFont / 28, inset = 14 * (ir.height / 40) + c.w0 * 0.5 * k; c.from = { x: HE ? ir.right - inset : ir.left + inset, y: ir.top + ir.height / 2, sc: k }; }
         const f = c.from || { x: W / 2, y: H / 2, sc: 1 };
         const p = E.outQuint(clamp(local / fly));
         const drift = Math.max(0, local - fly * 0.6);
@@ -584,7 +618,7 @@ function buildScript() {
   const typeAt = T.ask + 2.3, perChar = 0.042;
   const typed = typeAt + Q.length * perChar;
   T.mapIt = typed + 0.85;
-  caption(T.ask + 0.7, T.mapIt + 0.5, 'Ask a question people really disagree on.', 'Mosaic Views');
+  caption(T.ask + 0.7, T.mapIt + 0.5, tr('Ask a question people really disagree on.', 'שאלו שאלה שאנשים באמת חלוקים עליה.'), tr('Mosaic Views', 'מוזאיקה'));
   ev(T.ask + 1.95, () => click(input()));
   for (let i = 1; i <= Q.length; i++) ev(typeAt + i * perChar + (i % 7 === 0 ? 0.03 : 0), () => typeInto(input(), Q.slice(0, i)));
   ev(T.mapIt, async () => { html.classList.remove('demo-pre'); await click(go()); });
@@ -599,18 +633,18 @@ function buildScript() {
     ['.vd-cap', T.rain + 4.0, T.rain + 4.8],
     ['.vd-more, .vd-foot', T.rain + 4.2, T.rain + 5.0],
   ]);
-  caption(T.rain + 0.3, T.rain + 3.9, 'Mosaic lays out the views on it, stone by stone.');
+  caption(T.rain + 0.3, T.rain + 3.9, tr('Mosaic lays out the views on it, stone by stone.', 'מוזאיקה פורשת את העמדות עליה, אבן אחר אבן.'));
 
   // 3. The whole page
   T.wide = T.rain + 4.3;
-  caption(T.wide, T.wide + 3.3, 'Four main views. Four questions they split on.');
+  caption(T.wide, T.wide + 3.3, tr('Four main views. Four questions they split on.', 'ארבע עמדות עיקריות. ארבע שאלות שעליהן הן נחלקות.'));
 
   // 4. Each colour is a view
   T.views = T.wide + 3.6;
   const vdur = 2.15;
   const vsegs = NUCLEAR.views.map((v, i) => ({ i, t0: T.views + 0.5 + i * vdur, t1: T.views + 0.5 + (i + 1) * vdur }));
   viewTour(vsegs);
-  caption(T.views + 0.4, T.views + 0.5 + 4 * vdur, 'Each colour is a view, and the people who hold it.');
+  caption(T.views + 0.4, T.views + 0.5 + 4 * vdur, tr('Each colour is a view, and the people who hold it.', 'כל צבע הוא עמדה, והאנשים שמחזיקים בה.'));
 
   // 5. Each ring is a question
   T.rings = T.views + 0.5 + 4 * vdur + 0.3;
@@ -620,9 +654,9 @@ function buildScript() {
   ringTour(rsegs);
   callout(rsegs[3].t0 + 0.6, rsegs[3].t1, ringCard(NUCLEAR, 3, true), { x: 1200, y: 240 });
   fadeEls(rsegs[3].t0 + 0.4, rsegs[3].t1 + 0.2, '.vd-col-panel', 0.12);
-  caption(T.rings + 0.2, rsegs[1].t1, 'Each ring is a question they split on.');
-  caption(rsegs[1].t1, rsegs[2].t1 + 0.4, 'They agree most at the centre, and split hardest at the rim.');
-  caption(rsegs[3].t0 + 0.4, rsegs[3].t1, 'Solid stones give one answer. Pale stones give the other.');
+  caption(T.rings + 0.2, rsegs[1].t1, tr('Each ring is a question they split on.', 'כל טבעת היא שאלה שעליה הן נחלקות.'));
+  caption(rsegs[1].t1, rsegs[2].t1 + 0.4, tr('They agree most at the centre, and split hardest at the rim.', 'במרכז הן מסכימות הכי הרבה, ובשוליים הן הכי חלוקות.'));
+  caption(rsegs[3].t0 + 0.4, rsegs[3].t1, tr('Solid stones give one answer. Pale stones give the other.', 'אבנים מלאות הן תשובה אחת. אבנים בהירות הן התשובה השנייה.'));
 
   // 6. Open a ring
   T.ring = rsegs[3].t1 + 0.4;
@@ -630,14 +664,14 @@ function buildScript() {
   const readItem = (side, j) => () => document.querySelectorAll('.vd-pop .vd-side')[side]?.querySelectorAll('.vd-read > li')[j];
   T.ringClick = T.ring + 1.3;
   ev(T.ringClick, () => click(num(3)()));
-  caption(T.ring + 0.2, T.ringClick + 3.4, 'Every filled stone is a real piece, arguing that answer.');
+  caption(T.ring + 0.2, T.ringClick + 3.4, tr('Every filled stone is a real piece, arguing that answer.', 'כל אבן מלאה היא כתבה אמיתית שטוענת בעד התשובה הזאת.'));
   spotlight(T.ringClick + 1.7, T.ringClick + 5.4, readItem(0, 0), { pad: 10, dim: 0.07 });
   scrollBox(T.ringClick + 5.6, T.ringClick + 7.0, popIn, (el) => {
     const sides = el.querySelectorAll('.vd-side');
     return sides[1] ? offsetIn(el, sides[1]) - 8 : el.scrollHeight;
   });
   spotlight(T.ringClick + 7.2, T.ringClick + 10.4, readItem(1, 0), { pad: 10, dim: 0.07 });
-  caption(T.ringClick + 3.6, T.ringClick + 10.6, 'Pieces for both answers, every link opened and read.');
+  caption(T.ringClick + 3.6, T.ringClick + 10.6, tr('Pieces for both answers, every link opened and read.', 'כתבות בעד שתי התשובות, וכל קישור נפתח ונקרא.'));
 
   // 7. Pull back, then a view's whole case
   T.pull = T.ringClick + 10.8;
@@ -645,15 +679,15 @@ function buildScript() {
   ev(T.pull + 0.2, () => document.querySelector('.vd-pop-x') && click(document.querySelector('.vd-pop-x')));
   ev(T.viewClick, () => click(label(2)()));
   const panel = $('.vd-col-panel');
-  caption(T.viewClick - 0.6, T.viewClick + 3.6, 'Tap a view for its whole case: its answers, its reasons, its sources.');
+  caption(T.viewClick - 0.6, T.viewClick + 3.6, tr('Tap a view for its whole case: its answers, its reasons, its sources.', 'הקישו על עמדה וראו את כל הטיעון שלה: התשובות, הנימוקים והמקורות.'));
   scrollBox(T.viewClick + 3.7, T.viewClick + 6.2, panel, (el) => {
     const r = el.querySelector('.vd-reasons'); return r ? offsetIn(el, r) - 90 : 400;
   });
   scrollBox(T.viewClick + 7.0, T.viewClick + 9.0, panel, (el) => {
     return el.scrollHeight - el.clientHeight;
   });
-  caption(T.viewClick + 3.8, T.viewClick + 6.8, 'Each reason links to where it’s made.');
-  caption(T.viewClick + 6.8, T.viewClick + 11.0, 'And what would change its mind.');
+  caption(T.viewClick + 3.8, T.viewClick + 6.8, tr('Each reason links to where it’s made.', 'כל נימוק מקשר למקום שבו הוא נטען.'));
+  caption(T.viewClick + 6.8, T.viewClick + 11.0, tr('And what would change its mind.', 'וגם מה היה גורם לה לשנות את דעתה.'));
   spotlight(T.viewClick + 9.3, T.viewClick + 11.0, changeMind, { pad: 8, dim: 0 });
 
   // 8. Other questions
@@ -666,15 +700,15 @@ function buildScript() {
   T.vacc = T.more + 3.7;
   ev(T.vacc, () => click(chip('vaccines')()));
   rain(T.vacc + 0.1, { dur: 1.3, fall: 0.6, seed: 23, labelsAt: 1.4, hold: 0.2, armAt: T.vacc });
-  caption(T.more + 0.2, T.vacc + 1.9, 'Ready examples, researched and checked by hand.');
+  caption(T.more + 0.2, T.vacc + 1.9, tr('Ready examples, researched and checked by hand.', 'דוגמאות מוכנות, שנחקרו ונבדקו ביד אדם.'));
 
   // 8b. Or ask your own: question after question runs through the box, each
   // faster than the last, and lifts out into a cloud around it.
   T.own = T.vacc + 2.5;
   T.ownClick = T.own - 0.3;
   ev(T.ownClick, () => click(input()));
-  const flashEnd = questionFlash(T.own + 0.15, input, go, OWN_QS);
-  caption(T.vacc + 1.9, flashEnd + 0.5, 'Or ask your own question, mapped from live search.');
+  const flashEnd = questionFlash(T.own + 0.15, input, go, HE ? OWN_QS_HE : OWN_QS);
+  caption(T.vacc + 1.9, flashEnd + 0.5, tr('Or ask your own question, mapped from live search.', 'או שאלו שאלה משלכם, והיא תמופה מחיפוש בזמן אמת.'));
 
   // 9. The end
   T.end = flashEnd + 0.6;
