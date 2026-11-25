@@ -1,0 +1,69 @@
+/* Demo-video layer only: camera, cursor, captions, callouts and cards drawn
+   over the real views page. Nothing here is part of the app. */
+html.demo, html.demo body { overflow: hidden; height: 100%; }
+html.demo #root { transform-origin: 0 0; will-change: transform; }
+html.demo *:focus, html.demo *:focus-visible { outline: none !important; }
+html.demo .vd-mm-label:focus-visible { text-decoration: none; }
+html.demo input { caret-color: transparent; }
+/* the director animates these frame by frame, so the page's own easing would only lag */
+html.demo .vd-mm-svg *, html.demo .vd-vl-row, html.demo .vd-stage-head, html.demo .vd-col, html.demo .vd-cap, html.demo .vd-more, html.demo .vd-foot { transition: none !important; }
+/* a shorter ring pop-up, so it reads large on screen with room for captions */
+html.demo .vd-pop-in { max-height: 520px; }
+/* Before the question is asked: nothing mapped yet, no example picked. */
+html.demo-pre .vd-main, html.demo-pre .vd-foot { opacity: 0; }
+html.demo-pre .vd-ex.on { background: var(--vd-panel); border-color: var(--vd-rule); color: var(--vd-soft); }
+
+#demo-layer { position: fixed; inset: 0; z-index: 1000; pointer-events: none; overflow: hidden;
+  --ink: #1a1612; --soft: #4a4038; --faded: #8a7f72; --rule: #d4c9b4; --rule-soft: #e5dcc8; --bg: #f5f0e6; --deep: #efe8d8;
+  --panel: #faf6ee; --accent: #8f2418; --gold: #b8923a; --sage: #6b7559;
+  --serif: 'Fraunces', Georgia, serif; --sans: 'Instrument Sans', sans-serif; --mono: 'JetBrains Mono', monospace; }
+
+/* spotlight: everything but one box goes quiet */
+.dm-spot { position: absolute; border-radius: 6px; box-shadow: 0 0 0 4000px rgba(26, 22, 18, 0.34); opacity: 0; }
+.dm-spot::after { content: ''; position: absolute; inset: -3px; border: 2px solid var(--gold); border-radius: 8px; }
+
+/* captions: a quiet card at the foot of the frame */
+.dm-cap { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; opacity: 0; }
+.dm-cap-in { max-width: 1400px; }
+.dm-cap-in { display: inline-block; background: rgba(250, 246, 238, 0.96); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 16px 30px 18px; box-shadow: 0 10px 34px rgba(26, 22, 18, 0.14), 0 1px 3px rgba(26, 22, 18, 0.08); }
+.dm-cap-eye { display: block; font: 400 13px var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.dm-cap-text { display: block; font: 400 36px/1.22 var(--serif); letter-spacing: -0.01em; color: var(--ink); font-variation-settings: 'opsz' 48; }
+
+/* callouts: data beside the mandala, in the app's card style */
+.dm-call { position: absolute; width: 520px; background: rgba(250, 246, 238, 0.97); border: 1px solid var(--rule); border-left: 4px solid var(--c, var(--ink));
+  border-radius: 4px; padding: 20px 24px 22px; box-shadow: 0 12px 40px rgba(26, 22, 18, 0.16), 0 1px 3px rgba(26, 22, 18, 0.08); opacity: 0; }
+.dm-call-eye { font: 400 13px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--c, var(--accent)); margin: 0 0 8px; }
+.dm-call-title { font: 400 31px/1.2 var(--serif); letter-spacing: -0.01em; color: var(--ink); margin: 0; font-variation-settings: 'opsz' 40; }
+.dm-call-title .n { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--ink); color: var(--panel); font: 600 17px var(--sans); margin-right: 12px; vertical-align: 4px; }
+.dm-call-body { font: 400 19px/1.5 var(--sans); color: var(--soft); margin: 12px 0 0; }
+.dm-call-who { font: 400 16px/1.45 var(--sans); color: var(--faded); margin: 12px 0 0; }
+.dm-call-who b { font: 400 12.5px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; margin-right: 8px; color: var(--faded); }
+.dm-rows { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.dm-rows li { display: flex; align-items: flex-start; gap: 12px; font: 500 20px/1.35 var(--sans); color: var(--ink); }
+.dm-sw { flex: none; width: 20px; height: 20px; margin-top: 3px; border: 1.5px solid var(--soft); background: var(--soft); }
+.dm-sw.pale { background: transparent; }
+.dm-sw.striped { background: repeating-linear-gradient(45deg, var(--soft) 0 2px, transparent 2px 6px); }
+.dm-tags { display: block; margin-top: 6px; }
+.dm-tag { display: inline-block; font: 600 15px var(--sans); color: #fff; background: var(--c); border-radius: 999px; padding: 4px 11px; margin: 0 6px 4px 0; }
+
+/* full-screen cards: the opening line and the end */
+.dm-card { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+.dm-card-eye { font: 400 16px var(--mono); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin: 0 0 26px; }
+.dm-card-line { font: 400 84px/1.12 var(--serif); letter-spacing: -0.018em; color: var(--ink); text-align: center; margin: 0; font-variation-settings: 'opsz' 144; }
+.dm-card-line .w { display: inline-block; }
+.dm-card-sub { font: 400 26px/1.45 var(--sans); color: var(--soft); margin: 30px 0 0; text-align: center; }
+.dm-brand { display: flex; align-items: center; gap: 26px; }
+.dm-brand svg { width: 104px; height: 104px; overflow: visible; }
+.dm-brand-name { font: italic 500 112px/1 var(--serif); color: var(--ink); letter-spacing: -0.01em; font-variation-settings: 'opsz' 144; }
+.dm-brand-sub { font: 400 22px var(--mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--faded); border: 1.5px solid var(--rule); border-radius: 3px; padding: 6px 12px 5px; align-self: center; margin-left: 4px; }
+.dm-end-tag { font: 400 34px/1.35 var(--serif); color: var(--soft); margin: 40px 0 0; text-align: center; font-variation-settings: 'opsz' 40; }
+.dm-end-tag b { font-weight: 400; color: var(--ink); }
+.dm-rule { width: 0; height: 1px; background: var(--rule); margin: 38px 0 0; }
+.dm-stones { position: absolute; inset: 0; overflow: visible; }
+
+/* the pointer */
+.dm-cursor { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -3px 0 0 -6px; opacity: 0; transform-origin: 6px 3px; }
+.dm-cursor svg { width: 34px; height: 34px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(26, 22, 18, 0.28)); }
+.dm-ripple { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 3px solid var(--accent); opacity: 0; }
