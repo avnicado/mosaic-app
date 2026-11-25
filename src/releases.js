@@ -11,6 +11,17 @@
 
 export const RELEASES = [
   {
+    version: '0.9.0',
+    date: '2026-11-25',
+    title: 'Every stone is a piece',
+    summary: 'The stones in the views mandala are now the pieces each ring found, and rings find more of them.',
+    changes: [
+      { kind: 'better', text: 'Each filled stone is a piece arguing that answer. A faint stone means nothing has been found for it yet.' },
+      { kind: 'better', text: 'Opening a ring looks for more pieces, up to four for each answer, and fills in its stones.' },
+      { kind: 'better', text: 'Rings now look with a search that finds op-eds and opinion pieces, not just explainers, so more of what turns up actually argues a side.' },
+    ],
+  },
+  {
     version: '0.8.0',
     date: '2026-11-25',
     title: 'Stones in the views mandala',

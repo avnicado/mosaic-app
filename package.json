@@ -1,7 +1,7 @@
 {
   "name": "mosaic-app",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "module",
   "description": "Mosaic — hold questions over time; four composed items per session; see what actually moved.",
   "scripts": {
