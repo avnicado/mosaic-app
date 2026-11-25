@@ -58,7 +58,7 @@ html.demo-pre .vd-ex.on { background: var(--vd-panel); border-color: var(--vd-ru
 .dm-brand svg { width: 104px; height: 104px; overflow: visible; }
 .dm-brand-name { font: italic 500 112px/1 var(--serif); color: var(--ink); letter-spacing: -0.01em; font-variation-settings: 'opsz' 144; }
 .dm-brand-sub { font: 400 22px var(--mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--faded); border: 1.5px solid var(--rule); border-radius: 3px; padding: 6px 12px 5px; align-self: center; margin-left: 4px; }
-.dm-end-tag { font: 400 34px/1.35 var(--serif); color: var(--soft); margin: 40px 0 0; text-align: center; font-variation-settings: 'opsz' 40; }
+.dm-end-tag { font: 400 56px/1.2 var(--serif); letter-spacing: -0.012em; color: var(--ink); margin: 40px 0 0; text-align: center; font-variation-settings: 'opsz' 96; }
 .dm-end-tag b { font-weight: 400; color: var(--ink); }
 .dm-rule { width: 0; height: 1px; background: var(--rule); margin: 38px 0 0; }
 .dm-stones { position: absolute; inset: 0; overflow: visible; }

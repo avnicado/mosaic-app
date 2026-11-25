@@ -408,7 +408,7 @@ function buildCards() {
   ending.innerHTML = `<div class="dm-brand"><svg viewBox="0 0 24 24">${TESSERAE.map((d, i) => `<path d="${d}" fill="${TESS_COLORS[i]}" style="transform-box:fill-box;transform-origin:center"/>`).join('')}</svg>
     <span class="dm-brand-name">Mosaic</span><span class="dm-brand-sub">Views</span></div>
     <div class="dm-rule"></div>
-    <p class="dm-end-tag"><b>Every side of a question,</b> who holds it, and their sources.<br>Never a verdict.</p>`;
+    <p class="dm-end-tag">Earn your opinion.</p>`;
 }
 function drawOpening(t, t0, t1) {
   const out = E.inOutSine(prog(t, t1 - 0.7, t1));
