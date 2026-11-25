@@ -81,7 +81,8 @@ html.demo-pre .vd-ex.on { background: var(--vd-panel); border-color: var(--vd-ru
 #demo-layer.he .dm-cap-eye, #demo-layer.he .dm-card-eye, #demo-layer.he .dm-call-eye { letter-spacing: 0.04em; font-family: var(--sans); font-weight: 500; }
 #demo-layer.he .dm-card-line { font-size: 92px; line-height: 1.12; }
 #demo-layer.he .dm-end-tag { font-size: 62px; }
-#demo-layer.he .dm-brand { direction: ltr; }
+#demo-layer.he .dm-brand { direction: rtl; }
+#demo-layer.he .dm-brand-name { font-style: normal; }
 #demo-layer.he .dm-call { border-left: 1px solid var(--rule); border-right: 4px solid var(--c, var(--ink)); }
 #demo-layer.he .dm-call-title .n { margin: 0 0 0 12px; }
 #demo-layer.he .dm-tag { margin: 0 0 4px 6px; }

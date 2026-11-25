@@ -1,0 +1,467 @@
+{
+ "question": "האם אנרגיה גרעינית מסוכנת מדי בשביל המאבק במשבר האקלים?",
+ "headline": "ארבע עמדות עיקריות, מבנייה של הרבה יותר כורים ועד הוצאה הדרגתית של הגרעין משימוש. הן נחלקות על עלות ומהירות ועל פסולת, לא פחות מאשר על סכנת תאונות.",
+ "views": [
+  {
+   "id": "build-more",
+   "name": "לבנות הרבה יותר כורים",
+   "short": "לבנות עוד",
+   "summary": "גרעין הוא מקור חשמל מוכח, נקי וזמין מסביב לשעון, והעולם צריך לבנות הרבה יותר ממנו לצד אנרגיה מתחדשת כדי לקצץ פליטות בהיקף הנדרש.",
+   "who": "Clean Air Task Force, Breakthrough Institute, הסוכנות הבינלאומית לאנרגיה; ממשלות שחתמו בוועידת COP28 על ההתחייבות לשלש את הספק הגרעין עד 2050",
+   "changeMind": "אם כורים חדשים בתכנון אחיד (כולל כורים מודולריים קטנים) ימשיכו לאחר ולחרוג מהתקציב גם אחרי שנבנו כמה מאותו דגם, זה יערער את העמדה הזאת.",
+   "sources": [
+    {
+     "title": "הדרך לעידן חדש של אנרגיה גרעינית: תקציר מנהלים",
+     "outlet": "International Energy Agency",
+     "author": "",
+     "date": "2025",
+     "url": "https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary",
+     "quote": "גרעין יכול לספק שירותים והיקף שקשה לשחזר בטכנולוגיות אחרות דלות פליטות."
+    }
+   ],
+   "reasons": [
+    {
+     "text": "לאורך כל חייו, מהכרייה ועד הפירוק, גרעין פולט פחמן ליחידת חשמל מעט כמו רוח, והרבה פחות מפחם.",
+     "sources": [
+      {
+       "title": "האו״ם: פליטות הפחמן של אנרגיה גרעינית הן הנמוכות מבין מקורות החשמל",
+       "outlet": "Earth.Org",
+       "author": "Olivia Lai",
+       "date": "2021-11",
+       "url": "https://earth.org/nuclear-energy-carbon-emissions-lowest-among-electricity-sources-un-reports/",
+       "quote": "פולט בין 5.1 ל־6.4 גרם שווה ערך פחמן דו־חמצני לכל קוט״ש שמיוצר"
+      },
+      {
+       "title": "אנרגיה גרעינית",
+       "outlet": "Our World in Data",
+       "author": "Hannah Ritchie, Pablo Rosado",
+       "date": "2020",
+       "url": "https://ourworldindata.org/nuclear-energy",
+       "quote": "אנרגיה גרעינית וטכנולוגיות מתחדשות פולטות בדרך כלל מעט מאוד CO2 ליחידת אנרגיה"
+      }
+     ]
+    },
+    {
+     "text": "גם בספירה של צ׳רנוביל ופוקושימה, גרעין גורם למעט מקרי מוות ליחידת חשמל כמו רוח ושמש, ול־99.8% פחות מפחם.",
+     "sources": [
+      {
+       "title": "מהם מקורות האנרגיה הבטוחים והנקיים ביותר?",
+       "outlet": "Our World in Data",
+       "author": "Hannah Ritchie",
+       "date": "2020",
+       "url": "https://ourworldindata.org/safest-sources-of-energy",
+       "quote": "בעוד שגרעין ומקורות אנרגיה מתחדשת מודרניים בטוחים ונקיים הרבה יותר."
+      }
+     ]
+    },
+    {
+     "text": "זה מקור מוכח ונקי שיכול לפעול 24/7 ולספק חשמל בסיסי אמין.",
+     "sources": [
+      {
+       "title": "אנרגיה גרעינית מתקדמת",
+       "outlet": "Clean Air Task Force",
+       "author": "",
+       "date": "2026",
+       "url": "https://www.catf.us/advanced-nuclear-energy/",
+       "quote": "אנרגיה גרעינית היא מקור אנרגיה מוכח ונקי שיכול לפעול 24/7 ולספק חשמל בסיסי אמין."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "keep-existing",
+   "name": "לשמור על הכורים, בזהירות עם חדשים",
+   "short": "לשמור על הקיים",
+   "summary": "כורים קיימים עם רקורד בטיחות טוב הם חשמל דל פחמן יקר ערך, ואין לסגור אותם מוקדם רק כדי להחליף אותם בגז, אבל תכנונים חדשים צריכים כללי בטיחות מחמירים יותר, והעלות שלהם מנופחת בהבטחות.",
+   "who": "Union of Concerned Scientists (למשל Edwin Lyman, Steve Clemmer)",
+   "changeMind": "הוכחה ברורה שתכנוני כורים חדשים בטוחים ומאובטחים כמו שהובטח ושאפשר לבנות אותם בתקציב תקרב אותם לבנייה של עוד כורים; תחליפים מתחדשים זולים ויציבים יפחיתו את הדאגה שלהם מסגירות.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "תחנות עם רקורד בטיחות חזק ראויות לתמיכה כספית, כי כורים שנסגרו מוקדם הוחלפו בעיקר בגז טבעי, טוען ארגון Union of Concerned Scientists.",
+     "sources": [
+      {
+       "title": "אנרגיה גרעינית והתחממות כדור הארץ",
+       "outlet": "Union of Concerned Scientists",
+       "author": "",
+       "date": "2018-11",
+       "url": "https://www.ucs.org/resources/nuclear-power-global-warming",
+       "quote": "תמיכה כספית בתחנות כוח עם רקורד בטיחות חזק"
+      }
+     ]
+    },
+    {
+     "text": "כורים קטנים חדשים נמכרים בהגזמה, ושווה לבנות אותם רק אם יוכח שהם בטוחים ומאובטחים.",
+     "sources": [
+      {
+       "title": "חמישה דברים שה״חבר׳ה של הגרעין״ לא רוצים שתדעו על כורים מודולריים קטנים",
+       "outlet": "Union of Concerned Scientists",
+       "author": "Edwin Lyman",
+       "date": "2024-04",
+       "url": "https://blog.ucs.org/edwin-lyman/five-things-the-nuclear-bros-dont-want-you-to-know-about-small-modular-reactors/",
+       "quote": "ייתכן שלכורים מודולריים קטנים יש תפקיד בעתיד האנרגיה שלנו, אבל רק אם הם בטוחים ומאובטחים מספיק."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "renewables-first",
+   "name": "מתחדשות קודם, הגרעין איטי מדי",
+   "short": "מתחדשות קודם",
+   "summary": "הבעיה בגרעין חדש היא לא בעיקר הסכנה, אלא שהוא איטי ויקר מדי, כך שכל דולר חוסך יותר פחמן, ומהר יותר, כשמשקיעים אותו ברוח, בשמש, באגירה ובהתייעלות.",
+   "who": "Amory Lovins (ממייסדי RMI), Mark Z. Jacobson (סטנפורד), מועצת האקלים של אוסטרליה, כלכלני אנרגיה רבים",
+   "changeMind": "כורים חדשים שייבנו בתוך כמה שנים בעלות נמוכה מזו של מתחדשות עם אגירה, או רשתות מבוססות מתחדשות שלא יצליחו להישאר אמינות, ישנו את העמדה הזאת.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "כורים חדשים מאחרים וחורגים מהתקציב: הרחבת תחנת Vogtle בג׳ורג׳יה הושלמה באיחור של שבע שנים, ב־36.8 מיליארד דולר במקום 14 מיליארד שתוכננו.",
+     "sources": [
+      {
+       "title": "שנתיים אחרי השלמתה, תחנת Vogtle עדיין מעיבה על הוויכוח על הגרעין",
+       "outlet": "Inside Climate News",
+       "author": "Ryan Krugman",
+       "date": "2026-05",
+       "url": "https://insideclimatenews.org/news/10052026/plant-vogtle-nuclear-debate-two-years-after-completion/",
+       "quote": "הפרויקט הושלם לבסוף ב־2024, שבע שנים באיחור, בעלות סופית של 36.8 מיליארד דולר"
+      },
+      {
+       "title": "הדרך לעידן חדש של אנרגיה גרעינית: תקציר מנהלים",
+       "outlet": "International Energy Agency",
+       "author": "",
+       "date": "2025",
+       "url": "https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary",
+       "quote": "נאבקה בשנים האחרונות בעיכובים ובחריגות תקציב בכל הכורים הגדולים החדשים"
+      }
+     ]
+    },
+    {
+     "text": "כל דולר שמושקע בגרעין מחליף פחות דלק מאובנים מאותו דולר במתחדשות ובהתייעלות, טוען Amory Lovins.",
+     "sources": [
+      {
+       "title": "הגרעין נכשל, והבינה המלאכותית לא תציל אותו",
+       "outlet": "Utility Dive (opinion)",
+       "author": "Amory B. Lovins",
+       "date": "2025-09",
+       "url": "https://utilitydive.com/news/nuclear-power-smr-ai-amory-lovins/758660",
+       "quote": "גרעין מחליף פחות דלק מאובנים לכל דולר (או שנה), וכך מחמיר את משבר האקלים."
+      }
+     ]
+    },
+    {
+     "text": "כורים יקרים להחריד ואיטיים עד כאב, בעוד שמתחדשות עם אגירה יכולות להפעיל את הכלכלה הרבה לפני שכור כלשהו יעלה לרשת, אומרת מועצת האקלים של אוסטרליה.",
+     "sources": [
+      {
+       "title": "ועדה פרלמנטרית: הגרעין הוא סיכון גבוה בלי שום תמורה",
+       "outlet": "Climate Council",
+       "author": "",
+       "date": "2025-02",
+       "url": "https://www.climatecouncil.org.au/resources/parliamentary-inquiry-nuclear-high-risk-zero-reward",
+       "quote": "כורים גרעיניים יקרים להחריד ואיטיים עד כאב."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phase-out",
+   "name": "להוציא את הגרעין משימוש",
+   "short": "להוציא משימוש",
+   "summary": "סכנת התאונות של הגרעין, הפסולת שנשארת לאורך זמן והפגיעות שלו במלחמה לא שוות את זה, ולכן צריך להפסיק לבנות כורים, לסגור את הקיימים ולהפחית פליטות בעזרת מתחדשות והתייעלות.",
+   "who": "הלשכה האירופית לאיכות הסביבה, Greenpeace, Food & Water Watch, Friends of the Earth, Beyond Nuclear; היציאה של ממשלת גרמניה מהגרעין ב־2023",
+   "changeMind": "מאגרי פסולת קבועים שפועלים בבטחה במשך שנים, וכורים שמוכיחים שהם מאובטחים גם באזורי מלחמה, יחלישו את לב העמדה הזאת.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "כל כור מייצר פסולת שנשארת מסוכנת עשרות אלפי שנים, ומלחמה מסכנת תחנות: זפוריז׳יה הופגזה, נכבשה ונותקה מהרשת.",
+     "sources": [
+      {
+       "title": "מצ׳רנוביל ועד זפוריז׳יה: עלינו לבחור בעתיד בלי גרעין",
+       "outlet": "European Environmental Bureau",
+       "author": "",
+       "date": "2026-04",
+       "url": "https://meta.eeb.org/2026/04/24/from-chornobyl-to-zaporizhzhia-we-must-choose-a-future-without-nuclear/",
+       "quote": "כל כור מייצר חומרים שנשארים מסוכנים עשרות אלפי שנים"
+      }
+     ]
+    },
+    {
+     "text": "אף מדינה עוד לא מפעילה מאגר קבוע לדלק משומש: פינלנד העניקה רישיון לראשון באוקטובר 2026, והוא עוד לא נפתח.",
+     "sources": [
+      {
+       "title": "פינלנד קרובה לפתיחת מאגר הפסולת הגרעינית הקבוע הראשון בעולם",
+       "outlet": "Al Jazeera",
+       "author": "Al Jazeera Staff and AFP",
+       "date": "2026-10",
+       "url": "https://aljazeera.com/news/2026/10/23/finland-nearing-opening-of-worlds-first-permanent-nuclear-waste-repository",
+       "quote": "פינלנד העניקה רישיון הפעלה למאגר התת־קרקעי הקבוע הראשון בעולם לדלק גרעיני משומש."
+      }
+     ]
+    },
+    {
+     "text": "צריך לעצור את ההתרחבות, כולל כורים קטנים, ולהתחיל לסגור את התחנות הקיימות.",
+     "sources": [
+      {
+       "title": "חמש סיבות למה הרחבת הגרעין היא רעיון נוראי",
+       "outlet": "Food & Water Watch",
+       "author": "Natalie Balbuena Chavez, Mia DiFelice",
+       "date": "2025-09",
+       "url": "https://www.foodandwaterwatch.org/2025/09/19/5-reasons-why-expanding-nuclear-is-a-terrible-idea/",
+       "quote": "לעצור את ההתרחבות (כולל כורים מודולריים קטנים), ולהתחיל לפרק את תחנות הכוח הקיימות"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "cruxes": [
+  {
+   "question": "האם אפשר לבנות כורים חדשים מהר וזול מספיק כדי שזה ישנה?",
+   "left": "כן, בתכנון שחוזר על עצמו",
+   "right": "לא, איטי ויקר מדי",
+   "why": "אם תחנות חדשות ימשיכו לקחת יותר מ־10 שנים ולעלות פי שניים, אותו כסף יכול לחסוך יותר פחמן, ומהר יותר, במקום אחר.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "right",
+    "phase-out": "right"
+   },
+   "stakes": {
+    "build-more": 3,
+    "keep-existing": 1,
+    "renewables-first": 3,
+    "phase-out": 2
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "בעיות העלות ולוחות הזמנים של הגרעין נובעות מפרויקטים חד־פעמיים; תכנון אחיד שנבנה שוב ושוב, כמו בסין ובתוכניות עבר בארה״ב, מוריד עלויות וזמנים.",
+     "title": "החוליה החסרה בעתיד הגרעיני של אמריקה: תקינה בהיקף רחב",
+     "url": "https://www.catf.us/2026/07/missing-link-americas-nuclear-energy-future-standardization-scale/",
+     "outlet": "Clean Air Task Force",
+     "author": "Lindsey Popken",
+     "date": "2026-07",
+     "quote": "העלויות יורדות ככל שהניסיון מצטבר, הלקחים נלמדים והשיטות הטובות משוחזרות."
+    },
+    {
+     "side": "left",
+     "says": "בנייה של כורים רבים מתכנון אחד שכבר אושר, עם תוכניות ושרשראות אספקה אחידות, תהפוך כל כור חדש בסגנון Vogtle לזול ומסוכן פחות בהרבה.",
+     "title": "ארה״ב חייבת לפתח גרעין ״בהיקף צי״ כדי שהלקחים מ־Vogtle לא ילכו לאיבוד",
+     "url": "https://fortune.com/2024/08/30/us-fleet-scale-nuclear-development-lessons-learned-vogtle-energy-environment-tech/",
+     "outlet": "Fortune",
+     "author": "Juliann Edwards",
+     "date": "2024-08",
+     "quote": "בזכות הגישה של בנייה בהיקף צי, עלות הבנייה של כורים גרעיניים יכולה לרדת, ותרד."
+    },
+    {
+     "side": "right",
+     "says": "כורים חדשים יקרים ואיטיים מדי מכדי להגיע בזמן ליעד של 1.5 מעלות, בעוד שרוח ושמש זולות ומהירות יותר לבנייה.",
+     "title": "מאוחר מדי שהגרעין יציל את האקלים",
+     "url": "https://techcrunch.com/2023/10/23/nuclear-wont-save-the-climate/",
+     "outlet": "TechCrunch",
+     "author": "Tim De Chant",
+     "date": "2023-10",
+     "quote": "כמעט כל טכנולוגיה אחרת זולה משמעותית מהחשמל שמייצרים הכורים החדשים."
+    },
+    {
+     "side": "right",
+     "says": "כורים מודולריים קטנים ממשיכים לחרוג מהתקציב ולאחר בלוחות הזמנים, ולכן יתרמו מעט לקיצוץ הפליטות ב־10 עד 15 השנים הבאות.",
+     "title": "כורים מודולריים קטנים עדיין יקרים, איטיים ומסוכנים מדי",
+     "url": "https://ieefa.org/articles/small-modular-reactors-are-still-too-expensive-too-slow-and-too-risky",
+     "outlet": "IEEFA",
+     "author": "David Schlissel and Dennis Wamsted",
+     "date": "2024-05",
+     "quote": "המתחדשות, ולא הכורים הקטנים, הן הפתרון לטווח הקרוב של המעבר האנרגטי."
+    }
+   ]
+  },
+  {
+   "question": "האם רוח, שמש וסוללות לבדן יכולות לשמור על החשמל דולק?",
+   "left": "לא, צריך חשמל יציב",
+   "right": "כן, עם אגירה",
+   "why": "אם מתחדשות עם אגירה יכולות להפעיל רשת שלמה באופן אמין, פחות צריך את החשמל של הגרעין שזמין תמיד.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "right",
+    "phase-out": "right"
+   },
+   "stakes": {
+    "build-more": 2,
+    "keep-existing": 1,
+    "renewables-first": 3,
+    "phase-out": 1
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "אגירה לא יכולה לכסות פערים של כמה ימים ברוח ובשמש בעלות סבירה, ולכן צריך מקור נקי ויציב מסביב לשעון, כמו גרעין.",
+     "title": "למה מתחדשות לא יכולות להחליף דלקים מאובנים",
+     "url": "https://democracyjournal.org/arguments/why-renewables-cannot-replace-fossil-fuels",
+     "outlet": "Democracy Journal",
+     "author": "William D. Budinger",
+     "date": "2024-02",
+     "quote": "בכנות, כדי לעמוד ביעדי האפס נטו של 2050, כמות כזאת של אגירה ושל בנייה עודפת של מתחדשות פשוט אינה אפשרות מציאותית."
+    },
+    {
+     "side": "left",
+     "says": "רשת של ניו אינגלנד שמבוססת רק על מתחדשות תצטרך בנייה עודפת ואגירה עצומות כדי לשרוד תקופות ארוכות של עננים ובלי רוח; בסיס גרעיני יציב יקל את הנטל.",
+     "title": "אנרגיה גרעינית צריכה להיות חלק מתמהיל האנרגיה של ניו אינגלנד",
+     "url": "https://www.wbur.org/cognoscenti/2026/04/14/renewable-energy-nucelar-power-massachusetts-new-england-frederick-hewett",
+     "outlet": "WBUR Cognoscenti",
+     "author": "Frederick Hewett",
+     "date": "2026-04",
+     "quote": "לעמוד ברף הזה רק בעזרת חשמל שתלוי במזג האוויר זו משימה קשה."
+    },
+    {
+     "side": "right",
+     "says": "סוללות זולות היום מספיק כדי ששמש עם אגירה תספק חשמל כמעט בכל שעה בשנה במקומות שטופי שמש, בעלות תחרותית.",
+     "title": "חשמל סולארי בכל שעה של כל יום כבר כאן, והוא משנה הכול",
+     "url": "https://ember-energy.org/latest-insights/solar-electricity-every-hour-of-every-day-is-here-and-it-changes-everything/",
+     "outlet": "Ember",
+     "author": "Kostantsa Rangelova and Dave Jones",
+     "date": "2025-06",
+     "quote": "חשמל סולארי מסביב לשעון כבר אינו רק אפשרות טכנית וחלום רחוק, אלא מציאות כלכלית."
+    },
+    {
+     "side": "right",
+     "says": "שילוב רוח ושמש ברשת כבר נפתר, עם סוללות, התייעלות והסטת צריכה כגיבוי, ומדינות רבות פועלות בעיקר על מתחדשות באופן אמין.",
+     "title": "מאמר על אנרגיה גרעינית מול מתחדשות מתעלם מעובדות יסוד",
+     "url": "https://thebulletin.org/2026/03/essay-about-nuclear-energy-versus-renewables-omits-crucial-fundamentals/",
+     "outlet": "Bulletin of the Atomic Scientists",
+     "author": "Amory B. Lovins",
+     "date": "2026-03",
+     "quote": "למעשה, שילובן ברשת הוא בעיה שכבר נפתרה."
+    }
+   ]
+  },
+  {
+   "question": "האם בעיית הפסולת הגרעינית נפתרה?",
+   "left": "כן, אפשר לקבור אותה בבטחה",
+   "right": "לא, עדיין לא נפתרה",
+   "why": "דלק משומש נשאר מסוכן אלפי שנים, והמאגר הקבוע הראשון קיבל רישיון רק עכשיו.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "mid",
+    "renewables-first": "mid",
+    "phase-out": "right"
+   },
+   "stakes": {
+    "build-more": 1,
+    "keep-existing": 1,
+    "renewables-first": 1,
+    "phase-out": 3
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "דלק משומש הוא מוצק ודחוס, והמאגר שעומד להיפתח בפינלנד מראה שאפשר לבודד אותו עמוק באדמה לאורך זמנים גאולוגיים.",
+     "title": "שלוש שאלות: פסולת גרעינית בפרספקטיבה",
+     "url": "https://news.mit.edu/2026/3-questions-putting-nuclear-waste-into-perspective-0915",
+     "outlet": "MIT News",
+     "author": "Steve Nadis",
+     "date": "2026-09",
+     "quote": "כיום כמה מדינות מראות שבידוד יעיל לאורך זמנים גאולוגיים אפשרי."
+    },
+    {
+     "side": "left",
+     "says": "טמינה גאולוגית עמוקה היא פתרון מוכח ומוכר בעולם, ופינלנד, שוודיה, צרפת ואחרות בונות עכשיו מאגרים כדי ליישם אותו.",
+     "title": "איך מתקדמים פרויקטי המאגרים הגאולוגיים?",
+     "url": "https://world-nuclear-news.org/articles/how-are-geological-repository-projects-progressing",
+     "outlet": "World Nuclear News",
+     "author": "Alex Hunt",
+     "date": "2025-12",
+     "quote": "אנחנו יודעים כבר הרבה זמן שטמינה גאולוגית עמוקה אפשרית מבחינה טכנית ובטוחה באופן מוכח."
+    },
+    {
+     "side": "right",
+     "says": "יותר כורים פירושם יותר פסולת, תוכניות טמינה לאומיות כמו יוקה מאונטן ממשיכות להיתקע, והבעיה צריכה מסגרות בינלאומיות חדשות לפני שתצא משליטה.",
+     "title": "הפסולת הגרעינית צריכה פתרון עולמי",
+     "url": "https://www.eli.org/environmental-forum-column/nuclear-waste-needs-global-fix",
+     "outlet": "Environmental Law Institute",
+     "author": "Christopher Zahn",
+     "date": "2026-05",
+     "quote": "המאמצים האלה מראים הכרה גוברת בבעיה, אבל הם עדיין לא מספיקים."
+    },
+    {
+     "side": "right",
+     "says": "גם כשהתמיכה בגרעין גדלה, לארה״ב עדיין אין מאגר קבוע, והיא ממשיכה להסתמך על אחסון זמני באתרי הכורים.",
+     "title": "הדילמה המתמשכת של ניהול הפסולת הגרעינית הפעילה מאוד באמריקה",
+     "url": "https://www.brookings.edu/articles/the-enduring-dilemma-of-managing-american-high-level-nuclear-waste",
+     "outlet": "Brookings",
+     "author": "Barry G. Rabe",
+     "date": "2025-07",
+     "quote": "הקיפאון הממושך באמריקה סביב ניהול פסולת גרעינית פעילה מאוד נמשך"
+    }
+   ]
+  },
+  {
+   "question": "אם כור פעיל נסגר, האם הזיהום עולה?",
+   "left": "כן, גז ממלא את החסר",
+   "right": "לא, מתחדשות ממלאות את החסר",
+   "why": "זה מכריע אם סגירה מוקדמת של תחנות קיימות עוזרת לאקלים או פוגעת בו.",
+   "positions": {
+    "build-more": "left",
+    "keep-existing": "left",
+    "renewables-first": "mid",
+    "phase-out": "right"
+   },
+   "stakes": {
+    "build-more": 2,
+    "keep-existing": 3,
+    "renewables-first": 1,
+    "phase-out": 2
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "כשתחנת אינדיאן פוינט נסגרה, גז ולא מתחדשות מילא את החסר, ופליטות גזי החממה של מדינת ניו יורק עלו.",
+     "title": "סגירת תחנת כוח גרעינית נחגגה כניצחון ירוק. ואז הפליטות עלו",
+     "url": "https://www.yahoo.com/news/nuclear-plant-closure-hailed-green-100038112.html",
+     "outlet": "The Guardian (via Yahoo News)",
+     "author": "Oliver Milman",
+     "date": "2024-03",
+     "quote": "ניו יורק הגדילה את צריכת הגז הזמין כדי לכסות את החוסר ב־2020 ושוב ב־2021"
+    },
+    {
+     "side": "left",
+     "says": "את הכורים שגרמניה סגרה אחרי פוקושימה החליפו בעיקר פחם ויבוא, במחיר של מיליארדים בשנה, בעיקר במקרי מוות מזיהום אוויר נוסף.",
+     "title": "העלויות הפרטיות והחיצוניות של יציאת גרמניה מהגרעין",
+     "url": "https://www.lse.ac.uk/granthaminstitute/publication/the-private-and-external-costs-of-germanys-nuclear-phase-ou/",
+     "outlet": "LSE Grantham Research Institute (Journal of the European Economic Association)",
+     "author": "Stephen Jarvis, Olivier Deschenes and Akshaya Jha",
+     "date": "2022-06",
+     "quote": "הירידה בייצור החשמל הגרעיני קוזזה בעיקר בעלייה בייצור מפחם"
+    },
+    {
+     "side": "right",
+     "says": "בשנה שאחרי שגרמניה סגרה את הכורים האחרונים שלה, מתחדשות שהתרחבו החליפו את התפוקה הגרעינית שאבדה, וייצור החשמל מדלקים מאובנים ירד בחדות.",
+     "title": "תמונת מצב: שנה ליציאת גרמניה מהגרעין: הספק המתחדשות גדל, והחשמל מדלקים מאובנים ירד משמעותית",
+     "url": "https://www.ise.fraunhofer.de/en/press-media/press-releases/2024/status-quo-one-year-since-germanys-nuclear-exit-renewable-capacity-expands-electricity-from-fossil-fuels-significantly-reduced.html",
+     "outlet": "Fraunhofer ISE",
+     "author": "",
+     "date": "2024-04",
+     "quote": "את החשמל הגרעיני החליף ייצור מוגבר ממקורות אנרגיה מתחדשת."
+    },
+    {
+     "side": "right",
+     "says": "אחרי שהכורים האחרונים של גרמניה נסגרו, תפוקת שיא של מתחדשות כיסתה יותר מכל האובדן, השימוש בפחם הגיע לשפל של עשורים והפליטות ממגזר החשמל ירדו.",
+     "title": "שאלות ותשובות: יציאת גרמניה מהגרעין, שנה אחרי",
+     "url": "https://www.cleanenergywire.org/factsheets/qa-germanys-nuclear-exit-one-year-after",
+     "outlet": "Clean Energy Wire",
+     "author": "Benjamin Wehrmann",
+     "date": "2024-04",
+     "quote": "הדלקים המאובנים לא חזרו למלא את החסר"
+    }
+   ]
+  }
+ ],
+ "wording": {
+  "assumes": "השאלה מניחה שסכנת התאונות היא שקובעת את מקומו של הגרעין. חלק מהעמדות אומרות שהגרעין בטוח מספיק, ואחרות אומרות שעלות ומהירות חשובות יותר מהסיכון.",
+  "leansAwayFrom": [
+   "build-more",
+   "renewables-first"
+  ]
+ }
+}

@@ -4,15 +4,18 @@
 //
 // Everything is a pure function of the time t, except the clicks and typing,
 // which drive the real page once, in order, when their time comes.
-import { EXAMPLES } from '/src/viewsdemo/examples.js';
+import { EXAMPLES as EXAMPLES_EN } from '/src/viewsdemo/examples.js';
+import { EXAMPLES as EXAMPLES_HE } from './he/examples.js';
 import './director.css';
 
 const W = 1920, H = 1080;
-const NUCLEAR = EXAMPLES.find((e) => e.id === 'nuclear');
 const COLORS = ['#4f8079', '#b84a3c', '#3d5875', '#8a6a1f'];
 const params = new URLSearchParams(location.search);
-// ?lang=he gives the Hebrew cut: Hebrew captions, cards and questions, right to left.
+// ?lang=he gives the Hebrew cut: Hebrew captions, cards and questions, right to
+// left. Run it on demo-video/he/views.html, the page itself in Hebrew.
 const HE = params.get('lang') === 'he';
+const NUCLEAR = (HE ? EXAMPLES_HE : EXAMPLES_EN).find((e) => e.id === 'nuclear');
+const NUCLEAR_EN = EXAMPLES_EN.find((e) => e.id === 'nuclear');
 const tr = (en, he) => (HE ? he : en);
 const OPTS = { captions: params.get('captions') !== '0', callouts: params.get('callouts') !== '0' };
 
@@ -332,7 +335,7 @@ function spotlight(t0, t1, get, { pad = 10, dim = 0.34 } = {}) {
 
 // How far down a scroll box a child sits, in the box's own pixels.
 const offsetIn = (box, child) => box.scrollTop + (child.getBoundingClientRect().top - box.getBoundingClientRect().top) / cam.s;
-const changeMind = () => [...document.querySelectorAll('.vd-col-panel .vd-card-facts > li')].find((li) => /change its mind/i.test(li.textContent));
+const changeMind = () => [...document.querySelectorAll('.vd-col-panel .vd-card-facts > li')].find((li) => (HE ? /לשנות את דעתה/ : /change its mind/i).test(li.textContent));
 
 // Quiet some of the page for a while.
 function fadeEls(t0, t1, sel, to) {
@@ -393,16 +396,13 @@ const viewCard = (map, i) => () => {
   return `<p class="dm-call-eye">View ${i + 1} of ${map.views.length}</p><p class="dm-call-title">${esc(v.name)}</p>
     <p class="dm-call-body">${esc(v.summary)}</p>${who ? `<p class="dm-call-who"><b>Held by</b>${esc(who)}</p>` : ''}`;
 };
-// The one ring the video opens, in Hebrew. The view tags stay as the page labels them.
-const RING_HE = { nuclear: { 3: { q: 'אם כור פעיל נסגר, האם הזיהום עולה?', left: 'כן, גז ממלא את החסר', right: 'לא, אנרגיה מתחדשת ממלאת את החסר' } } };
 const ringCard = (map, k, withAnswers) => () => {
   const c = map.cruxes[k];
   const at = (pos) => map.views.filter((v) => (c.positions[v.id] || 'mid') === pos);
   const row = (pos, sw, label) => { const vs = at(pos); return vs.length ? `<li><i class="dm-sw ${sw}"></i><span>${esc(label)}<span class="dm-tags">${vs.map((v) => tag(map, v.id)).join('')}</span></span></li>` : ''; };
-  const heq = HE && RING_HE[map.id]?.[k];
   return `<p class="dm-call-eye">${tr('Ring', 'טבעת')} ${k + 1} ${tr('of', 'מתוך')} ${map.cruxes.length}${k === 0 ? tr(' · the centre', ' · המרכז') : k === map.cruxes.length - 1 ? tr(' · the rim', ' · השוליים') : ''}</p>
-    <p class="dm-call-title"><span class="n">${k + 1}</span>${esc(heq ? heq.q : c.question)}</p>
-    ${withAnswers ? `<ul class="dm-rows">${row('left', '', heq ? heq.left : c.left)}${row('right', 'pale', heq ? heq.right : c.right)}${row('mid', 'striped', tr('It depends', 'תלוי'))}</ul>` : ''}`;
+    <p class="dm-call-title"><span class="n">${k + 1}</span>${esc(c.question)}</p>
+    ${withAnswers ? `<ul class="dm-rows">${row('left', '', c.left)}${row('right', 'pale', c.right)}${row('mid', 'striped', tr('It depends', 'תלוי'))}</ul>` : ''}`;
 };
 
 // ---------- cards ----------
@@ -413,7 +413,7 @@ function buildCards() {
   opening.innerHTML = `<p class="dm-card-eye">${tr('Mosaic · Views', 'מוזאיקה')}</p>
     <p class="dm-card-line">${words(tr('Hard questions have', 'לשאלות קשות יש'))}<br>${words(tr('more than two sides.', 'יותר משני צדדים.'))}</p>`;
   ending.innerHTML = `<div class="dm-brand"><svg viewBox="0 0 24 24">${TESSERAE.map((d, i) => `<path d="${d}" fill="${TESS_COLORS[i]}" style="transform-box:fill-box;transform-origin:center"/>`).join('')}</svg>
-    <span class="dm-brand-name">Mosaic</span><span class="dm-brand-sub">Views</span></div>
+    <span class="dm-brand-name">${tr('Mosaic', 'מוזאיקה')}</span>${HE ? '' : '<span class="dm-brand-sub">Views</span>'}</div>
     <div class="dm-rule"></div>
     <p class="dm-end-tag">${tr('Earn your opinion.', 'את הדעה צריך להרוויח.')}</p>`;
 }
@@ -445,7 +445,7 @@ function drawEnding(t, t0) {
   const name = ending.querySelector('.dm-brand-name'), sub = ending.querySelector('.dm-brand-sub');
   const pn = E.out(prog(t, t0 + 1.0, t0 + 1.8));
   name.style.opacity = pn.toFixed(3); name.style.transform = `translateX(${(-18 * (1 - pn)).toFixed(2)}px)`;
-  sub.style.opacity = E.out(prog(t, t0 + 1.4, t0 + 2.0)).toFixed(3);
+  if (sub) sub.style.opacity = E.out(prog(t, t0 + 1.4, t0 + 2.0)).toFixed(3);
   ending.querySelector('.dm-rule').style.width = `${(560 * E.inOut(prog(t, t0 + 1.7, t0 + 2.6))).toFixed(1)}px`;
   const pt = E.out(prog(t, t0 + 2.2, t0 + 3.1));
   const tagEl = ending.querySelector('.dm-end-tag');
@@ -615,12 +615,13 @@ function buildScript() {
   T.ask = 4.0;
   const input = $('.vd-ask input'), go = $('.vd-ask button');
   const Q = NUCLEAR.question;
-  const typeAt = T.ask + 2.3, perChar = 0.042;
+  // The Hebrew question is typed over the same time as the English one, so both cuts keep one timeline.
+  const typeAt = T.ask + 2.3, perChar = 0.042 * NUCLEAR_EN.question.length / Q.length;
   const typed = typeAt + Q.length * perChar;
   T.mapIt = typed + 0.85;
   caption(T.ask + 0.7, T.mapIt + 0.5, tr('Ask a question people really disagree on.', 'שאלו שאלה שאנשים באמת חלוקים עליה.'), tr('Mosaic Views', 'מוזאיקה'));
   ev(T.ask + 1.95, () => click(input()));
-  for (let i = 1; i <= Q.length; i++) ev(typeAt + i * perChar + (i % 7 === 0 ? 0.03 : 0), () => typeInto(input(), Q.slice(0, i)));
+  for (let i = 1; i <= Q.length; i++) ev(typeAt + i * perChar + (i % 7 === 0 ? 0.03 : 0), () => { const el = input(); typeInto(el, Q.slice(0, i)); if (HE) el.scrollLeft = -el.scrollWidth; });
   ev(T.mapIt, async () => { html.classList.remove('demo-pre'); await click(go()); });
 
   // 2. The stones fall into place
@@ -653,7 +654,7 @@ function buildScript() {
   const rsegs = rdur.map((d, k) => { const s = { k, t0: rt, t1: rt + d }; rt += d; return s; });
   ringTour(rsegs);
   callout(rsegs[3].t0 + 0.6, rsegs[3].t1, ringCard(NUCLEAR, 3, true), { x: 1200, y: 240 });
-  fadeEls(rsegs[3].t0 + 0.4, rsegs[3].t1 + 0.2, '.vd-col-panel', 0.12);
+  fadeEls(rsegs[3].t0 + 0.4, rsegs[3].t1 + 0.2, HE ? '.vd-col-key' : '.vd-col-panel', 0.12);
   caption(T.rings + 0.2, rsegs[1].t1, tr('Each ring is a question they split on.', 'כל טבעת היא שאלה שעליה הן נחלקות.'));
   caption(rsegs[1].t1, rsegs[2].t1 + 0.4, tr('They agree most at the centre, and split hardest at the rim.', 'במרכז הן מסכימות הכי הרבה, ובשוליים הן הכי חלוקות.'));
   caption(rsegs[3].t0 + 0.4, rsegs[3].t1, tr('Solid stones give one answer. Pale stones give the other.', 'אבנים מלאות הן תשובה אחת. אבנים בהירות הן התשובה השנייה.'));
@@ -692,7 +693,8 @@ function buildScript() {
 
   // 8. Other questions
   T.more = T.viewClick + 11.3;
-  const chip = (text) => $find('.vd-ex', text);
+  const CHIP_HE = { 'kids under 16': 'מתחת לגיל 16', vaccines: 'חיסונים' };
+  const chip = (text) => $find('.vd-ex', HE ? CHIP_HE[text] : text);
   // Close the open view first: the page can't yet switch maps with a view open.
   const closeView = async () => { const b = document.querySelector('.vd-detail-back'); if (b) await click(b); };
   ev(T.more + 1.0, async () => { await closeView(); await click(chip('kids under 16')()); });
@@ -715,13 +717,18 @@ function buildScript() {
   T.duration = T.end + 5.8;
 
   // ---- camera ----
+  // The Hebrew page lays out right to left, a mirror of the English one, so
+  // moves framed on the page mirror too: mx flips a sideways offset, ax a
+  // point across the page. The mandala and its pop-ups don't mirror, so the
+  // moves framed on them stay as they are.
+  const mx = (v) => (HE ? -v : v), ax = (x) => (HE ? W - x : x);
   const C = [];
   const key = (t, to, ease = 'inOut', from) => C.push({ t, to, ease, from });
-  key(0, at(1318, 80, 2.1));
-  key(T.ask, at(1318, 80, 2.1));
-  key(T.ask + 1.8, look(input, 2.3, -120, -150), 'inOut');
-  key(typed, look(input, 2.45, -60, -150), 'inOutSine', T.ask + 1.8);
-  key(T.mapIt + 0.1, look(go, 2.45, 160, -150), 'inOut', typed + 0.1);
+  key(0, at(ax(1318), 80, 2.1));
+  key(T.ask, at(ax(1318), 80, 2.1));
+  key(T.ask + 1.8, look(input, 2.3, mx(-120), -150), 'inOut');
+  key(typed, look(input, 2.45, mx(-60), -150), 'inOutSine', T.ask + 1.8);
+  key(T.mapIt + 0.1, look(go, 2.45, mx(160), -150), 'inOut', typed + 0.1);
   key(T.rain + 1.2, mandala(1.9, 0, -60), 'inOut', T.mapIt + 0.2);
   key(T.rain + 3.5, mandala(2.0, 0, -60), 'inOutSine');
   key(T.wide + 0.9, at(960, 560, 1.0), 'inOut', T.rain + 3.5);
@@ -748,12 +755,12 @@ function buildScript() {
   key(T.ringClick + 0.3, mandala(1.7, 80, -60), 'inOutSine');
   key(T.ringClick + 1.5, topOf(pop, 1.6, -400, 46), 'inOut', T.ringClick + 0.25);
   key(T.ringClick + 10.4, topOf(pop, 1.66, -400, 40), 'inOutSine');
-  key(T.pull + 1.5, mandala(1.45, 220, -70), 'inOut', T.pull);
-  key(T.viewClick + 0.2, mandala(1.45, 220, -70), 'inOutSine');
-  key(T.viewClick + 1.4, topOf(panel, 1.55, 150, 60), 'inOut', T.viewClick + 0.1);
-  key(T.viewClick + 9.0, topOf(panel, 1.6, 150, 50), 'inOutSine');
-  key(T.viewClick + 9.9, bottomOf(panel, 1.6, 150, 905), 'inOut', T.viewClick + 8.4);
-  key(T.viewClick + 10.8, bottomOf(panel, 1.62, 150, 905), 'inOutSine');
+  key(T.pull + 1.5, mandala(1.45, mx(220), -70), 'inOut', T.pull);
+  key(T.viewClick + 0.2, mandala(1.45, mx(220), -70), 'inOutSine');
+  key(T.viewClick + 1.4, topOf(panel, 1.55, mx(150), 60), 'inOut', T.viewClick + 0.1);
+  key(T.viewClick + 9.0, topOf(panel, 1.6, mx(150), 50), 'inOutSine');
+  key(T.viewClick + 9.9, bottomOf(panel, 1.6, mx(150), 905), 'inOut', T.viewClick + 8.4);
+  key(T.viewClick + 10.8, bottomOf(panel, 1.62, mx(150), 905), 'inOutSine');
   key(T.more + 0.9, at(960, 470, 1.12), 'inOut', T.viewClick + 10.8);
   key(T.vacc, at(960, 480, 1.15), 'inOutSine');
   key(T.vacc + 1.7, at(960, 486, 1.16), 'inOutSine');
@@ -766,12 +773,12 @@ function buildScript() {
   const P = [];
   const pk = (t, to, ease = 'inOut', from, bow) => P.push({ t, to, ease, from, bow });
   const ptOf = (get, dx = 0, dy = 0) => () => { const r = crect(get()); return { x: r.cx + dx, y: r.cy + dy }; };
-  pk(0, () => ({ x: 1500, y: 230 }));
-  pk(T.ask + 0.9, () => ({ x: 1500, y: 230 }));
-  pk(T.ask + 1.9, ptOf(input, -40, 4), 'inOut', T.ask + 0.9);
-  pk(T.mapIt - 0.6, ptOf(input, -40, 4));
+  pk(0, () => ({ x: ax(1500), y: 230 }));
+  pk(T.ask + 0.9, () => ({ x: ax(1500), y: 230 }));
+  pk(T.ask + 1.9, ptOf(input, mx(-40), 4), 'inOut', T.ask + 0.9);
+  pk(T.mapIt - 0.6, ptOf(input, mx(-40), 4));
   pk(T.mapIt - 0.05, ptOf(go, 2, 4), 'inOut', T.mapIt - 0.6);
-  pk(T.mapIt + 0.9, ptOf(go, 30, 70), 'out', T.mapIt + 0.15);
+  pk(T.mapIt + 0.9, ptOf(go, mx(30), 70), 'out', T.mapIt + 0.15);
   pk(T.ringClick - 1.0, ptOf(svg, 160, 120), 'linear');
   pk(T.ringClick - 0.05, ptOf(num(3), 1, 2), 'inOut', T.ringClick - 1.0);
   pk(T.ringClick + 1.3, ptOf(num(3), 60, 70), 'out', T.ringClick + 0.2);
@@ -780,13 +787,13 @@ function buildScript() {
   pk(T.viewClick - 1.1, ptOf(svg, -200, 60), 'inOut', T.pull + 0.4);
   pk(T.viewClick - 0.05, ptOf(label(2), -10, 2), 'inOut', T.viewClick - 1.1);
   pk(T.viewClick + 1.0, ptOf(label(2), 60, 60), 'out', T.viewClick + 0.2);
-  pk(T.more + 0.2, ptOf(chip('kids under 16'), 60, 40), 'inOut', T.viewClick + 10.6);
+  pk(T.more + 0.2, ptOf(chip('kids under 16'), mx(60), 40), 'inOut', T.viewClick + 10.6);
   pk(T.more + 0.95, ptOf(chip('kids under 16'), 0, 2), 'inOut', T.more + 0.2);
   pk(T.vacc - 0.05, ptOf(chip('vaccines'), 0, 2), 'inOut', T.vacc - 1.0);
-  pk(T.vacc + 1.0, ptOf(chip('vaccines'), 60, 80), 'out', T.vacc + 0.1);
-  pk(T.ownClick - 0.05, ptOf(input, -60, 4), 'inOut', T.vacc + 1.6);
-  pk(T.ownClick + 1.0, ptOf(input, 40, 120), 'out', T.ownClick + 0.15);
-  pk(T.duration, ptOf(input, 40, 120));
+  pk(T.vacc + 1.0, ptOf(chip('vaccines'), mx(60), 80), 'out', T.vacc + 0.1);
+  pk(T.ownClick - 0.05, ptOf(input, mx(-60), 4), 'inOut', T.vacc + 1.6);
+  pk(T.ownClick + 1.0, ptOf(input, mx(40), 120), 'out', T.ownClick + 0.15);
+  pk(T.duration, ptOf(input, mx(40), 120));
   curTrack = track(P, ptMix);
   curVis = [[T.ask + 0.6, T.mapIt + 1.6], [T.ringClick - 1.4, T.ringClick + 1.8], [T.pull - 1.0, T.viewClick + 1.6], [T.more - 0.3, T.ownClick + 0.9]];
   clicks = [T.ask + 1.95, T.mapIt, T.ringClick, T.pull + 0.2, T.viewClick, T.more + 1.0, T.vacc, T.ownClick];

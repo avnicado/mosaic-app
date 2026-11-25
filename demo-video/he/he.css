@@ -1,0 +1,9 @@
+/* The Hebrew demo page: right to left, with Hebrew type. Demo-only. */
+/* Small labels are set in caps with wide tracking; Hebrew has no caps and reads badly spaced out. */
+.vd-mono, .vd-kicker, .vd-detail-step, .vd-brand-sub, .vd-side-who, .vd-vl-who b, .vd-card-who span, .vd-card-facts span, .vd-card-read, .vd-wording-label { letter-spacing: .02em; }
+.vd-brand { font-style: normal; }
+/* The chart lays its own labels out; keep its anchors as drawn. */
+.vd-mm-svg { direction: ltr; }
+.vd-mm-label, .vd-mm-hubt { direction: rtl; unicode-bidi: plaintext; }
+/* Links and their meta: names of outlets stay in Latin. */
+.vd-src-meta, .vd-src a { unicode-bidi: plaintext; }

@@ -1,0 +1,460 @@
+{
+ "question": "האם להרחיק ילדים מתחת לגיל 16 מהרשתות החברתיות?",
+ "headline": "ארבע עמדות עיקריות: לאסור חשבונות מתחת לגיל 16, להפוך את האפליקציות לבטוחות יותר, להשקיע בתמיכה בילדים, או להגן על הפרטיות של כולם. הן נחלקות בעיקר על השאלה אם הרשתות החברתיות גורמות לנזק ואם איסורים עובדים.",
+ "views": [
+  {
+   "id": "ban-under-16",
+   "name": "לאסור חשבונות מתחת לגיל 16",
+   "short": "איסור",
+   "summary": "הרשתות החברתיות פוגעות בדור שלם של ילדים, וגיל מינימום חוקי של 16 שהפלטפורמות מחויבות לאכוף הוא הדרך הברורה ביותר להחזיר לילדים את הילדות.",
+   "who": "Jonathan Haidt, Zach Rausch ו־Ravi Iyer (תנועת The Anxious Generation); ממשלת אוסטרליה בראשות ראש הממשלה Anthony Albanese ונציבות eSafety שלה; קבוצות מחאה של הורים; ממשלות שמעתיקות עכשיו את אוסטרליה",
+   "changeMind": "Solid follow-up data from Australia showing no improvement in teens' sleep, mood or wellbeing, or a clear rise in harm as kids move to riskier, less-watched apps.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "Up to 95% of US 13- to 17-year-olds use social media, and those on it more than three hours a day face double the risk of depression and anxiety symptoms, says the US Surgeon General.",
+     "sources": [
+      {
+       "title": "Social Media and Youth Mental Health",
+       "outlet": "U.S. Department of Health and Human Services (Office of the Surgeon General)",
+       "author": "",
+       "date": "2024-05",
+       "url": "https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media",
+       "quote": "face double the risk of mental health problems including experiencing symptoms of depression and anxiety."
+      }
+     ]
+    },
+    {
+     "text": "Australia's law has not failed, and other countries should learn from it, argue Jonathan Haidt and colleagues.",
+     "sources": [
+      {
+       "title": "What the World Should Learn from Australia's Social Media Law",
+       "outlet": "TIME",
+       "author": "Ravi Iyer, Jonathan Haidt and Zach Rausch",
+       "date": "2026-07",
+       "url": "https://time.com/article/2026/07/18/the-world-should-learn-from-australia-s-social-media-law/",
+       "quote": "The Australian social media law has not failed."
+      }
+     ]
+    },
+    {
+     "text": "Australia's prime minister says social media is doing social harm to children, and the government said it would legislate 16 as the minimum age.",
+     "sources": [
+      {
+       "title": "Minimum age for social media access to protect Australian kids",
+       "outlet": "Minister for Communications / Prime Minister of Australia",
+       "author": "Anthony Albanese and Michelle Rowland",
+       "date": "",
+       "url": "https://minister.infrastructure.gov.au/node/6365",
+       "quote": "Social media is doing social harm to our kids."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "safer-design",
+   "name": "להפוך את הפלטפורמות לבטוחות יותר",
+   "short": "עיצוב בטוח",
+   "summary": "הנזק נובע מהאופן שבו האפליקציות בנויות, ולכן החוק צריך לחייב את חברות הטכנולוגיה לעצב אותן מחדש כך שיהיו בטוחות לילדים, במקום פשוט להרחיק את הילדים ולשחרר את החברות מאחריות.",
+   "who": "Molly Rose Foundation (ארגון בריטי לבטיחות ברשת), UNICEF, Amnesty International, נציבי זכויות האדם והילדים של אוסטרליה",
+   "changeMind": "Evidence that design-safety laws, such as the UK Online Safety Act, fail to reduce harm to children while age limits clearly do.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "Blunt bans won't give children the safety they need; laws should force companies to build safer apps.",
+     "sources": [
+      {
+       "title": "Social media bans are the wrong approach for children",
+       "outlet": "Molly Rose Foundation",
+       "author": "",
+       "date": "2026-01",
+       "url": "https://mollyrosefoundation.org/wp-content/uploads/2026/01/MRF-Briefing_Social-media-bans-are-the-wrong-approach-for-children_Jan-2026.pdf",
+       "quote": "Blunt and simplistic solutions will fail to offer parents and children the safety and wellbeing they are rightly demanding."
+      }
+     ]
+    },
+    {
+     "text": "Age limits are no substitute for platforms investing in child safety, says UNICEF.",
+     "sources": [
+      {
+       "title": "Age restrictions alone won't keep children safe online",
+       "outlet": "UNICEF",
+       "author": "",
+       "date": "2025-12",
+       "url": "https://www.unicef.org/press-releases/age-restrictions-alone-wont-keep-children-safe-online",
+       "quote": "Regulation should not be a substitute for platforms investing in child safety."
+      }
+     ]
+    },
+    {
+     "text": "Three months into Australia's ban, about 82% of 10- to 15-year-olds still used a banned platform, by the regulator's own survey.",
+     "sources": [
+      {
+       "title": "Early days, early insights: Understanding experiences of social media age restrictions at the three-month follow-up",
+       "outlet": "eSafety Commissioner (Australian Government)",
+       "author": "",
+       "date": "2026-07",
+       "url": "https://www.esafety.gov.au/sites/default/files/2026-08/Early-days-Early-Insights-SMMA-Evaluation-Understanding-experiences-of-social-media-age-restrictions-August2026.pdf",
+       "quote": "Despite this reduction, many children who held accounts at baseline had retained them at three months"
+      },
+      {
+       "title": "Australia's under-16 social media ban failing, study shows: What it means",
+       "outlet": "Al Jazeera",
+       "author": "Sarah Shamim",
+       "date": "2026-08",
+       "url": "https://www.aljazeera.com/economy/2026/8/6/australias-under-16-social-media-ban-failing-study-shows-what-it-means",
+       "quote": "continuing to use social media despite being banned from doing so"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "support-kids",
+   "name": "לתמוך בילדים, לא לאסור",
+   "short": "תמיכה",
+   "summary": "מאשימים את הטלפונים במשבר בריאות הנפש של צעירים, שיש לו סיבות עמוקות יותר, ולכן הכסף והמאמץ צריכים ללכת ליועצים, למורים, למשפחות ולמיומנויות דיגיטליות, ולא לאיסורים שעלולים לדחוף ילדים לפינות גרועות יותר ברשת.",
+   "who": "הפסיכולוגית ההתפתחותית Candice Odgers (UC Irvine ו־Duke); חוקרי חינוך כמו Catherine Smith (אוניברסיטת מלבורן); חלק מהפעילים לבריאות הנפש של צעירים",
+   "changeMind": "Well-run studies showing that removing social media actually improves teenagers' mental health.",
+   "sources": [
+    {
+     "title": "Australia's under-16 social media ban won't change the reality of growing up online",
+     "outlet": "Pursuit, University of Melbourne",
+     "author": "Catherine Smith",
+     "date": "2025-12",
+     "url": "https://pursuit.unimelb.edu.au/articles/australias-under-16-social-media-ban-wont-change-the-reality-of-growing-up-online",
+     "quote": "blanket bans on technology rarely solve the issues they claim to address."
+    }
+   ],
+   "reasons": [
+    {
+     "text": "A National Academies review found not enough evidence that social media changes teen health across the population.",
+     "sources": [
+      {
+       "title": "To Minimize Harms and Maximize Benefits of Social Media to Adolescent Health, New Report Recommends Setting Industrywide Standards, New Protections Against Harassment",
+       "outlet": "National Academies of Sciences, Engineering, and Medicine",
+       "author": "",
+       "date": "2023-12",
+       "url": "https://www.nationalacademies.org/news/2023/12/to-minimize-harms-and-maximize-benefits-of-social-media-to-adolescent-health-new-report-recommends-setting-industrywide-standards-new-protections-against-harassment",
+       "quote": "not enough evidence to say that social media causes changes in adolescent health at the population level."
+      }
+     ]
+    },
+    {
+     "text": "Social media can benefit some young people by giving them positive community and connection with others who share their identities, abilities and interests.",
+     "sources": [
+      {
+       "title": "Social Media Has Both Positive and Negative Impacts on Children and Adolescents",
+       "outlet": "U.S. Surgeon General, via NCBI Bookshelf",
+       "author": "",
+       "date": "2023",
+       "url": "https://www.ncbi.nlm.nih.gov/books/NBK594763/",
+       "quote": "Social media can provide benefits for some youth by providing positive community and connection"
+      }
+     ]
+    },
+    {
+     "text": "Money spent locking up kids' phones would be better spent hiring teachers and counsellors and paying them well, says psychologist Candice Odgers.",
+     "sources": [
+      {
+       "title": "Are we using screens as a scapegoat for teen mental health? (TED Radio Hour transcript)",
+       "outlet": "NPR",
+       "author": "Manoush Zomorodi (host), with Candice Odgers",
+       "date": "2026",
+       "url": "https://www.npr.org/transcripts/nx-s1-5871161",
+       "quote": "We need to hire teachers. We need to hire counselors. And we need to pay them well."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "protect-privacy",
+   "name": "להגן על הפרטיות ועל חופש הביטוי",
+   "short": "פרטיות",
+   "summary": "אכיפת מגבלת גיל פירושה לחייב את כולם להוכיח את גילם בתעודה מזהה או בסריקת פנים, מה שמסכן את הפרטיות ומנתק צעירים מביטוי ומידע, ולכן בדיקות גיל מחייבות עושות יותר נזק מתועלת.",
+   "who": "Electronic Frontier Foundation (EFF), American Civil Liberties Union (ACLU), ארגונים לזכויות דיגיטליות",
+   "changeMind": "Age-check technology that is accurate, stores no personal data, and cannot be used to track or censor people.",
+   "sources": [],
+   "reasons": [
+    {
+     "text": "Age verification technology is often inaccurate and privacy-invasive, and ID-based checks risk shutting out people who lack documents such as a passport or driver's licence.",
+     "sources": [
+      {
+       "title": "When No ID Means No Internet: Age Verification and the Right to Access Information",
+       "outlet": "Electronic Frontier Foundation",
+       "author": "Jillian C. York and Sheila B. Lalwani",
+       "date": "2026-10",
+       "url": "https://www.eff.org/deeplinks/2026/10/when-no-id-means-no-internet-age-verification-and-right-access-information",
+       "quote": "Age verification technology itself is often inaccurate and privacy-invasive."
+      }
+     ]
+    },
+    {
+     "text": "Broad laws to regulate what kids see online fail to protect them and run against free-speech rights, says the ACLU.",
+     "sources": [
+      {
+       "title": "Lawmakers Renew Push to Regulate Kids' Speech Online Despite Speech Protections",
+       "outlet": "ACLU",
+       "author": "Hibah Ansari",
+       "date": "2025-12",
+       "url": "https://aclu.org/news/privacy-technology/lawmakers-renew-push-to-regulate-kids-speech-online-despite-speech-protections",
+       "quote": "broad attempts to regulate speech fail to protect children and violate the First Amendment in the process."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "cruxes": [
+  {
+   "question": "האם הרשתות החברתיות גורמות לחרדה ולדיכאון אצל בני נוער?",
+   "left": "כן, זו סיבה מרכזית",
+   "right": "לא הוכח; יש סיבות אחרות",
+   "why": "אם זו סיבה מרכזית, הרחקת ילדים יכולה לעזור הרבה; אם זה בעיקר מתלווה לבעיות אחרות, איסור אולי ישנה מעט.",
+   "positions": {
+    "ban-under-16": "left",
+    "safer-design": "mid",
+    "support-kids": "right",
+    "protect-privacy": "mid"
+   },
+   "stakes": {
+    "ban-under-16": 3,
+    "safer-design": 2,
+    "support-kids": 2,
+    "protect-privacy": 1
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "Many lines of evidence, from cohort studies to natural experiments, show heavy social media use is harming teens' mental health at a scale that shifts whole populations.",
+     "title": "Social media is harming adolescents at a scale large enough to cause changes at the population level",
+     "url": "https://worldhappiness.report/ed/2026/social-media-is-harming-adolescents-at-a-scale-large-enough-to-cause-changes-at-the-population-level/",
+     "outlet": "World Happiness Report 2026",
+     "author": "Jonathan Haidt and Zachary Rausch",
+     "date": "2026-03",
+     "quote": "the forward relationship from social media use to depressive symptoms is robust, particularly for adolescents."
+    },
+    {
+     "side": "left",
+     "says": "Mounting evidence, including a natural experiment on Facebook's arrival at US colleges, shows social media raises depression and anxiety, so the question is now what to do.",
+     "title": "Social media harms teens’ mental health, mounting evidence shows. What now?",
+     "url": "https://www.sciencenews.org/article/social-media-teens-mental-health",
+     "outlet": "Science News",
+     "author": "Sujata Gupta",
+     "date": "2024-02",
+     "quote": "The answer was a clear yes, says MIT economist Alexey Makarin, a coauthor of the study"
+    },
+    {
+     "side": "right",
+     "says": "Psychologist Candice Odgers finds social media is not a major cause of teen mental health symptoms; caregiver mental health and other life conditions matter far more.",
+     "title": "Stop blaming the phone",
+     "url": "https://socialecology.uci.edu/news/stop-blaming-phone",
+     "outlet": "UC Irvine School of Social Ecology",
+     "author": "Mimi Ko Cruz",
+     "date": "2026-06",
+     "quote": "Social media use does not show up in our longitudinal studies as a major cause of mental health symptoms in teens."
+    },
+    {
+     "side": "right",
+     "says": "A study following over 25,000 young teens found heavier social media use or gaming did not predict worse anxiety or depression a year later.",
+     "title": "Time spent on gaming and social media not to blame for teen mental health issues",
+     "url": "https://www.manchester.ac.uk/about/news/time-spent-on-gaming-and-social-media/",
+     "outlet": "The University of Manchester",
+     "author": "Joe Stafford",
+     "date": "2026-01",
+     "quote": "found little evidence that social media use or video gaming are causing mental health problems in young teenagers"
+    }
+   ]
+  },
+  {
+   "question": "האם בדיקות גיל יכולות לעבוד בלי לפגוע בפרטיות?",
+   "left": "כן, מספיק טוב",
+   "right": "לא, מסוכן מדי",
+   "why": "מגבלה מתחת לגיל 16 עובדת רק אם האפליקציות יודעות מי מתחת לגיל 16, וזה עשוי לחייב את כולם להציג תעודה או את הפנים.",
+   "positions": {
+    "ban-under-16": "left",
+    "safer-design": "mid",
+    "support-kids": "mid",
+    "protect-privacy": "right"
+   },
+   "stakes": {
+    "ban-under-16": 2,
+    "safer-design": 1,
+    "support-kids": 1,
+    "protect-privacy": 3
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "Australia's independent government trial concluded that age assurance can be done, and that the tested systems can be private, robust and effective.",
+     "title": "Age Assurance Technology Trial: Part A – Main Report",
+     "url": "https://ageassurance.com.au/report/part-a/",
+     "outlet": "Age Assurance Technology Trial (Australian Government)",
+     "author": "",
+     "date": "2025-09",
+     "quote": "our analysis of age assurance systems in the context of Australia demonstrates how they can be private, robust and effective"
+    },
+    {
+     "side": "left",
+     "says": "Australia's online safety regulator holds that platforms can check ages using existing signals and layered methods in ways that are effective while still preserving privacy.",
+     "title": "New regulatory guidance released to support social media industry ahead of minimum age law",
+     "url": "https://esafety.gov.au/newsroom/media-releases/new-regulatory-guidance-released-to-support-social-media-industry-ahead-of-minimum-age-law",
+     "outlet": "eSafety Commissioner (Australia)",
+     "author": "",
+     "date": "2025-09",
+     "quote": "help technology companies meet their obligations in a way that is effective, privacy-preserving and fair"
+    },
+    {
+     "side": "right",
+     "says": "Australia's Human Rights Commissioner warns age checks force everyone to hand over sensitive data, creating databases that become targets, so child safety shouldn't cost everyone's privacy.",
+     "title": "Keeping kids safe shouldn’t mean a loss of privacy for everyone",
+     "url": "https://humanrights.gov.au/about-us/media-centre/opinion-pieces/rights-and-freedoms/keeping-kids-safe-shouldnt-mean-a-loss-of-privacy-for-everyone",
+     "outlet": "Australian Human Rights Commission",
+     "author": "Lorraine Finlay",
+     "date": "2025-12",
+     "quote": "That’s the reality of expanding sensitive data collection – every new database becomes a target."
+    },
+    {
+     "side": "right",
+     "says": "Age gates make people upload face scans or IDs to go online, creating privacy and tracking risks that no verification method has solved.",
+     "title": "Internet Age Gates Are a Growing Global Threat",
+     "url": "https://www.eff.org/deeplinks/2026/06/internet-age-gates-are-growing-global-threat",
+     "outlet": "Electronic Frontier Foundation",
+     "author": "Paige Collings",
+     "date": "2026-06",
+     "quote": "the vast scope of privacy issues pertaining to the collection, storage, and sharing of this personal information"
+    }
+   ]
+  },
+  {
+   "question": "האם איסורים דוחפים ילדים לפינות מסוכנות יותר ברשת?",
+   "left": "לא, זה בעיקר מגן",
+   "right": "כן, זה עלול להתהפך",
+   "why": "ילדים שעוקפים איסור עלולים להגיע לאפליקציות שפחות מפקחים עליהן, או להסתיר בעיות מהמבוגרים שיכולים לעזור.",
+   "positions": {
+    "ban-under-16": "left",
+    "safer-design": "right",
+    "support-kids": "right",
+    "protect-privacy": "mid"
+   },
+   "stakes": {
+    "ban-under-16": 1,
+    "safer-design": 2,
+    "support-kids": 3,
+    "protect-privacy": 2
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "Australia's regulator says apps outside the ban must still meet enforceable safety codes, and it monitors migration so popular alternatives can be age-restricted too.",
+     "title": "Social media age restrictions and your family",
+     "url": "https://www.esafety.gov.au/parents/social-media-age-restrictions",
+     "outlet": "eSafety Commissioner (Australia)",
+     "author": "",
+     "date": "2026-10",
+     "quote": "Australia has enforceable Online Safety Codes and Standards that require a broad range of online services to implement safety protections"
+    },
+    {
+     "side": "left",
+     "says": "Even a leaky ban is worth having, like early public health rules, and Meta's warning about unregulated alternatives ignores that its own platforms are barely regulated.",
+     "title": "The social media ban won't work. It's still a good thing",
+     "url": "https://www.newstatesman.com/comment/2026/06/of-course-the-social-media-ban-wont-work-that-doesnt-mean-its-pointless",
+     "outlet": "New Statesman",
+     "author": "Will Dunn",
+     "date": "2026-06",
+     "quote": "as if its platforms are regulated in any meaningful way."
+    },
+    {
+     "side": "right",
+     "says": "UNICEF warns bans can backfire by sending children to less regulated platforms where they are harder to protect, and urges safer platform design instead.",
+     "title": "Age restrictions alone won't keep children safe online",
+     "url": "https://www.unicef.org/press-releases/age-restrictions-alone-wont-keep-children-safe-online",
+     "outlet": "UNICEF",
+     "author": "",
+     "date": "2025-12",
+     "quote": "social media bans come with their own risks, and they may even backfire."
+    },
+    {
+     "side": "right",
+     "says": "Tightening age gates is likely to backfire, pushing teens toward less-moderated, higher-risk platforms that attract both vulnerable youth and those who prey on them.",
+     "title": "Kids are outsmarting social media bans. That's not a problem we need to solve.",
+     "url": "https://www.technologyreview.com/2026/10/16/1146834/kids-are-outsmarting-social-media-bans-thats-not-a-problem-we-need-to-solve/",
+     "outlet": "MIT Technology Review",
+     "author": "Michal Luria, Aliya Bhatia and Danah Boyd",
+     "date": "2026-10",
+     "quote": "Age gates can be staggeringly counterproductive, pushing kids to darker corners of the web."
+    }
+   ]
+  },
+  {
+   "question": "האם הוגן לנתק ילדים שנשענים על חברים ברשת?",
+   "left": "כן, ההגנה קודמת",
+   "right": "לא, הם יאבדו עוגן",
+   "why": "בני נוער מבודדים, עם מוגבלות או להט״בים מוצאים לעיתים קרובות תמיכה ברשת, ולכן איסור עולה לחלק מהילדים יותר מלאחרים.",
+   "positions": {
+    "ban-under-16": "left",
+    "safer-design": "right",
+    "support-kids": "right",
+    "protect-privacy": "right"
+   },
+   "stakes": {
+    "ban-under-16": 1,
+    "safer-design": 1,
+    "support-kids": 3,
+    "protect-privacy": 1
+   },
+   "reading": [
+    {
+     "side": "left",
+     "says": "LGBTQ+ and other disadvantaged teens are the ones harmed most by social media, so the lifeline argument is wrong and protections would help them most.",
+     "title": "The Worst Argument That Social-Media Companies Use to Defend Themselves",
+     "url": "https://www.afterbabel.com/p/tech-hypocrisy",
+     "outlet": "After Babel",
+     "author": "Zach Rausch and Jon Haidt",
+     "date": "2024-09",
+     "quote": "As it turns out, the adolescents being harmed the most by social media are those from historically disadvantaged groups."
+    },
+    {
+     "side": "left",
+     "says": "Australia's eSafety Commissioner argues the ban can protect kids without cutting lifelines, because messaging and gaming services where communities form stay open.",
+     "title": "Julie Inman Grant says under-16s social media ban not designed to cut kids off from 'digital lifelines'",
+     "url": "https://womensagenda.com.au/latest/julie-inman-grant-says-under-16s-social-media-ban-not-designed-to-cut-kids-off-from-digital-lifelines/",
+     "outlet": "Women's Agenda",
+     "author": "Madeline Hislop",
+     "date": "2025-06",
+     "quote": "we're not trying to cut lifelines or to prevent them from communicating, exploring and creating"
+    },
+    {
+     "side": "right",
+     "says": "For LGBTIQA+ young people, online communities are essential support, and a blanket ban removes them; taking away their communities is not protection.",
+     "title": "Social ban cuts LGBTIQA+ kids off from support networks",
+     "url": "https://ccyp.wa.gov.au/news/opinion-social-ban-cuts-lgbtiqaplus-kids-off-from-support-networks/",
+     "outlet": "Commissioner for Children and Young People WA",
+     "author": "Jacqueline McGowan-Jones and Chloe Clements",
+     "date": "2025-12",
+     "quote": "A blanket ban on social media threatens to sever young people from these essential networks."
+    },
+    {
+     "side": "right",
+     "says": "The ban severs digital lifelines linking marginalised and queer teens to affirming communities, support networks and mental health resources, leaving many isolated.",
+     "title": "Under-16s social media ban abandons LGBTIQA+ and marginalised youth",
+     "url": "https://lens.monash.edu/under-16-social-media-ban-abandons-lgbtiqa-and-marginalised-youth/",
+     "outlet": "Monash Lens (Monash University)",
+     "author": "Paula Gerber",
+     "date": "2025-12",
+     "quote": "For queer youth, rather than being a season of joy, this time will be one of isolation and loneliness."
+    }
+   ]
+  }
+ ],
+ "wording": {
+  "assumes": "השאלה מציגה את הבחירה כהרחקת ילדים או לא. שלוש מתוך ארבע העמדות אומרות שהתשובה נמצאת במקום אחר: באופן שבו האפליקציות בנויות, בתמיכה בילדים או בהגנה על הפרטיות.",
+  "leansAwayFrom": [
+   "safer-design",
+   "support-kids",
+   "protect-privacy"
+  ]
+ }
+}
