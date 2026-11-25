@@ -10,6 +10,8 @@ import { EXAMPLES, exampleFor } from './examples.js';
 import { closestTo, SOURCE_COUNT, hostOf, titleDenies, notAnArgument, standingOf, dateOf } from '../engine/viewsDemo.js';
 import { Icon } from '../ui/icons.jsx';
 import { fetchRingSides } from './ringSides.js';
+import { MEDIA } from '../media.js';
+import { t, tp, loc, useLang } from '../i18n/index.js';
 
 // Mosaic's own palette: its teal, coral, slate blue and ochre.
 const COLORS = ['#4f8079', '#b84a3c', '#3d5875', '#8a6a1f'];
@@ -30,7 +32,7 @@ const fmtDate = (d) => {
   if (!d) return '';
   const [y, m] = String(d).split('-');
   if (!m) return y;
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString(loc(), { month: 'short', year: 'numeric' });
 };
 
 // The outlet is written by the model, so it can give a page more standing than
@@ -39,6 +41,24 @@ const fmtDate = (d) => {
 // shown beside the outlet, so the reader can weigh the page themselves. Mosaic
 // does not rule on a question, so a page of lesser standing is labelled, never
 // hidden. See docs/views-review-2026-11-24.md.
+// standingOf() returns fixed English labels (checked by scripts); they're
+// translated here, where they're shown.
+function standingLabel(s) {
+  switch (s) {
+    case 'Submitted to a hearing': return t('Submitted to a hearing');
+    case 'Transcript of remarks': return t('Transcript of remarks');
+    case 'Preprint, not peer reviewed': return t('Preprint, not peer reviewed');
+    case 'Posted to an open archive': return t('Posted to an open archive');
+    case 'Peer reviewed': return t('Peer reviewed');
+    case 'Government or official body': return t('Government or official body');
+    case 'University': return t('University');
+    default: return s;
+  }
+}
+// A piece's kind (Article, Paper…): read from its type when it has one, so it
+// follows the interface language even when it was saved in another.
+const typeLabel = (s) => (s.type && MEDIA[s.type] ? MEDIA[s.type].label : s.label);
+
 function SourceLink({ s, withQuote = true }) {
   const standing = standingOf(s.url);
   // Maps saved before the search was asked for a publish date carry none, so
@@ -49,7 +69,7 @@ function SourceLink({ s, withQuote = true }) {
     <li className="vd-src">
       <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title || hostOf(s.url)}<span aria-hidden="true"> ↗</span></a>
       <span className="vd-src-meta">{[s.author, s.outlet || hostOf(s.url), fmtDate(when)].filter(Boolean).join(' · ')}</span>
-      {standing && <span className="vd-src-standing">{standing}</span>}
+      {standing && <span className="vd-src-standing">{standingLabel(standing)}</span>}
       {withQuote && s.quote && <q className="vd-src-quote">{s.quote}</q>}
     </li>
   );
@@ -71,9 +91,9 @@ function Wording({ map, focus, onFocus }) {
   if (!w?.assumes) return null;
   const away = map.views.filter((v) => w.leansAwayFrom.includes(v.id));
   return (
-    <section className="vd-wording" aria-label="How the question is worded">
-      <span className="vd-wording-label">Notice the wording</span>
-      <p>{w.assumes}{away.length > 0 && ' Views that reject that framing: '}
+    <section className="vd-wording" aria-label={t('How the question is worded')}>
+      <span className="vd-wording-label">{t('Notice the wording')}</span>
+      <p>{w.assumes}{away.length > 0 && ` ${t('Views that reject that framing:')} `}
         {away.map((v) => <Tag key={v.id} map={map} view={v} focus={focus} onFocus={onFocus} small />)}
       </p>
     </section>
@@ -89,7 +109,7 @@ const shortWho = (who) => {
 // mouths. So it is shown only for a view that stands on at least one source,
 // and it is labelled as unchecked. The ready examples were checked by hand.
 const whoOf = (map, v) => (map.live && !(v.reasons || []).length ? '' : v.who || '');
-const whoLabel = (map) => (map.live ? 'Said to hold it' : 'Held by');
+const whoLabel = (map) => (map.live ? t('Said to hold it') : t('Held by'));
 const countSources = (v) => new Set([...(v.reasons || []).flatMap((r) => r.sources), ...(v.sources || [])].map((s) => s.url)).size;
 
 function useWide(query = '(min-width: 760px)') {
@@ -118,14 +138,14 @@ function Questions({ map, focus, onFocus, ring, onRing }) {
               <span className="vd-qi-n">{k + 1}</span><span>{c.question}</span>
             </button>
             <ul className="vd-qi-ans">
-              {[['left', 'solid', c.left], ['right', 'pale', c.right], ['mid', 'striped', 'It depends']].map(([pos, sw, label]) => {
+              {[['left', 'solid', c.left], ['right', 'pale', c.right], ['mid', 'striped', t('It depends')]].map(([pos, sw, label]) => {
                 const vs = at(pos);
                 if (pos === 'mid' && !vs.length) return null;
                 return (
                   <li key={pos}>
                     <span className="vd-qi-a"><i className={`vd-sw ${sw}`} aria-hidden="true" />{label}</span>
                     <span className="vd-qi-tags">
-                      {vs.length ? vs.map((v) => <Tag key={v.id} map={map} view={v} focus={focus} onFocus={onFocus} small />) : <span className="vd-muted">none of them</span>}
+                      {vs.length ? vs.map((v) => <Tag key={v.id} map={map} view={v} focus={focus} onFocus={onFocus} small />) : <span className="vd-muted">{t('none of them')}</span>}
                     </span>
                   </li>
                 );
@@ -133,7 +153,7 @@ function Questions({ map, focus, onFocus, ring, onRing }) {
             </ul>
             {(c.reading || []).length > 0 && (
               <button type="button" className="vd-qi-read" onClick={() => onRing(k)}>
-                {c.reading.length} article{c.reading.length === 1 ? '' : 's'} on this question →
+                {tp(c.reading.length, '{n} article on this question →', '{n} articles on this question →')}
               </button>
             )}
           </li>
@@ -159,7 +179,7 @@ function ViewsList({ map, focus, onFocus }) {
                 <span className="vd-vl-name">{v.name}</span>
                 <span className="vd-vl-sum">{v.summary}</span>
                 {who && <span className="vd-vl-who"><b>{whoLabel(map)}</b> {shortWho(who)}</span>}
-                <span className="vd-vl-more">{n > 0 ? `Its reasons and ${n} source${n === 1 ? '' : 's'}` : 'Its case'} →</span>
+                <span className="vd-vl-more">{n > 0 ? tp(n, 'Its reasons and {n} source →', 'Its reasons and {n} sources →') : t('Its case →')}</span>
               </span>
             </button>
           </li>
@@ -180,17 +200,17 @@ function CaseBody({ map, view, onRing }) {
       <p className="vd-card-sum">{view.summary}</p>
       {whoOf(map, view) && (
         <p className="vd-card-who"><span>{whoLabel(map)}</span> {whoOf(map, view)}
-          {map.live && <span className="vd-muted"> — named by the model, not checked.</span>}
+          {map.live && <span className="vd-muted"> {t('— named by the model, not checked.')}</span>}
         </p>
       )}
-      <p className="vd-card-read">Its answers</p>
+      <p className="vd-card-read">{t('Its answers')}</p>
       <ol className="vd-its">
         {map.cruxes.map((c, k) => {
           const pos = c.positions[view.id] || 'mid';
           return (
             <li key={k}>
               <button type="button" className="vd-its-n" onClick={onRing ? () => onRing(k) : undefined} tabIndex={onRing ? 0 : -1}
-                aria-label={`Question ${k + 1}: ${c.question}`} title={c.question}>{k + 1}</button>
+                aria-label={t('Question {n}: {question}', { n: k + 1, question: c.question })} title={c.question}>{k + 1}</button>
               <i className={`vd-sw ${pos === 'left' ? 'solid' : pos === 'right' ? 'pale' : 'striped'}`} aria-hidden="true" />
               <span className="vd-its-a"><span className="vd-its-q">{c.question}</span>{answerText(c, pos)}</span>
             </li>
@@ -199,7 +219,7 @@ function CaseBody({ map, view, onRing }) {
       </ol>
       {reasons.length > 0 && (
         <>
-          <p className="vd-card-read">Its reasons, and where they’re made</p>
+          <p className="vd-card-read">{t('Its reasons, and where they’re made')}</p>
           <ol className="vd-reasons">
             {reasons.map((r, i) => (
               <li key={i}>
@@ -212,16 +232,16 @@ function CaseBody({ map, view, onRing }) {
       )}
       {view.sources.length > 0 && (
         <>
-          <p className="vd-card-read">More from people who make this case</p>
+          <p className="vd-card-read">{t('More from people who make this case')}</p>
           <ul className="vd-srcs">{view.sources.map((s, j) => <SourceLink key={j} s={s} />)}</ul>
         </>
       )}
-      {!reasons.length && !view.sources.length && <p className="vd-muted">No article found yet by someone who argues this view.</p>}
+      {!reasons.length && !view.sources.length && <p className="vd-muted">{t('No article found yet by someone who argues this view.')}</p>}
       <ul className="vd-card-facts">
         {close && n > 0 && (close.same > 0
-          ? <li><span>Closest to</span> {close.name}: same answer on {close.same} of {n}</li>
-          : <li><span>Stands apart</span> No other view shares any of its answers.</li>)}
-        {view.changeMind && <li><span>What would change its mind</span> {view.changeMind}</li>}
+          ? <li><span>{t('Closest to')}</span> {t('{name}: same answer on {same} of {n}', { name: close.name, same: close.same, n })}</li>
+          : <li><span>{t('Stands apart')}</span> {t('No other view shares any of its answers.')}</li>)}
+        {view.changeMind && <li><span>{t('What would change its mind')}</span> {view.changeMind}</li>}
       </ul>
     </>
   );
@@ -237,14 +257,14 @@ function ViewDetail({ map, view, onFocus, onRing, sheet }) {
     <div ref={ref} className={`vd-detail ${sheet ? 'sheet' : ''}`} style={{ '--c': colorOf(map, view.id) }}
       role={sheet ? 'dialog' : undefined} aria-label={view.name}>
       <div className="vd-detail-head">
-        <button type="button" className="vd-detail-back" onClick={() => onFocus(null)}>{sheet ? 'Close' : '← All views'}</button>
-        <span className="vd-detail-step">View {i + 1} of {map.views.length}</span>
+        <button type="button" className="vd-detail-back" onClick={() => onFocus(null)}>{sheet ? t('Close') : t('← All views')}</button>
+        <span className="vd-detail-step">{t('View {n} of {total}', { n: i + 1, total: map.views.length })}</span>
       </div>
       <h3 className="vd-detail-name">{view.name}</h3>
       <CaseBody map={map} view={view} onRing={onRing} />
       <div className="vd-detail-nav">
-        <button type="button" onClick={() => onFocus(prev.id)} style={{ '--c': colorOf(map, prev.id) }}>← {prev.short || prev.name}</button>
-        <button type="button" onClick={() => onFocus(next.id)} style={{ '--c': colorOf(map, next.id) }}>{next.short || next.name} →</button>
+        <button type="button" onClick={() => onFocus(prev.id)} style={{ '--c': colorOf(map, prev.id) }}>{t('← {name}', { name: prev.short || prev.name })}</button>
+        <button type="button" onClick={() => onFocus(next.id)} style={{ '--c': colorOf(map, next.id) }}>{t('{name} →', { name: next.short || next.name })}</button>
       </div>
     </div>
   );
@@ -259,11 +279,11 @@ function Splits({ map, focus, onFocus }) {
           <article className="vd-split" key={i}>
             <h3 className="vd-split-q"><span className="vd-split-n">{i + 1}</span>{c.question}</h3>
             <div className="vd-track">
-              <div className="vd-ends"><span className="vd-end">{c.left}</span><span className="vd-end mid">It depends</span><span className="vd-end">{c.right}</span></div>
+              <div className="vd-ends"><span className="vd-end">{c.left}</span><span className="vd-end mid">{t('It depends')}</span><span className="vd-end">{c.right}</span></div>
               <div className="vd-line" aria-hidden="true" />
               <div className="vd-zones">
                 {['left', 'mid', 'right'].map((pos) => (
-                  <div key={pos} className={`vd-zone ${pos}`} aria-label={pos === 'mid' ? 'In between' : pos === 'left' ? c.left : c.right}>
+                  <div key={pos} className={`vd-zone ${pos}`} aria-label={pos === 'mid' ? t('In between') : pos === 'left' ? c.left : c.right}>
                     {at(pos).map((v) => <Tag key={v.id} map={map} view={v} focus={focus} onFocus={onFocus} />)}
                   </div>
                 ))}
@@ -280,15 +300,15 @@ function Splits({ map, focus, onFocus }) {
 function ChartCaption() {
   return (
     <div className="vd-cap">
-      <p className="vd-cap-how"><b>Tap any stone</b> to read the pieces on that ring’s question; a ring finds more as you open it. <b>Tap a name</b> for that view’s whole case.</p>
+      <p className="vd-cap-how">{t('{tap} to read the pieces on that ring’s question; a ring finds more as you open it.', { tap: <b>{t('Tap any stone')}</b> })}{' '}{t('{tap} for that view’s whole case.', { tap: <b>{t('Tap a name')}</b> })}</p>
       <p className="vd-cap-key">
-        <span><b>Colour</b> = a view</span>
-        <span><b>Ring</b> = a question, numbered from the centre</span>
-        <span><b>Filled stone</b> = a piece arguing that answer; faint = none found yet</span>
-        <span><b>More room</b> = the question matters more to that view</span>
-        <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
-        <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>
-        <span><i className="vd-sw striped" aria-hidden="true" /> it depends</span>
+        <span><b>{t('Colour')}</b> = {t('a view')}</span>
+        <span><b>{t('Ring')}</b> = {t('a question, numbered from the centre')}</span>
+        <span><b>{t('Filled stone')}</b> = {t('a piece arguing that answer; faint = none found yet')}</span>
+        <span><b>{t('More room')}</b> = {t('the question matters more to that view')}</span>
+        <span><i className="vd-sw solid" aria-hidden="true" /> {t('first answer')}</span>
+        <span><i className="vd-sw pale" aria-hidden="true" /> {t('second answer')}</span>
+        <span><i className="vd-sw striped" aria-hidden="true" /> {t('it depends')}</span>
       </p>
     </div>
   );
@@ -343,14 +363,14 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
   return (
     <>
       <div className="vd-detail-head">
-        <span className="vd-detail-step">Ring {k + 1} of {M}</span>
-        <button type="button" className="vd-pop-x" onClick={onClose} aria-label="Close">Close ✕</button>
+        <span className="vd-detail-step">{t('Ring {n} of {total}', { n: k + 1, total: M })}</span>
+        <button type="button" className="vd-pop-x" onClick={onClose} aria-label={t('Close')}>{t('Close ✕')}</button>
       </div>
       <h3 className="vd-ring-q"><span className="vd-qi-n">{k + 1}</span>{c.question}</h3>
       {view && (
         <p className="vd-ring-mine">
-          <b style={{ color: colorOf(map, view.id) }}>{view.name}</b> answers: {answerText(c, mine)}.{' '}
-          <button type="button" className="vd-linkish" onClick={() => onView(view.id)}>Its whole case →</button>
+          {t('{view} answers: {answer}.', { view: <b style={{ color: colorOf(map, view.id) }}>{view.name}</b>, answer: answerText(c, mine) })}{' '}
+          <button type="button" className="vd-linkish" onClick={() => onView(view.id)}>{t('Its whole case →')}</button>
         </p>
       )}
       {c.why && <p className="vd-ring-why">{c.why}</p>}
@@ -359,9 +379,9 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
         const holders = map.views.filter((v) => c.positions[v.id] === pos);
         return (
           <section key={pos} className={`vd-side ${mine === pos ? 'mine' : ''}`}>
-            <p className="vd-side-h"><i className={`vd-sw ${sw}`} aria-hidden="true" />{label}</p>
+            <p className="vd-side-h"><i className={`vd-sw ${sw}`} aria-hidden="true" />{label}{mine === pos && <span className="vd-side-mine">{t('its answer')}</span>}</p>
             {holders.length > 0 && (
-              <p className="vd-side-who">Views here: {holders.map((v) => (
+              <p className="vd-side-who">{t('Views here:')} {holders.map((v) => (
                 <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
               ))}</p>
             )}
@@ -369,29 +389,29 @@ function RingDetail({ map, k, view, onClose, onRing, onView, items, onItems }) {
               <ul className="vd-read">
                 {items.map((s, j) => (
                   <li key={j}>
-                    {s.says && <p className="vd-read-says">{s.label && <span className="vd-ritem-type">{s.label}</span>}{s.says}</p>}
+                    {s.says && <p className="vd-read-says">{typeLabel(s) && <span className="vd-ritem-type">{typeLabel(s)}</span>}{s.says}</p>}
                     <ul className="vd-srcs"><SourceLink s={s} /></ul>
                   </li>
                 ))}
               </ul>
             ) : null}
-            {filling && short[pos] && looking && <p className="vd-muted">Finding pieces that argue this…</p>}
-            {!items.length && !(filling && looking) && <p className="vd-muted">{filling ? 'Nothing found arguing this yet.' : 'No checked article on this side yet.'}</p>}
+            {filling && short[pos] && looking && <p className="vd-muted">{t('Finding pieces that argue this…')}</p>}
+            {!items.length && !(filling && looking) && <p className="vd-muted">{filling ? t('Nothing found arguing this yet.') : t('No checked article on this side yet.')}</p>}
           </section>
         );
       })}
       {mids.length > 0 && (
-        <p className="vd-side-mid"><i className="vd-sw striped" aria-hidden="true" />It depends: {mids.map((v) => (
+        <p className="vd-side-mid"><i className="vd-sw striped" aria-hidden="true" />{t('It depends:')} {mids.map((v) => (
           <button key={v.id} type="button" className="vd-tag small" style={{ '--c': colorOf(map, v.id) }} onClick={() => onView(v.id)}>{v.short || v.name}</button>
         ))}</p>
       )}
       {filling && items && !items.loading && (items.error || shown.some((pos) => short[pos] && !all[pos].length)) && (
-        <p className="vd-muted">{items.error ? 'Couldn’t look for pieces just now.' : (only ? 'Nothing turned up for this answer.' : 'Nothing turned up for one of the answers.')}{' '}
-          <button type="button" className="vd-linkish" onClick={() => onItems(k, { retry: true })}>Try again</button></p>
+        <p className="vd-muted">{items.error ? t('Couldn’t look for pieces just now.') : (only ? t('Nothing turned up for this answer.') : t('Nothing turned up for one of the answers.'))}{' '}
+          <button type="button" className="vd-linkish" onClick={() => onItems(k, { retry: true })}>{t('Try again')}</button></p>
       )}
       <div className="vd-detail-nav">
-        <button type="button" onClick={() => onRing((k - 1 + M) % M)}>← Question {((k - 1 + M) % M) + 1}</button>
-        <button type="button" onClick={() => onRing((k + 1) % M)}>Question {((k + 1) % M) + 1} →</button>
+        <button type="button" onClick={() => onRing((k - 1 + M) % M)}>{t('← Question {n}', { n: ((k - 1 + M) % M) + 1 })}</button>
+        <button type="button" onClick={() => onRing((k + 1) % M)}>{t('Question {n} →', { n: ((k + 1) % M) + 1 })}</button>
       </div>
     </>
   );
@@ -468,7 +488,7 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView, items,
         </svg>
       )}
       <div ref={boxRef} className={`vd-pop ${pos?.side || ''}`} style={style} role="dialog" tabIndex={-1}
-        aria-label={`Question ${k + 1}: ${c.question}`} key={`${k}-${view?.id || ''}`}>
+        aria-label={t('Question {n}: {question}', { n: k + 1, question: c.question })} key={`${k}-${view?.id || ''}`}>
         <div ref={inRef} className="vd-pop-in vd-detail vd-ring">
           <RingDetail map={map} k={k} view={view} onClose={onClose} onRing={onRing} onView={onView} items={items} onItems={onItems} />
         </div>
@@ -483,6 +503,7 @@ function RingPop({ map, k, view, chartRef, wide, onClose, onRing, onView, items,
 // few checked articles, kept on the thread. Without them (the standalone page)
 // they're looked up here and kept for as long as the page is open.
 export function Result({ map, embedded = false, ringItems = null, onRingItems = null }) {
+  useLang(); // re-render when the interface language changes
   const [localRings, setLocalRings] = useState({});
   const localRef = useRef({ key: '', rings: {} });
   const [focus, setFocus] = useState(null);
@@ -541,8 +562,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
       <div className="vd-result">
         <h1 className="vd-q">{map.question}</h1>
         <p className="vd-empty">{map.thin
-          ? 'People do disagree on this, but I couldn’t find enough articles from each side to show it properly. Try wording it another way, or open a ready example.'
-          : 'This doesn’t look like something people hold public views on, so there are no sides to map.'}</p>
+          ? t('People do disagree on this, but I couldn’t find enough articles from each side to show it properly. Try wording it another way, or open a ready example.')
+          : t('This doesn’t look like something people hold public views on, so there are no sides to map.')}</p>
       </div>
     );
   }
@@ -559,8 +580,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
     <div className="vd-result">
       <div className="vd-stage">
         <div className="vd-stage-head">
-          <p className="vd-kicker">{map.live ? 'Mapped just now' : 'Ready example'} · {map.views.length} views · {map.cruxes.length} questions they split on{sources > 0
-            ? (map.live ? ` · ${sources} sources found by search, each opened to check it loads` : ` · ${sources} sources, each opened and read`)
+          <p className="vd-kicker">{map.live ? t('Mapped just now') : t('Ready example')} · {t('{n} views', { n: map.views.length })} · {t('{n} questions they split on', { n: map.cruxes.length })}{sources > 0
+            ? ` · ${map.live ? t('{n} sources found by search, each opened to check it loads', { n: sources }) : t('{n} sources, each opened and read', { n: sources })}`
             : ''}</p>
           {!embedded && <h1 className="vd-q">{map.question}</h1>}
           {map.headline && <p className="vd-headline">{map.headline}</p>}
@@ -568,8 +589,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
 
         {wide && (
           <aside className="vd-col vd-col-key" aria-labelledby="vd-key-h">
-            <h2 id="vd-key-h" className="vd-col-h">The {map.cruxes.length} questions they split on</h2>
-            <p className="vd-col-sub">One per ring. Tap one for real articles on each side of it.</p>
+            <h2 id="vd-key-h" className="vd-col-h">{t('The {n} questions they split on', { n: map.cruxes.length })}</h2>
+            <p className="vd-col-sub">{t('One per ring. Tap one for real articles on each side of it.')}</p>
             {questions}
           </aside>
         )}
@@ -589,8 +610,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
           <aside className="vd-col vd-col-panel" aria-live="polite">
             {viewOpen ? detail(false) : (
               <>
-                <h2 className="vd-col-h">The {map.views.length} main views</h2>
-                <p className="vd-col-sub">Tap one to see its reasons and sources.</p>
+                <h2 className="vd-col-h">{t('The {n} main views', { n: map.views.length })}</h2>
+                <p className="vd-col-sub">{t('Tap one to see its reasons and sources.')}</p>
                 <ViewsList map={map} focus={focus} onFocus={pickView} />
               </>
             )}
@@ -598,8 +619,8 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
         ) : (
           <div className="vd-tabs-wrap">
             <div className="vd-tabs" role="tablist">
-              <button type="button" role="tab" aria-selected={tab === 'views'} onClick={() => setTab('views')}>The {map.views.length} views</button>
-              <button type="button" role="tab" aria-selected={tab === 'questions'} onClick={() => setTab('questions')}>The {map.cruxes.length} questions</button>
+              <button type="button" role="tab" aria-selected={tab === 'views'} onClick={() => setTab('views')}>{t('The {n} views', { n: map.views.length })}</button>
+              <button type="button" role="tab" aria-selected={tab === 'questions'} onClick={() => setTab('questions')}>{t('The {n} questions', { n: map.cruxes.length })}</button>
             </div>
             <div role="tabpanel">
               {tab === 'views' ? <ViewsList map={map} focus={focus} onFocus={pickView} /> : questions}
@@ -616,11 +637,11 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
       )}
 
       <details className="vd-more">
-        <summary>Each question as a line, with every view placed on it</summary>
+        <summary>{t('Each question as a line, with every view placed on it')}</summary>
         <Splits map={map} focus={focus} onFocus={setFocus} />
       </details>
       <details className="vd-more">
-        <summary>Every view’s full case, one after another</summary>
+        <summary>{t('Every view’s full case, one after another')}</summary>
         <div className="vd-cards">
           {map.views.map((v) => (
             <article key={v.id} className="vd-card" style={{ '--c': colorOf(map, v.id) }} id={`view-${v.id}`}>
@@ -634,25 +655,28 @@ export function Result({ map, embedded = false, ringItems = null, onRingItems = 
   );
 }
 
-const STEPS = ['Finding the main views and who holds them', 'Working out the points they split on', 'Searching for articles by people who hold each view', 'Opening every link to check it'];
+const STEPS = () => [t('Finding the main views and who holds them'), t('Working out the points they split on'), t('Searching for articles by people who hold each view'), t('Opening every link to check it')];
+const STEP_COUNT = 4;
 
 export function Working() {
+  useLang();
   const [i, setI] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setI((n) => Math.min(n + 1, STEPS.length - 1)), 6000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setI((n) => Math.min(n + 1, STEP_COUNT - 1)), 6000);
+    return () => clearInterval(timer);
   }, []);
   return (
     <div className="vd-working" aria-live="polite">
       <ol>
-        {STEPS.map((s, k) => <li key={k} className={k < i ? 'done' : k === i ? 'now' : ''}>{s}</li>)}
+        {STEPS().map((s, k) => <li key={k} className={k < i ? 'done' : k === i ? 'now' : ''}>{s}</li>)}
       </ol>
-      <p className="vd-muted">Usually 20 to 40 seconds for a new question.</p>
+      <p className="vd-muted">{t('Usually 20 to 40 seconds for a new question.')}</p>
     </div>
   );
 }
 
 export default function ViewsPage() {
+  useLang();
   const init = readUrl();
   const initialEx = init.q ? null : (EXAMPLES.find((e) => e.id === init.ex) || EXAMPLES[0]);
   const [map, setMap] = useState(initialEx);
@@ -677,7 +701,7 @@ export default function ViewsPage() {
 
   async function ask(q) {
     const question = String(q || '').trim();
-    if (question.length < 6) { setError('Type a question first, like “Should cities ban cars downtown?”'); return; }
+    if (question.length < 6) { setError(t('Type a question first, like “Should cities ban cars downtown?”')); return; }
     const ex = exampleFor(question);
     if (ex) { openExample(ex); return; }
     setBusy(true); setError(null); setExId(null); setMap(null);
@@ -690,8 +714,8 @@ export default function ViewsPage() {
         j = await res.json().catch(() => ({}));
         if (!res.ok || !j?.pending) break;
       }
-      if (!res.ok) throw new Error(j?.error?.message || `Something went wrong (${res.status}).`);
-      if (j?.pending) throw new Error('The mapping model is busy just now. Try again in a minute.');
+      if (!res.ok) throw new Error(j?.error?.message || t('Something went wrong ({status}).', { status: res.status }));
+      if (j?.pending) throw new Error(t('The mapping model is busy just now. Try again in a minute.'));
       setMap(j);
     } catch (e) {
       setError(e.message || String(e));
@@ -705,12 +729,12 @@ export default function ViewsPage() {
   return (
     <div className="vd">
       <header className="vd-bar">
-        <p className="vd-bar-brand"><span className="vd-brand"><Icon name="mosaic" size={20} className="vd-brand-ic" />Mosaic<span className="vd-brand-sub">Views</span></span></p>
-        <p className="vd-bar-tag">Every side of a question, who holds it, and their sources. Never a verdict.</p>
+        <p className="vd-bar-brand"><span className="vd-brand"><Icon name="mosaic" size={20} className="vd-brand-ic" />{t('Mosaic')}<span className="vd-brand-sub">{t('Views')}</span></span></p>
+        <p className="vd-bar-tag">{t('Every side of a question, who holds it, and their sources. Never a verdict.')}</p>
       </header>
 
-      <nav className="vd-pick" aria-label="Pick a question">
-        <div className="vd-examples" role="list" aria-label="Ready examples">
+      <nav className="vd-pick" aria-label={t('Pick a question')}>
+        <div className="vd-examples" role="list" aria-label={t('Ready examples')}>
           {EXAMPLES.map((ex) => (
             <button key={ex.id} role="listitem" className={`vd-ex ${exId === ex.id ? 'on' : ''}`} onClick={() => openExample(ex)} aria-pressed={exId === ex.id}>
               {ex.question}
@@ -718,10 +742,10 @@ export default function ViewsPage() {
           ))}
         </div>
         <form className="vd-ask" onSubmit={submit}>
-          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Or ask your own question" aria-label="Your question" maxLength={300} enterKeyHint="go" />
-          <button type="submit" disabled={busy}>{busy ? 'Mapping…' : 'Map it'}</button>
+          <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Or ask your own question')} aria-label={t('Your question')} maxLength={300} enterKeyHint="go" />
+          <button type="submit" disabled={busy}>{busy ? t('Mapping…') : t('Map it')}</button>
         </form>
-        {live === false && <p className="vd-note">Typed questions aren’t switched on in this version yet. The ready examples are complete.</p>}
+        {live === false && <p className="vd-note">{t('Typed questions aren’t switched on in this version yet. The ready examples are complete.')}</p>}
       </nav>
 
       <main ref={resultRef} className="vd-main">
@@ -729,13 +753,13 @@ export default function ViewsPage() {
         {error && !busy && (
           <div className="vd-error" role="alert">
             <p>{error}</p>
-            <p className="vd-muted">Try one of the ready examples above in the meantime.</p>
+            <p className="vd-muted">{t('Try one of the ready examples above in the meantime.')}</p>
           </div>
         )}
         {map && !busy && <Result map={map} />}
         {map?.status === 'none' && map.nearby?.length > 0 && (
           <div className="vd-nearby">
-            <p>Questions near it that people do hold different views on:</p>
+            <p>{t('Questions near it that people do hold different views on:')}</p>
             {map.nearby.map((q) => <button key={q} className="vd-ex small" onClick={() => { setText(q); ask(q); }}>{q}</button>)}
           </div>
         )}
@@ -743,8 +767,8 @@ export default function ViewsPage() {
 
       <footer className="vd-foot">
         {map && !map.live
-          ? <p>This example was researched in {map.preparedOn || 'November 2026'}. Every link was opened and read to confirm it says what it’s cited for. Each view is summarised the way its own holders put it, and none is marked right or wrong.</p>
-          : <p>A typed question is mapped by AI from live web search. It only links pages it actually found, and opens each one to check it loads. It doesn’t pick a side, so read the sources themselves.</p>}
+          ? <p>{t('This example was researched in {date}. Every link was opened and read to confirm it says what it’s cited for. Each view is summarised the way its own holders put it, and none is marked right or wrong.', { date: !map.preparedOn || map.preparedOn === 'November 2026' ? t('November 2026') : map.preparedOn })}</p>
+          : <p>{t('A typed question is mapped by AI from live web search. It only links pages it actually found, and opens each one to check it loads. It doesn’t pick a side, so read the sources themselves.')}</p>}
       </footer>
     </div>
   );

@@ -1,5 +1,5 @@
 /* Feedback: the sidebar button, its dialog, and the owner's inbox. */
-.fb-open { width: 100%; background: none; border: none; cursor: pointer; text-align: left; font: inherit; }
+.fb-open { width: 100%; background: none; border: none; cursor: pointer; text-align: start; font: inherit; }
 .fb-open:focus-visible, .fb-kinds button:focus-visible, .fb-x:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
 
 dialog.fb { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); color: var(--ink); box-shadow: 0 12px 40px rgba(26, 22, 18, 0.22); }
@@ -17,8 +17,8 @@ dialog.fb::backdrop { background: rgba(26, 22, 18, 0.35); }
 .fb-check { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
 .fb-check input { margin: 3px 0 0; accent-color: var(--accent); width: 16px; height: 16px; flex: 0 0 auto; }
 .fb-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.fb-count { margin-left: auto; font-family: var(--mono); font-size: 11px; }
-.side-badge { margin-left: auto; min-width: 18px; padding: 0 6px; border-radius: 9px; background: var(--accent); color: #fbf6ee; font-family: var(--mono); font-size: 10.5px; line-height: 18px; text-align: center; }
+.fb-count { margin-inline-start: auto; font-family: var(--mono); font-size: 11px; }
+.side-badge { margin-inline-start: auto; min-width: 18px; padding: 0 6px; border-radius: 9px; background: var(--accent); color: #fbf6ee; font-family: var(--mono); font-size: 10.5px; line-height: 18px; text-align: center; }
 
 .fb-list { list-style: none; margin: 10px 0 0; padding: 0; }
 .fb-list li { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); display: grid; gap: 4px; }

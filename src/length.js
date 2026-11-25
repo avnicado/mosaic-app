@@ -7,6 +7,7 @@
 // from what kind of thing it is and where it comes from, marked
 // length_by 'estimate' so a card can say "about".
 import { normalizeMediaType } from './media.js';
+import { t } from './i18n/index.js';
 
 export const WPM = 230;
 
@@ -61,11 +62,11 @@ export function withLength(item) {
 export function fmtMinutes(m) {
   if (!valid(m)) return '';
   const r = Math.round(m);
-  if (r < 60) return `${r} min`;
+  if (r < 60) return t('{n} min', { n: r });
   const h = Math.floor(r / 60), mm = r % 60;
-  return `${h} hr${mm ? ` ${mm} min` : ''}`;
+  return mm ? t('{h} hr {m} min', { h, m: mm }) : t('{h} hr', { h });
 }
 export const shortMinutes = (m) => (m < 60 ? `${Math.round(m)}′` : `${(m / 60).toFixed(1).replace('.0', '')}h`);
 // "12 min", or "about 15 min" when it's an estimate.
 export const lengthText = (item) => (valid(item?.minutes)
-  ? `${item.length_by === 'estimate' ? 'about ' : ''}${fmtMinutes(item.minutes)}` : '');
+  ? (item.length_by === 'estimate' ? t('about {time}', { time: fmtMinutes(item.minutes) }) : fmtMinutes(item.minutes)) : '');

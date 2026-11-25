@@ -8,6 +8,7 @@ import { readThread, analyzeImage, judgeMovement, effectHistory, applyCorrection
 import { fillSlot, repeatsMaker, avoidList } from '../engine/feed.js';
 import { tagItems, vocabulary } from '../engine/tags.js';
 import { SLOTS } from '../engine/prompts.js';
+import { t } from '../i18n/index.js';
 
 // ---- busy state ------------------------------------------------------------
 // busy[threadId] = { reading?:true, filling?:Set(slot), judging?:true, error?:string }
@@ -57,19 +58,19 @@ const shownUrls = (threadId) => R.itemsFor(threadId).map((i) => i.url).filter(Bo
 // Create a thread, read it, and open its first session (feed fills in background).
 // opts: { text, seed, image:{base64, mediaType, thumbnail, observation}, parentId, spawnAnchor }
 export async function createThread({ text, seed = null, image = null, parentId = null, spawnAnchor = null }) {
-  if (!text || !text.trim()) throw new Error('Write the question first.');
-  const t = R.newThread({
+  if (!text || !text.trim()) throw new Error(t('Write the question first.'));
+  const th = R.newThread({
     text, seed, parentId, spawnAnchor,
     image: image ? { observation: image.observation || '', thumbnail: image.thumbnail || null } : null,
   });
   if (parentId) R.touch(parentId);
   // Fire and forget: the page shows progress from busy state.
   (async () => {
-    await reread(t.id, image);
-    if (!R.getThread(t.id)?.reading) return;
-    await newFeed(t.id);
+    await reread(th.id, image);
+    if (!R.getThread(th.id)?.reading) return;
+    await newFeed(th.id);
   })();
-  return t.id;
+  return th.id;
 }
 
 export async function reread(threadId, image = null) {
@@ -78,7 +79,7 @@ export async function reread(threadId, image = null) {
     const reading = await readThread(buildContext(threadId), image && image.base64 ? image : null);
     R.patchThread(threadId, { reading, readAt: Date.now() });
   } catch (e) {
-    setBusy(threadId, { error: `Couldn't read the thread: ${errText(e)}` });
+    setBusy(threadId, { error: t("Couldn't read the thread: {error}", { error: errText(e) }) });
   } finally {
     setBusy(threadId, { reading: false });
   }
@@ -207,7 +208,7 @@ export async function fillMissing(threadId) {
       done(item.slot);
     }
   } catch (e) {
-    setBusy(threadId, { error: `Feed stopped: ${errText(e)}` });
+    setBusy(threadId, { error: t('Feed stopped: {error}', { error: errText(e) }) });
   } finally {
     setBusy(threadId, { filling: new Set() });
   }
@@ -230,7 +231,7 @@ export async function replaceItem(itemId) {
     R.patchItem(itemId, { replacedBy: item.id });
     R.patchSession(sessionId, (s) => ({ itemIds: s.itemIds.map((id) => (id === itemId ? item.id : id)) }));
   } catch (e) {
-    setBusy(threadId, { error: `Couldn't find another item: ${errText(e)}` });
+    setBusy(threadId, { error: t("Couldn't find another item: {error}", { error: errText(e) }) });
   } finally {
     const f = new Set(getBusy(threadId).filling || []); f.delete(slot);
     setBusy(threadId, { filling: f });
@@ -241,7 +242,7 @@ export async function replaceItem(itemId) {
 // judges the movement against the articulation it opened with.
 export async function restate(threadId, text, note = '') {
   text = (text || '').trim();
-  if (!text) throw new Error('Write where the question is now.');
+  if (!text) throw new Error(t('Write where the question is now.'));
   const s = R.openSessionFor(threadId);
   if (!s) {
     R.patchThread(threadId, (t) => ({ articulations: [...t.articulations, { text, at: Date.now(), sessionId: null }], touchedAt: Date.now() }));
@@ -260,7 +261,7 @@ export async function restate(threadId, text, note = '') {
     R.patchThread(threadId, (t) => ({ articulations: [...t.articulations, { text, at: Date.now(), sessionId: s.id }], touchedAt: Date.now() }));
     return diff;
   } catch (e) {
-    setBusy(threadId, { error: `Couldn't judge the movement: ${errText(e)} — your restatement is not lost; try again.` });
+    setBusy(threadId, { error: t("Couldn't judge the movement: {error} — your restatement is not lost; try again.", { error: errText(e) }) });
     throw e;
   } finally {
     setBusy(threadId, { judging: false });

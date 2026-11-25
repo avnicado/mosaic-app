@@ -21,6 +21,8 @@ import { getSessionInfo } from '../session.js';
 import { Icon } from './icons.jsx';
 import Reader from './reader/Reader.jsx';
 import { FeedbackButton, useUnreadFeedback } from './feedback/Feedback.jsx';
+import { t, useLang, applyDocument } from '../i18n/index.js';
+import '../i18n/rtl.css';
 
 function Sidebar({ route, onNavigate }) {
   const [showClosed, setShowClosed] = useState(false);
@@ -39,48 +41,48 @@ function Sidebar({ route, onNavigate }) {
   const link = (name, path, label, icon, badge = 0) => (
     <a href={'#' + path} className={`side-link ${route.name === name ? 'active' : ''}`} onClick={onNavigate}>
       <Icon name={icon} size={17} />{label}
-      {badge > 0 && <span className="side-badge" title={`${badge} unread feedback`}>{badge}</span>}
+      {badge > 0 && <span className="side-badge" title={t('{n} unread feedback', { n: badge })}>{badge}</span>}
     </a>
   );
-  const threadLink = (t, cls = '') => (
-    <a key={t.id} href={'#' + threadPath(t.id)} onClick={onNavigate}
-      className={`side-thread ${cls} ${route.name === 'thread' && route.id === t.id ? 'active' : ''}`}
-      title={R.currentArticulation(t)}>
-      <span className="clamp">{open.has(t.id) && <span className="open-dot" title="session in progress" />}{R.currentArticulation(t)}</span>
+  const threadLink = (th, cls = '') => (
+    <a key={th.id} href={'#' + threadPath(th.id)} onClick={onNavigate}
+      className={`side-thread ${cls} ${route.name === 'thread' && route.id === th.id ? 'active' : ''}`}
+      title={R.currentArticulation(th)}>
+      <span className="clamp">{open.has(th.id) && <span className="open-dot" title={t('session in progress')} />}{R.currentArticulation(th)}</span>
     </a>
   );
   return (
-    <nav className="sidebar" aria-label="Main">
-      <a className="brand" href="#/" onClick={onNavigate}><Icon name="mosaic" size={20} className="brand-ic" />Mosaic<span className="brand-alpha">alpha</span></a>
-      <a className="btn primary side-new" href="#/new" onClick={onNavigate}><Icon name="plus" size={15} /> New thread</a>
-      {link('desk', '/', 'Desk', 'desk')}
-      {link('quests', '/quests', 'Quests', 'quest')}
-      {quests.length > 0 && <div className="side-section">Quests</div>}
+    <nav className="sidebar" aria-label={t('Main')}>
+      <a className="brand" href="#/" onClick={onNavigate}><Icon name="mosaic" size={20} className="brand-ic" />{t('Mosaic')}<span className="brand-alpha">{t('alpha')}</span></a>
+      <a className="btn primary side-new" href="#/new" onClick={onNavigate}><Icon name="plus" size={15} /> {t('New thread')}</a>
+      {link('desk', '/', t('Desk'), 'desk')}
+      {link('quests', '/quests', t('Quests'), 'quest')}
+      {quests.length > 0 && <div className="side-section">{t('Quests')}</div>}
       {quests.map((q) => (
         <a key={q.id} href={'#' + questPath(q.id)} onClick={onNavigate} title={q.title}
           className={`side-thread side-quest ${route.name === 'quest' && route.id === q.id ? 'active' : ''}`}>
           <span className="clamp">{q.title}</span>
         </a>
       ))}
-      <div className="side-section">Threads</div>
-      {active.length ? active.map((t) => threadLink(t)) : <div className="side-link muted" style={{ fontStyle: 'italic' }}>None yet</div>}
-      {quiet.length > 0 && <div className="side-section">Quiet</div>}
+      <div className="side-section">{t('Threads')}</div>
+      {active.length ? active.map((t) => threadLink(t)) : <div className="side-link muted" style={{ fontStyle: 'italic' }}>{t('None yet')}</div>}
+      {quiet.length > 0 && <div className="side-section">{t('Quiet')}</div>}
       {quiet.map((t) => threadLink(t, 'quiet'))}
       {closed.length > 0 && (
         <div className="side-section">
-          Closed · {closed.length}
-          <button onClick={() => setShowClosed((v) => !v)}>{showClosed ? 'hide' : 'show'}</button>
+          {t('Closed · {n}', { n: closed.length })}
+          <button onClick={() => setShowClosed((v) => !v)}>{showClosed ? t('hide') : t('show')}</button>
         </div>
       )}
       {showClosed && closed.map((t) => threadLink(t, 'closed'))}
       <SharedSection route={route} onNavigate={onNavigate} />
       <div className="side-spacer" />
       <div className="side-foot">
-        {link('promenade', '/promenade', 'Promenade', 'promenade')}
-        {link('library', '/library', 'Library', 'library')}
+        {link('promenade', '/promenade', t('Promenade'), 'promenade')}
+        {link('library', '/library', t('Library'), 'library')}
         <WhatsNewLink active={route.name === 'whats-new'} onNavigate={onNavigate} />
         <FeedbackButton page={route.name} />
-        {link('settings', '/settings', 'Settings', 'settings', unreadFeedback)}
+        {link('settings', '/settings', t('Settings'), 'settings', unreadFeedback)}
         <SignedInAs />
       </div>
     </nav>
@@ -91,9 +93,9 @@ function WhatsNewLink({ active, onNavigate }) {
   const unseen = useHasUnseen();
   return (
     <a href="#/whats-new" className={`side-link ${active ? 'active' : ''}`} onClick={onNavigate}
-      title={unseen ? `Version ${CURRENT_VERSION} is new since you last looked` : `Version ${CURRENT_VERSION}`}>
-      <Icon name="news" size={17} />What’s new
-      <span className="wn-side">{unseen && <span className="wn-dot" aria-label="new" />}{CURRENT_VERSION}</span>
+      title={unseen ? t('Version {v} is new since you last looked', { v: CURRENT_VERSION }) : t('Version {v}', { v: CURRENT_VERSION })}>
+      <Icon name="news" size={17} />{t('What’s new')}
+      <span className="wn-side">{unseen && <span className="wn-dot" aria-label={t('new')} />}{CURRENT_VERSION}</span>
     </a>
   );
 }
@@ -104,7 +106,7 @@ function SharedSection({ route, onNavigate }) {
   if (!others.length) return null;
   return (
     <>
-      <div className="side-section">Shared with you</div>
+      <div className="side-section">{t('Shared with you')}</div>
       {others.map((s) => (
         <a key={s.owner.id + s.threadId} href={'#' + sharedPath(s.owner.id, s.threadId)} onClick={onNavigate}
           className={`side-thread shared ${route.name === 'shared' && route.id === s.threadId ? 'active' : ''}`}
@@ -123,12 +125,16 @@ function SignedInAs() {
   return (
     <div className="side-user">
       <span>{user.name}</span>
-      <a href="/?logout" className="btn link"><Icon name="signout" size={14} /> Sign out</a>
+      <a href="/?logout" className="btn link"><Icon name="signout" size={14} /> {t('Sign out')}</a>
     </div>
   );
 }
 
 export default function App() {
+  // A language switch remounts the whole app, so every string, date and memoised
+  // label is built again in the new language.
+  const lang = useLang();
+  useEffect(() => { applyDocument(); }, [lang]);
   useEffect(() => { startSharing(); }, []);
   const route = useRoute();
   const unseen = useHasUnseen();
@@ -151,12 +157,12 @@ export default function App() {
     default: page = <Desk />;
   }
   return (
-    <div className={`app ${drawer ? 'drawer-open' : ''}`}>
+    <div key={lang} className={`app ${drawer ? 'drawer-open' : ''}`}>
       <Sidebar route={route} onNavigate={() => setDrawer(false)} />
       <div className="main" onClick={() => drawer && setDrawer(false)}>
         <header className="topbar">
-          <button className="menu-btn" aria-label="Menu" onClick={(e) => { e.stopPropagation(); setDrawer(true); }}><Icon name="menu" size={20} />{unseen && <span className="wn-dot" />}</button>
-          <a className="brand" href="#/"><Icon name="mosaic" size={18} className="brand-ic" />Mosaic</a>
+          <button className="menu-btn" aria-label={t('Menu')} onClick={(e) => { e.stopPropagation(); setDrawer(true); }}><Icon name="menu" size={20} />{unseen && <span className="wn-dot" />}</button>
+          <a className="brand" href="#/"><Icon name="mosaic" size={18} className="brand-ic" />{t('Mosaic')}</a>
         </header>
         {page}
       </div>

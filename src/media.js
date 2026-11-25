@@ -1,32 +1,35 @@
 // What kind of thing an item is, and what you do with it. Pure; shared by the
 // engine (prompts, tagging), the UI (chips, open buttons) and the mosaic.
 
+import { t } from './i18n/index.js';
+
 // Canonical media types. `family` is what you do with it: read, watch, listen,
 // look at, or join in on.
+// Labels are getters so they read in the interface language at the moment they're shown.
 export const MEDIA = {
-  article:   { family: 'read',   label: 'Article' },
-  essay:     { family: 'read',   label: 'Essay' },
-  paper:     { family: 'read',   label: 'Paper' },
-  book:      { family: 'read',   label: 'Book' },
-  reference: { family: 'read',   label: 'Reference' },
-  video:     { family: 'watch',  label: 'Video' },
-  lecture:   { family: 'watch',  label: 'Lecture' },
-  film:      { family: 'watch',  label: 'Film' },
-  podcast:   { family: 'listen', label: 'Podcast' },
-  interview: { family: 'listen', label: 'Interview' },
-  music:     { family: 'listen', label: 'Music' },
-  art:       { family: 'look',   label: 'Art' },
-  forum:     { family: 'talk',   label: 'Discussion' },
-  web:       { family: 'read',   label: 'Web page' },
+  article:   { family: 'read',   get label() { return t('Article'); } },
+  essay:     { family: 'read',   get label() { return t('Essay'); } },
+  paper:     { family: 'read',   get label() { return t('Paper'); } },
+  book:      { family: 'read',   get label() { return t('Book'); } },
+  reference: { family: 'read',   get label() { return t('Reference'); } },
+  video:     { family: 'watch',  get label() { return t('Video'); } },
+  lecture:   { family: 'watch',  get label() { return t('Lecture'); } },
+  film:      { family: 'watch',  get label() { return t('Film'); } },
+  podcast:   { family: 'listen', get label() { return t('Podcast'); } },
+  interview: { family: 'listen', get label() { return t('Interview'); } },
+  music:     { family: 'listen', get label() { return t('Music'); } },
+  art:       { family: 'look',   get label() { return t('Art'); } },
+  forum:     { family: 'talk',   get label() { return t('Discussion'); } },
+  web:       { family: 'read',   get label() { return t('Web page'); } },
 };
 export const MEDIA_TYPES = Object.keys(MEDIA).filter((k) => k !== 'web');
 
 export const FAMILY = {
-  read:   { verb: 'Read',   label: 'Reading' },
-  watch:  { verb: 'Watch',  label: 'Watching' },
-  listen: { verb: 'Listen', label: 'Listening' },
-  look:   { verb: 'View',   label: 'Looking' },
-  talk:   { verb: 'Read the discussion', label: 'Discussion' },
+  read:   { get verb() { return t('Read'); },   get label() { return t('Reading'); } },
+  watch:  { get verb() { return t('Watch'); },  get label() { return t('Watching'); } },
+  listen: { get verb() { return t('Listen'); }, get label() { return t('Listening'); } },
+  look:   { get verb() { return t('View'); },   get label() { return t('Looking'); } },
+  talk:   { get verb() { return t('Read the discussion'); }, get label() { return t('Discussion'); } },
 };
 
 // Older records and models use other words for the same things.
@@ -72,7 +75,7 @@ export function normalizeMediaType(type, url = '') {
 export const mediaInfo = (type, url) => {
   const t = normalizeMediaType(type, url);
   const m = MEDIA[t];
-  return { type: t, ...m, verb: FAMILY[m.family].verb };
+  return { type: t, family: m.family, label: m.label, verb: FAMILY[m.family].verb };
 };
 
 // Broad fields: a fixed list so panels in the mosaic stay stable and comparable.

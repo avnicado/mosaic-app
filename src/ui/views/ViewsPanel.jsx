@@ -8,6 +8,7 @@ import { currentViews, wantsAutoCheck, requestViews, setViewsOpen } from '../../
 import { Spinner } from '../kit.jsx';
 import ViewsMandala from './ViewsMandala.jsx';
 import './views.css';
+import { t, loc } from '../../i18n/index.js';
 
 export default function ViewsPanel({ thread }) {
   const admin = isOwner();
@@ -25,12 +26,12 @@ export default function ViewsPanel({ thread }) {
   if (!admin || thread.status === 'closed') return null;
 
   const show = () => requestViews(thread.id, { force: true });
-  const tag = <span className="vp-admin" title="Only the admin sees this for now">admin</span>;
+  const tag = <span className="vp-admin" title={t('Only the admin sees this for now')}>{t('admin')}</span>;
 
   if (working) {
     return (
       <section className="vp vp-quiet" aria-live="polite">
-        <Spinner /> <span>{working === 'map' ? 'Mapping the views on this question and finding someone who holds each one…' : 'Checking whether this question is contested…'}</span>
+        <Spinner /> <span>{working === 'map' ? t('Mapping the views on this question and finding someone who holds each one…') : t('Checking whether this question is contested…')}</span>
         {tag}
       </section>
     );
@@ -38,28 +39,28 @@ export default function ViewsPanel({ thread }) {
 
   if (v?.status === 'divisive' && v.views?.length) {
     return (
-      <section className="vp section" aria-label="The views on this question">
+      <section className="vp section" aria-label={t('The views on this question')}>
         <div className="vp-head">
           <div>
-            <div className="eyebrow">Contested{v.topic ? ` · ${v.topic}` : ''}</div>
-            <h2 className="vp-title">How the views split</h2>
+            <div className="eyebrow">{t('Contested')}{v.topic ? ` · ${v.topic}` : ''}</div>
+            <h2 className="vp-title">{t('How the views split')}</h2>
           </div>
           <span className="th-spacer" />
           {tag}
-          <button className="btn small" onClick={() => setViewsOpen(thread.id, !v.open)}>{v.open ? 'Hide' : 'Show the views'}</button>
+          <button className="btn small" onClick={() => setViewsOpen(thread.id, !v.open)}>{v.open ? t('Hide') : t('Show the views')}</button>
         </div>
         {v.open && (
           <>
             <p className="vp-why">
-              {v.why} Each slice is a view and each ring a crux: a specific claim the views answer differently, not a value they all say they hold.
+              {v.why} {t('Each slice is a view and each ring a crux: a specific claim the views answer differently, not a value they all say they hold.')}
               {v.leanWhy ? ` ${v.leanWhy}` : ''}
             </p>
             <ViewsMandala map={v} />
             {v.settled?.length > 0 && (
-              <p className="vp-settled"><span className="label">Not in dispute</span> {v.settled.join(' · ')}</p>
+              <p className="vp-settled"><span className="label">{t('Not in dispute')}</span> {v.settled.join(' · ')}</p>
             )}
             <div className="vp-foot">
-              <span className="th-hint">Mapped {new Date(v.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} for this wording. A machine reading: check the pieces themselves.</span>
+              <span className="th-hint">{t('Mapped {date} for this wording. A machine reading: check the pieces themselves.', { date: new Date(v.at).toLocaleDateString(loc(), { month: 'short', day: 'numeric' }) })}</span>
             </div>
           </>
         )}
@@ -69,15 +70,15 @@ export default function ViewsPanel({ thread }) {
 
   // No map: the button, with a word on what the check found, if it ran.
   const note = v?.error
-    ? `Couldn’t map the views: ${v.error}`
+    ? t('Couldn’t map the views: {error}', { error: v.error })
     : v?.status === 'settled'
-      ? `No sides to map: the core of this is settled. ${v.why || ''}`
+      ? t('No sides to map: the core of this is settled. {why}', { why: v.why || '' })
       : v?.status === 'not' && v.force
-        ? `No real public sides came up. ${v.why || ''}`
+        ? t('No real public sides came up. {why}', { why: v.why || '' })
         : null;
   return (
     <section className="vp vp-quiet">
-      <button className="btn small ghost" onClick={show}>◐ Show the views</button>
+      <button className="btn small ghost" onClick={show}>◐ {t('Show the views')}</button>
       {note && <span className="th-hint vp-note">{note}</span>}
       {tag}
     </section>

@@ -11,32 +11,36 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { PARTS, hunchStems, nearHunch, leanParts, itemRing, fitsLean, LEAN_SHELF_SIZE, DENSITY_RING_COUNT } from '../../scoring.js';
 import { lengthText, shortMinutes, fmtMinutes } from '../../length.js';
-import { RING_BLURB, admittedOf } from './mandala.js';
+import { RING_BLURB, ringBlurb, admittedOf } from './mandala.js';
 import {
   SIZE, C, INNER, R, SHORT, slicesFor, cutSlice, isCut, polar, hsl, greyed, tesseraHSL, fieldHue, depthT,
 } from './tiles.js';
 import ShelfCard from './ShelfCard.jsx';
+import { t, tp } from '../../i18n/index.js';
 import './mandala.css';
 
+// Shown text is read through getters, so it follows a language change.
 export const MOVES = {
-  sharpen: { ask: 'Go deeper', phrase: 'that go deeper', why: 'it cuts closer to a frame' },
-  complicate: { ask: 'Push back on me', phrase: 'that push back', why: 'it resists the easy framing' },
-  bridge: { ask: 'Surprise me', phrase: 'from somewhere unexpected', why: 'the same shape in a different field' },
-  ground: { ask: 'Something concrete', phrase: 'that stay concrete', why: 'a specific, concrete case' },
+  sharpen: { get ask() { return t('Go deeper'); }, get phrase() { return t('that go deeper'); }, get why() { return t('it cuts closer to a frame'); } },
+  complicate: { get ask() { return t('Push back on me'); }, get phrase() { return t('that push back'); }, get why() { return t('it resists the easy framing'); } },
+  bridge: { get ask() { return t('Surprise me'); }, get phrase() { return t('from somewhere unexpected'); }, get why() { return t('the same shape in a different field'); } },
+  ground: { get ask() { return t('Something concrete'); }, get phrase() { return t('that stay concrete'); }, get why() { return t('a specific, concrete case'); } },
 };
-const RING_PHRASE = ['that barely scratch the surface', 'that are a light read', 'with some substance', 'that are demanding', 'as dense as they get'];
+const ringPhrase = (i) => [t('that barely scratch the surface'), t('that are a light read'), t('with some substance'), t('that are demanding'), t('as dense as they get')][i];
+// Left in English on purpose: a hunch is matched against the pieces' own
+// (English) words and sent to the server to search with.
 const HUNCH_EXAMPLES = ['something about cities', 'how things wear out', 'maps', 'time'];
-const METER_CAPTION = [
-  'Wide open. A good way to start when you’re not sure.',
-  'A light lean.',
-  'Leaning some.',
-  'Leaning in.',
-  'As focused as it gets, short of a question.',
-];
+const meterCaption = (i) => [
+  t('Wide open. A good way to start when you’re not sure.'),
+  t('A light lean.'),
+  t('Leaning some.'),
+  t('Leaning in.'),
+  t('As focused as it gets, short of a question.'),
+][i];
 const PHONE_SHORT = { 'sport & play': 'sport' };
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-export const andList = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+export const andList = (a) => (a.length < 2 ? a.join('') : t('{list} and {last}', { list: a.slice(0, -1).join(', '), last: a[a.length - 1] }));
 
 function useMedia(query) {
   const get = () => typeof matchMedia !== 'undefined' && matchMedia(query).matches;
@@ -81,17 +85,19 @@ function togglePart(lean, d, p) {
 export function leanStatement(lean) {
   const zoom = lean.fields[0] || null;
   const parts = zoom ? leanParts(lean, zoom) : [];
-  const where = zoom ? `in ${zoom}${parts.length ? ` (${andList(parts)})` : ''}` : 'anywhere';
-  const bits = [lean.ring != null ? RING_PHRASE[lean.ring] : '', lean.mood ? MOVES[lean.mood].phrase : ''].filter(Boolean);
-  if (!zoom && !bits.length) return 'Wide open. Every tile is lit';
-  return bits.length ? `Pieces ${bits.join(' and ')}, ${where}` : `Anything ${where}`;
+  const where = zoom
+    ? (parts.length ? t('in {field} ({parts})', { field: t(zoom), parts: andList(parts.map((p) => t(p))) }) : t('in {field}', { field: t(zoom) }))
+    : t('anywhere');
+  const bits = [lean.ring != null ? ringPhrase(lean.ring) : '', lean.mood ? MOVES[lean.mood].phrase : ''].filter(Boolean);
+  if (!zoom && !bits.length) return t('Wide open. Every tile is lit');
+  return bits.length ? t('Pieces {what}, {where}', { what: andList(bits), where }) : t('Anything {where}', { where });
 }
 
 function whyHere(it, lit, stems) {
-  let s = `${cap(RING_BLURB[itemRing(it)])}, and ${MOVES[it.slot]?.why || 'it fits the day'}.`;
-  if (stems.length && nearHunch(it, stems)) s += ' Near your hunch.';
-  if (!lit) s += ' Outside your lean.';
-  if (it.found_by === 'search') s += ' Found today by looking further.';
+  let s = t('{depth}, and {why}.', { depth: cap(ringBlurb(itemRing(it))), why: MOVES[it.slot]?.why || t('it fits the day') });
+  if (stems.length && nearHunch(it, stems)) s += ' ' + t('Near your hunch.');
+  if (!lit) s += ' ' + t('Outside your lean.');
+  if (it.found_by === 'search') s += ' ' + t('Found today by looking further.');
   return s;
 }
 
@@ -271,7 +277,7 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
     const a0 = s.a0, a1 = s.a0 + s.sweep, mid = (a0 + a1) / 2;
     const lower = Math.sin(mid) > 0.05;
     const n = s.items.filter(fits).length;
-    const name = phone && !zoom ? (PHONE_SHORT[s.domain] || s.label) : s.label;
+    const name = t(phone && !zoom ? (PHONE_SHORT[s.domain] || s.label) : s.label);
     const words = leaning || (zoom && zoomParts.length) ? `${name} ${n}` : name;
     const arcLen = Math.min(s.sweep, 2.6) * (R + 10) * 0.92;
     const fs = Math.max(8.5 * k, Math.min(rimPx * k, arcLen / (words.length * 0.6)));
@@ -287,7 +293,9 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
       <g key={s.key} className={`tm-rim-g ${act ? 'act' : ''}`}
         {...(act ? {
           tabIndex: 0, role: 'button',
-          'aria-label': zoom ? `${s.part}${on ? ', chosen' : ''}. ${s.items.length} pieces` : `Step into ${s.domain}. ${s.items.length} pieces`,
+          'aria-label': zoom
+            ? (on ? t('{part}, chosen. {n} pieces', { part: t(s.part), n: s.items.length }) : t('{part}. {n} pieces', { part: t(s.part), n: s.items.length }))
+            : t('Step into {field}. {n} pieces', { field: t(s.domain), n: s.items.length }),
           'aria-pressed': zoom ? on : undefined,
           onClick: (e) => { e.stopPropagation(); act(); }, onKeyDown: onKey(act),
         } : { 'aria-hidden': true })}>
@@ -327,45 +335,48 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
       key={activeTile.url} startHolding={holding === activeTile.url}>
       {!zoom && (
         <button type="button" className="btn link tm-step" onClick={(e) => { e.stopPropagation(); stepInto(activeTile.it.domain); }}>
-          Step into {SHORT[activeTile.it.domain]}
+          {t('Step into {field}', { field: t(SHORT[activeTile.it.domain]) })}
         </button>
       )}
     </ShelfCard>
   );
 
   return (
-    <section className="tm" aria-label="Today’s pieces, tiled into the Mandala">
+    <section className="tm" aria-label={t('Today’s pieces, tiled into the Mandala')}>
       <div className="tm-stage" ref={stageRef}>
-        <nav className="tm-crumbs" aria-label="Where you are on the Mandala">
+        <nav className="tm-crumbs" aria-label={t('Where you are on the Mandala')}>
           {zoom ? (
             <>
-              <button type="button" onClick={stepOut}>All fields</button>
+              <button type="button" onClick={stepOut}>{t('All fields')}</button>
               <span className="sep" aria-hidden>›</span>
-              <span className="here">{zoom}</span>
-              <span className="note">its parts</span>
+              <span className="here">{t(zoom)}</span>
+              <span className="note">{t('its parts')}</span>
             </>
-          ) : (<><span className="here">All fields</span><span className="note">Tap a name to step inside</span></>)}
+          ) : (<><span className="here">{t('All fields')}</span><span className="note">{t('Tap a name to step inside')}</span></>)}
         </nav>
 
         <svg ref={svgRef} key={zoom || 'all'}
           className={`tm-svg ${zoom ? 'zoomed' : ''} ${phone ? 'phone' : ''} ${anim}`}
           viewBox={`${C - half} ${C - half} ${half * 2} ${half * 2}`}
-          role="group" aria-label={zoom ? `Inside ${zoom}: ${inView.length} pieces` : `Today’s ${pool.length} pieces, tiled by field`}>
+          role="group" aria-label={zoom ? t('Inside {field}: {n} pieces', { field: t(zoom), n: inView.length }) : t('Today’s {n} pieces, tiled by field', { n: pool.length })}>
           <circle cx={C} cy={C} r={R + 1} className="tm-ground" />
           <g>
-            {tiles.map((t) => (
-              <path key={t.url} ref={(el) => { if (el) tileEls.current.set(t.url, el); else tileEls.current.delete(t.url); }}
-                d={t.d} fill={fillOf(t)} className="tm-tile" tabIndex={0} role="button"
-                aria-label={`${t.it.title}, ${t.it.source || ''}, ${lengthText(t.it)}${leaning && !fits(t.it) ? ', outside your lean' : ''}`}
-                onPointerEnter={onEnter(t.url)} onPointerLeave={onLeave}
-                onClick={onTileClick(t.url)} onKeyDown={onTileKey(t.url)} />
-            ))}
+            {tiles.map((tile) => {
+              const piece = `${tile.it.title}, ${tile.it.source || ''}, ${lengthText(tile.it)}`;
+              return (
+                <path key={tile.url} ref={(el) => { if (el) tileEls.current.set(tile.url, el); else tileEls.current.delete(tile.url); }}
+                  d={tile.d} fill={fillOf(tile)} className="tm-tile" tabIndex={0} role="button"
+                  aria-label={leaning && !fits(tile.it) ? t('{piece}, outside your lean', { piece }) : piece}
+                  onPointerEnter={onEnter(tile.url)} onPointerLeave={onLeave}
+                  onClick={onTileClick(tile.url)} onKeyDown={onTileKey(tile.url)} />
+              );
+            })}
           </g>
           <g aria-hidden className="tm-marks">
             {spans.map((s) => { const [x0, y0] = polar(INNER - 2, s.a0), [x1, y1] = polar(R + 1, s.a0); return <line key={s.key} x1={x0} y1={y0} x2={x1} y2={y1} className="tm-seam" />; })}
             {spans.filter((s) => !s.items.length && s.sweep > 0.6).map((s) => {
               const [mx, my] = polar((INNER + R) / 2, s.a0 + s.sweep / 2);
-              return <text key={s.key} x={mx} y={my} className="tm-empty" fontSize={(10.5 * k).toFixed(1)}>none today</text>;
+              return <text key={s.key} x={mx} y={my} className="tm-empty" fontSize={(10.5 * k).toFixed(1)}>{t('none today')}</text>;
             })}
             {stems.length > 0 && tiles.filter((t) => (!leaning || fits(t.it)) && nearHunch(t.it, stems)).map((t) => <path key={t.url} d={t.d} className="tm-hunch" />)}
           </g>
@@ -376,16 +387,16 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
           </g>
           <g>{rim}</g>
           {zoom ? (
-            <g className="tm-hub back" tabIndex={0} role="button" aria-label="Back to all fields"
+            <g className="tm-hub back" tabIndex={0} role="button" aria-label={t('Back to all fields')}
               onClick={(e) => { e.stopPropagation(); stepOut(); }} onKeyDown={onKey(stepOut)}>
               <circle cx={C} cy={C} r={INNER - 5} />
-              <text x={C} y={C - 7 * k} fontSize={(10 * k).toFixed(1)}>‹ all</text>
-              <text x={C} y={C + 8 * k} fontSize={(10 * k).toFixed(1)}>fields</text>
+              <text x={C} y={C - 7 * k} fontSize={(10 * k).toFixed(1)}>{t('‹ all#hub')}</text>
+              <text x={C} y={C + 8 * k} fontSize={(10 * k).toFixed(1)}>{t('fields#hub')}</text>
             </g>
           ) : (
             <g className="tm-hub" aria-hidden>
               <circle cx={C} cy={C} r={INNER - 5} />
-              <text x={C} y={C - 6 * k} fontSize={(10 * k).toFixed(1)}>today</text>
+              <text x={C} y={C - 6 * k} fontSize={(10 * k).toFixed(1)}>{t('today')}</text>
               <text x={C} y={C + 9 * k} fontSize={(12 * k).toFixed(1)}>{pool.length}</text>
             </g>
           )}
@@ -393,15 +404,15 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
 
         <p className="tm-hint">
           {sheet
-            ? (zoom ? 'Bigger tiles carry their titles. Tap any tile for its card.' : 'Tap a tile for its card. Small tiles show only colour, so step into a field to read titles.')
-            : (zoom ? 'Bigger tiles carry their titles. Point at any tile for its card, click to keep it open.' : 'Point at a tile for its card, click to keep it open. The number on a tile is its length.')}
+            ? (zoom ? t('Bigger tiles carry their titles. Tap any tile for its card.') : t('Tap a tile for its card. Small tiles show only colour, so step into a field to read titles.'))
+            : (zoom ? t('Bigger tiles carry their titles. Point at any tile for its card, click to keep it open.') : t('Point at a tile for its card, click to keep it open. The number on a tile is its length.'))}
         </p>
 
         {!sheet && activeTile && (
           <div className="tm-pop" ref={popRef} style={popAt ? { left: popAt.left, top: popAt.top } : { visibility: 'hidden', left: 0, top: 0 }}
             onPointerEnter={() => clearTimeout(hoverTimer.current)}
             onPointerLeave={(e) => { if (!pinned) onLeave(e); }}>
-            {pinned && <button type="button" className="tm-x" aria-label="Close" onClick={() => { setPinned(null); setHolding(null); }}>×</button>}
+            {pinned && <button type="button" className="tm-x" aria-label={t('Close')} onClick={() => { setPinned(null); setHolding(null); }}>×</button>}
             {card}
           </div>
         )}
@@ -409,30 +420,33 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
 
       <div className="tm-panel">
         <div className="tm-now">
-          <div className="label">Your lean</div>
+          <div className="label">{t('Your lean')}</div>
           <p className="tm-statement">
-            {leanStatement(lean)}
-            {(lean.hunch || '').trim() && <>, leaning toward <em>“{lean.hunch.trim()}”</em></>}.
+            {(lean.hunch || '').trim()
+              ? t('{lean}, leaning toward {hunch}.', { lean: leanStatement(lean), hunch: <em>“{lean.hunch.trim()}”</em> })
+              : `${leanStatement(lean)}.`}
           </p>
           <div className="tm-meter" aria-hidden>{meterSteps.map((on, i) => <span key={i} className={on ? 'on' : ''} />)}</div>
-          <p className="tm-meter-cap">{METER_CAPTION[meterN]}</p>
+          <p className="tm-meter-cap">{meterCaption(meterN)}</p>
           <p className="tm-count" aria-live="polite">
             {leaning
-              ? <><strong>{lit.length}</strong> of {inView.length} pieces lit. The rest stay in place, greyed.</>
-              : <><strong>{inView.length}</strong> {inView.length === 1 ? 'piece' : 'pieces'}{zoom ? ` in ${zoom}` : ' today'}, about {fmtMinutes(Math.max(1, totalMin)) || '0 min'} in all.</>}
-            {stems.length ? <> <strong>{nearCount}</strong> near your hunch.</> : null}
+              ? t('{lit} of {total} pieces lit. The rest stay in place, greyed.', { lit: <strong>{lit.length}</strong>, total: inView.length })
+              : zoom
+                ? tp(inView.length, '{n} piece in {field}, about {time} in all.', '{n} pieces in {field}, about {time} in all.', { n: <strong>{inView.length}</strong>, field: t(zoom), time: fmtMinutes(Math.max(1, totalMin)) || t('0 min') })
+                : tp(inView.length, '{n} piece today, about {time} in all.', '{n} pieces today, about {time} in all.', { n: <strong>{inView.length}</strong>, time: fmtMinutes(Math.max(1, totalMin)) || t('0 min') })}
+            {stems.length ? <>{' '}{t('{n} near your hunch.', { n: <strong>{nearCount}</strong> })}</> : null}
           </p>
         </div>
 
         {thin && (
           <div className="tm-thin" aria-live="polite">
             {looking ? (
-              <p className="tm-looking"><span className="spinner" aria-hidden /> Only {litFresh.length} {litFresh.length === 1 ? 'piece fits' : 'pieces fit'} here today. Looking further afield for more…</p>
+              <p className="tm-looking"><span className="spinner" aria-hidden /> {tp(litFresh.length, 'Only {n} piece fits here today. Looking further afield for more…', 'Only {n} pieces fit here today. Looking further afield for more…')}</p>
             ) : (
               <>
-                {further?.status === 'done' && <p>Mosaic looked further afield for this lean today{further.found ? ` and laid in ${further.found} more` : ', and nothing more turned up'}.</p>}
+                {further?.status === 'done' && <p>{further.found ? t('Mosaic looked further afield for this lean today and laid in {n} more.', { n: further.found }) : t('Mosaic looked further afield for this lean today, and nothing more turned up.')}</p>}
                 {further?.status === 'error' && <p>{further.message}</p>}
-                <p>Only {litFresh.length} {litFresh.length === 1 ? 'piece fits' : 'pieces fit'} here today. Widen the lean to light more:</p>
+                <p>{tp(litFresh.length, 'Only {n} piece fits here today. Widen the lean to light more:', 'Only {n} pieces fit here today. Widen the lean to light more:')}</p>
               </>
             )}
             <div className="tm-row">
@@ -442,21 +456,21 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
         )}
 
         <div className="tm-ctl">
-          <div className="label">How deep</div>
+          <div className="label">{t('How deep')}</div>
           <div className="tm-row">
-            <button type="button" className="tm-chip" aria-pressed={lean.ring == null} onClick={() => setLean((l) => ({ ...l, ring: null }))}>Any depth</button>
+            <button type="button" className="tm-chip" aria-pressed={lean.ring == null} onClick={() => setLean((l) => ({ ...l, ring: null }))}>{t('Any depth')}</button>
             {RING_BLURB.map((b, i) => (
               <button key={b} type="button" className="tm-chip" aria-pressed={lean.ring === i} onClick={() => setLean((l) => ({ ...l, ring: l.ring === i ? null : i }))}>
-                <span className="ramp" style={{ background: ringSwatch(i) }} aria-hidden />{b}
+                <span className="ramp" style={{ background: ringSwatch(i) }} aria-hidden />{ringBlurb(i)}
               </button>
             ))}
           </div>
         </div>
 
         <div className="tm-ctl">
-          <div className="label">In the mood for</div>
+          <div className="label">{t('In the mood for')}</div>
           <div className="tm-row">
-            <button type="button" className="tm-chip" aria-pressed={!lean.mood} onClick={() => setLean((l) => ({ ...l, mood: null }))}>Anything</button>
+            <button type="button" className="tm-chip" aria-pressed={!lean.mood} onClick={() => setLean((l) => ({ ...l, mood: null }))}>{t('Anything')}</button>
             {Object.entries(MOVES).map(([key, m]) => (
               <button key={key} type="button" className={`tm-chip mood ${key}`} aria-pressed={lean.mood === key}
                 onClick={() => setLean((l) => ({ ...l, mood: l.mood === key ? null : key }))}>
@@ -467,7 +481,7 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
         </div>
 
         <div className="tm-ctl">
-          <label className="label" htmlFor={`${uid}-hunch`}>A hunch (optional)</label>
+          <label className="label" htmlFor={`${uid}-hunch`}>{t('A hunch (optional)')}</label>
           <input id={`${uid}-hunch`} className="tm-hunch-in" type="text" autoComplete="off" maxLength={80}
             placeholder="something about cities" value={hunchText} onChange={(e) => setHunch(e.target.value)} />
           <div className="tm-row">
@@ -475,27 +489,28 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
               <button key={h} type="button" className="tm-chip" onClick={() => { setHunchText(h); setLean((l) => ({ ...l, hunch: h })); }}>{h}</button>
             ))}
           </div>
-          <p className="muted tm-small">A hunch outlines the pieces that mention it. It doesn’t grey anything.</p>
+          <p className="muted tm-small">{t('A hunch outlines the pieces that mention it. It doesn’t grey anything.')}</p>
         </div>
 
         <div className="tm-key" aria-hidden>
           <div className="tm-key-row">
             <div className="tm-sizes">
-              {[[5, '5 min'], [30, '30 min'], [90, '90 min']].map(([m, lab]) => {
+              {[5, 30, 90].map((m) => {
+                const lab = t('{n} min', { n: m });
                 const s = 2.7 * Math.sqrt(m);
                 const pts = Array.from({ length: 7 }, (_, j) => { const a = (j / 7) * Math.PI * 2 + (j % 3) * 0.17, q = s * (0.84 + ((j * 37) % 10) / 50); return `${(s + 2 + Math.cos(a) * q).toFixed(1)},${(s + 2 + Math.sin(a) * q).toFixed(1)}`; }).join(' ');
                 return <figure key={m}><svg width={Math.round(s * 2 + 4)} height={Math.round(s * 2 + 4)}><polygon points={pts} fill={hsl(tesseraHSL(fieldHue('philosophy & ideas'), 0.5))} /></svg>{lab}</figure>;
               })}
             </div>
-            <span><b>Size is length.</b> A tile’s area is its minutes, so an hour-long piece takes twelve times the room of a five-minute one. “About” on a card means the length is an estimate.</span>
+            <span>{t('{lead} A tile’s area is its minutes, so an hour-long piece takes twelve times the room of a five-minute one. “About” on a card means the length is an estimate.', { lead: <b>{t('Size is length.')}</b> })}</span>
           </div>
           <div className="tm-key-row">
             <div className="tm-ramp">{Array.from({ length: DENSITY_RING_COUNT }, (_, r) => <i key={r} style={{ background: ringSwatch(r) }} />)}</div>
-            <span><b>Darker is denser,</b> from barely scratched to as dense as it gets. Colour is the field.</span>
+            <span>{t('{lead} from barely scratched to as dense as it gets. Colour is the field.', { lead: <b>{t('Darker is denser,')}</b> })}</span>
           </div>
           <div className="tm-key-row">
-            <span className="tm-key-sw held" /><span>You hold it.</span>
-            <span className="tm-key-sw hunch" /><span>Near your hunch.</span>
+            <span className="tm-key-sw held" /><span>{t('You hold it.')}</span>
+            <span className="tm-key-sw hunch" /><span>{t('Near your hunch.')}</span>
           </div>
         </div>
       </div>
@@ -505,13 +520,13 @@ export default function Mandala({ items, lean, setLean, held, holdKey, dev, furt
           {activeTile && (
             <div className="tm-sheet-card" role="dialog" aria-label={activeTile.it.title}>
               <div className="tm-grab" aria-hidden />
-              <button type="button" className="tm-x" aria-label="Close" onClick={() => { setPinned(null); setHolding(null); }}>×</button>
+              <button type="button" className="tm-x" aria-label={t('Close')} onClick={() => { setPinned(null); setHolding(null); }}>×</button>
               {card}
               {walk.length > 1 && (
                 <div className="tm-step-row">
-                  <button type="button" className="btn" onClick={(e) => { e.stopPropagation(); stepTo(-1); }}>‹ Previous</button>
-                  <span className="tm-pos">{at + 1} of {walk.length}</span>
-                  <button type="button" className="btn" onClick={(e) => { e.stopPropagation(); stepTo(1); }}>Next ›</button>
+                  <button type="button" className="btn" onClick={(e) => { e.stopPropagation(); stepTo(-1); }}>{t('‹ Previous')}</button>
+                  <span className="tm-pos">{t('{at} of {total}', { at: at + 1, total: walk.length })}</span>
+                  <button type="button" className="btn" onClick={(e) => { e.stopPropagation(); stepTo(1); }}>{t('Next ›')}</button>
                 </div>
               )}
             </div>

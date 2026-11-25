@@ -8,6 +8,7 @@ import * as R from '../../data/record.js';
 import * as A from '../../data/actions.js';
 import { Spinner, SlotTag, hostOf } from '../kit.jsx';
 import { go, threadPath } from '../router.js';
+import { t } from '../../i18n/index.js';
 
 // Downscale in the browser before the image goes into any request: re-encode
 // to JPEG at ≤ maxSide px (upscaling anything under 32px), flattening alpha
@@ -18,7 +19,7 @@ export async function prepareImage(file, maxSide = 1536) {
     const img = await new Promise((resolve, reject) => {
       const im = new Image();
       im.onload = () => resolve(im);
-      im.onerror = () => reject(new Error("This image format can't be read by the browser (try a JPG or PNG)."));
+      im.onerror = () => reject(new Error(t("This image format can't be read by the browser (try a JPG or PNG).")));
       im.src = url;
     });
     const encode = (side, quality) => {
@@ -67,39 +68,39 @@ function ImageStart({ onPick, image, setImage }) {
       <input ref={fileRef} type="file" accept="image/*" className="nt-file" id="nt-file" onChange={(e) => onFile(e.target.files?.[0])} />
       {!image && state.phase !== 'preparing' && (
         <div className="nt-drop">
-          <label htmlFor="nt-file" className="btn">Choose an image…</label>
-          <span className="th-hint">A photo, a screenshot, a page of a book. It's scaled down before it's sent.</span>
+          <label htmlFor="nt-file" className="btn">{t('Choose an image…')}</label>
+          <span className="th-hint">{t("A photo, a screenshot, a page of a book. It's scaled down before it's sent.")}</span>
           {state.phase === 'error' && <div className="error nt-mt">{state.error}</div>}
         </div>
       )}
-      {state.phase === 'preparing' && <div className="th-hint"><Spinner /> Preparing the image…</div>}
+      {state.phase === 'preparing' && <div className="th-hint"><Spinner /> {t('Preparing the image…')}</div>}
       {image && (
         <div className="nt-imgwork">
           <figure className="nt-thumb">
-            <img src={image.thumbnail} alt="Your image" />
-            <button className="btn link" onClick={clear}>Remove</button>
+            <img src={image.thumbnail} alt={t('Your image')} />
+            <button className="btn link" onClick={clear}>{t('Remove')}</button>
           </figure>
           <div className="nt-imgside">
             {state.phase !== 'done' && (
               <>
-                <label className="label" htmlFor="nt-note">What drew you to it? <span className="muted">(optional)</span></label>
+                <label className="label" htmlFor="nt-note">{t('What drew you to it? {optional}', { optional: <span className="muted">{t('(optional)')}</span> })}</label>
                 <input id="nt-note" className="field nt-note" value={note} onChange={(e) => setNote(e.target.value)}
-                  placeholder="The light, a detail, something that doesn't fit…"
+                  placeholder={t("The light, a detail, something that doesn't fit…")}
                   onKeyDown={(e) => { if (e.key === 'Enter') analyze(); }} />
                 <div className="th-row">
                   <button className="btn" disabled={state.phase === 'reading'} onClick={analyze}>
-                    {state.phase === 'reading' ? <><Spinner /> Looking at it…</> : state.phase === 'error' ? 'Try again' : 'Suggest questions'}
+                    {state.phase === 'reading' ? <><Spinner /> {t('Looking at it…')}</> : state.phase === 'error' ? t('Try again') : t('Suggest questions')}
                   </button>
-                  {state.phase === 'reading' && <span className="th-hint">About 10 seconds.</span>}
+                  {state.phase === 'reading' && <span className="th-hint">{t('About 10 seconds.')}</span>}
                 </div>
-                {state.phase === 'error' && <div className="error nt-mt">Couldn't read the image: {state.error}</div>}
+                {state.phase === 'error' && <div className="error nt-mt">{t("Couldn't read the image: {error}", { error: state.error })}</div>}
               </>
             )}
             {state.phase === 'done' && result && (
               <>
-                <div className="label">What's in it</div>
+                <div className="label">{t("What's in it")}</div>
                 <p className="nt-obs">{result.observation}</p>
-                <div className="label nt-mt">Questions it could hold · pick one, then make it yours</div>
+                <div className="label nt-mt">{t('Questions it could hold · pick one, then make it yours')}</div>
                 <ul className="nt-cands">
                   {result.candidates.map((c, i) => (
                     <li key={i}>
@@ -110,7 +111,7 @@ function ImageStart({ onPick, image, setImage }) {
                     </li>
                   ))}
                 </ul>
-                <button className="btn link" onClick={() => { setResult(null); setState({ phase: 'ready' }); }}>Ask again with a different note</button>
+                <button className="btn link" onClick={() => { setResult(null); setState({ phase: 'ready' }); }}>{t('Ask again with a different note')}</button>
               </>
             )}
           </div>
@@ -147,42 +148,42 @@ export default function NewThread({ query = {} }) {
     <div className="page nt-page">
       {fromItem ? (
         <div className="nt-from">
-          <div className="eyebrow">Pursue</div>
-          <p className="nt-from-line">↳ from <a href={'#' + threadPath(fromThread?.id)}>{fromThread ? R.currentArticulation(fromThread) : 'a thread'}</a></p>
+          <div className="eyebrow">{t('Pursue')}</div>
+          <p className="nt-from-line">{t('↳ from {thread}', { thread: <a href={'#' + threadPath(fromThread?.id)}>{fromThread ? R.currentArticulation(fromThread) : t('a thread')}</a> })}</p>
           <div className={`nt-from-item slot-${fromItem.slot}`}>
             <SlotTag slot={fromItem.slot} />
             <a href={fromItem.url} target="_blank" rel="noopener noreferrer">{fromItem.title}</a>
             <span className="th-hint">{fromItem.source || hostOf(fromItem.url)}</span>
           </div>
         </div>
-      ) : <div className="eyebrow">New thread</div>}
+      ) : <div className="eyebrow">{t('New thread')}</div>}
 
-      <label htmlFor="nt-text" className="nt-q-label">{fromItem ? "What's the question this opens?" : 'What are you holding?'}</label>
+      <label htmlFor="nt-text" className="nt-q-label">{fromItem ? t("What's the question this opens?") : t('What are you holding?')}</label>
       <textarea id="nt-text" ref={taRef} className="nt-text" rows={4} value={text}
-        placeholder={fromItem ? 'Write it the way you’d say it.' : 'Write it the way you’d say it.'}
+        placeholder={fromItem ? t('Write it the way you’d say it.') : t('Write it the way you’d say it.')}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit(); } }} />
-      <p className="nt-hint">A question, a hunch, an observation, or “show me…”. It doesn't need to be well put; you'll restate it as it moves.</p>
+      <p className="nt-hint">{t("A question, a hunch, an observation, or “show me…”. It doesn't need to be well put; you'll restate it as it moves.")}</p>
 
       <div className="nt-actions">
-        <button className="btn primary" disabled={!text.trim() || busy} onClick={submit}>{busy ? <Spinner /> : null}{fromItem ? 'Start the thread' : 'Start thread'}</button>
+        <button className="btn primary" disabled={!text.trim() || busy} onClick={submit}>{busy ? <Spinner /> : null}{fromItem ? t('Start the thread') : t('Start thread')}</button>
         <span className="th-hint">⌘/Ctrl + Enter</span>
         <span className="th-spacer" />
-        {!fromItem && !showImage && <button className="btn link" onClick={() => setShowImage(true)}>Start from an image instead</button>}
+        {!fromItem && !showImage && <button className="btn link" onClick={() => setShowImage(true)}>{t('Start from an image instead')}</button>}
       </div>
       {err && <div className="error nt-mt">{err}</div>}
 
       {!fromItem && showImage && (
         <section className="nt-imgsec">
           <div className="nt-imgsec-head">
-            <span className="label">Start from an image</span>
-            <button className="btn link" onClick={() => { setShowImage(false); setImage(null); }}>Close</button>
+            <span className="label">{t('Start from an image')}</span>
+            <button className="btn link" onClick={() => { setShowImage(false); setImage(null); }}>{t('Close')}</button>
           </div>
           <ImageStart image={image} setImage={setImage} onPick={pick} />
         </section>
       )}
 
-      <p className="nt-after">When you start, the question is read back to you — what it takes for granted, what it leaves out — and a first feed of four items fills in. You can correct the reading at any point.</p>
+      <p className="nt-after">{t('When you start, the question is read back to you — what it takes for granted, what it leaves out — and a first feed of four items fills in. You can correct the reading at any point.')}</p>
     </div>
   );
 }

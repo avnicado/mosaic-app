@@ -11,7 +11,7 @@
 .tm-crumbs button { background: none; border: none; padding: 2px 0; cursor: pointer; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); font-size: 11px; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 .tm-crumbs .here { color: var(--ink); }
 .tm-crumbs .sep, .tm-crumbs .note { color: var(--ink-faded); }
-.tm-crumbs .note { text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12.5px; margin-left: 6px; }
+.tm-crumbs .note { text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12.5px; margin-inline-start: 6px; }
 
 .tm-svg { width: 100%; max-width: 580px; height: auto; display: block; touch-action: manipulation; overflow: visible; -webkit-tap-highlight-color: transparent; }
 .tm-svg.zooming { animation: tm-zoom .38s cubic-bezier(.2,.7,.2,1); }
@@ -55,7 +55,7 @@ path.tm-hunch { fill: none; stroke: var(--gold); stroke-width: 2px; stroke-dasha
 /* The card beside a tile (computers) */
 .tm-pop { position: absolute; z-index: 20; width: min(340px, calc(100vw - 24px)); box-shadow: 0 10px 30px rgba(40, 28, 12, 0.18), 0 1px 3px rgba(40, 28, 12, 0.12); border-radius: 6px; background: var(--panel); }
 .tm-pop .pm-card { margin: 0; box-shadow: none; }
-.tm-x { position: absolute; top: 4px; right: 4px; z-index: 2; width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--ink-faded); border-radius: 50%; }
+.tm-x { position: absolute; top: 4px; inset-inline-end: 4px; z-index: 2; width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--ink-faded); border-radius: 50%; }
 .tm-x:hover { color: var(--ink); background: var(--highlight); }
 .tm-step { font-size: 13px; }
 
@@ -65,7 +65,7 @@ path.tm-hunch { fill: none; stroke: var(--gold); stroke-width: 2px; stroke-dasha
 .tm-sheet-card { position: relative; max-width: 560px; margin: 0 auto; max-height: 62vh; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(40, 28, 12, 0.22); padding: 10px 6px calc(10px + env(safe-area-inset-bottom)); }
 .tm-sheet-card .pm-card { border: none; box-shadow: none; background: none; margin: 0; }
 .tm-grab { width: 38px; height: 4px; border-radius: 2px; background: var(--rule); margin: 0 auto 4px; }
-.tm-sheet .tm-x { top: 8px; right: 8px; width: 44px; height: 44px; }
+.tm-sheet .tm-x { top: 8px; inset-inline-end: 8px; width: 44px; height: 44px; }
 .tm-step-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px 2px; border-top: 1px solid var(--rule-soft); }
 .tm-step-row .btn { min-height: 44px; }
 .tm-pos { font-family: var(--mono); font-size: 12px; color: var(--ink-faded); }
@@ -111,12 +111,12 @@ path.tm-hunch { fill: none; stroke: var(--gold); stroke-width: 2px; stroke-dasha
 .tm-sizes figure { margin: 0; display: grid; justify-items: center; gap: 2px; font-family: var(--mono); font-size: 10px; }
 .tm-ramp { display: flex; }
 .tm-ramp i { width: 16px; height: 12px; display: block; }
-.tm-ramp i:first-child { border-radius: 2px 0 0 2px; }
-.tm-ramp i:last-child { border-radius: 0 2px 2px 0; }
+.tm-ramp i:first-child { border-start-start-radius: 2px; border-end-start-radius: 2px; }
+.tm-ramp i:last-child { border-start-end-radius: 2px; border-end-end-radius: 2px; }
 .tm-key-sw { width: 12px; height: 12px; display: inline-block; flex: none; }
 .tm-key-sw.held { border-radius: 50%; background: var(--accent); }
 .tm-key-sw.hunch { border: 2px dashed var(--gold); border-radius: 2px; }
-.tm-key-row .tm-key-sw + span { flex: 0 1 auto !important; margin-right: 8px; }
+.tm-key-row .tm-key-sw + span { flex: 0 1 auto !important; margin-inline-end: 8px; }
 
 .pm-collected { font-size: 13px; margin: 34px 0 10px; text-align: center; }
 .pm-desk { margin-top: 26px; }
@@ -135,11 +135,11 @@ path.tm-hunch { fill: none; stroke: var(--gold); stroke-width: 2px; stroke-dasha
   .tm { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
   .tm-svg { width: calc(100% + 24px); max-width: 480px; margin: -2px -12px 0; align-self: center; justify-self: center; }
   .tm-crumbs { min-height: 44px; font-size: 12px; }
-  .tm-crumbs button { min-height: 44px; padding: 0 10px 0 0; font-size: 12px; }
+  .tm-crumbs button { min-height: 44px; padding-block: 0; padding-inline: 0 10px; font-size: 12px; }
   .tm-statement { font-size: 20px; }
   .tm-row { gap: 8px; }
   .tm-chip { min-height: 44px; padding: 8px 12px; font-size: 14px; }
   .tm-hunch-in { min-height: 44px; }
   .tm-sheet-card .pm-card .btn.small { min-height: 40px; padding: 6px 14px; font-size: 13.5px; }
-  .tm-sheet-card .pm-card .open-btn.compact { min-height: 40px; padding: 6px 12px 6px 10px; font-size: 13px; }
+  .tm-sheet-card .pm-card .open-btn.compact { min-height: 40px; padding-block: 6px; padding-inline: 10px 12px; font-size: 13px; }
 }

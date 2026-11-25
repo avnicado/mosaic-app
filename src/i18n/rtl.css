@@ -1,0 +1,79 @@
+/* Hebrew / right-to-left adjustments. Only applies when <html lang="he" dir="rtl">,
+   so English is untouched. Layout mirroring itself comes from logical CSS
+   properties in each stylesheet; this file holds what those can't express. */
+
+/* Fraunces, Instrument Sans and JetBrains Mono have no Hebrew. Keep them first so
+   Latin text looks the same, and back them with Hebrew faces (loaded by i18n). */
+:root:lang(he) {
+  --serif: 'Fraunces', 'Frank Ruhl Libre', Georgia, serif;
+  --sans: 'Instrument Sans', 'Heebo', -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'Heebo', ui-monospace, monospace;
+}
+
+/* Charts, mandalas, mosaics and the reef are drawn left to right; their
+   coordinates and text anchors assume it. Text inside still shapes as Hebrew. */
+[dir='rtl'] svg { direction: ltr; }
+
+/* Icons that point somewhere mirror with the page. */
+[dir='rtl'] .ic-arrow, [dir='rtl'] .ic-back, [dir='rtl'] .ic-pursue, [dir='rtl'] .ic-signout { transform: scaleX(-1); }
+
+/* Wide letter-spacing breaks Hebrew letterforms apart, and Hebrew has no capitals,
+   so the small tracked-capital labels lose their tracking and gain a little size. */
+:root:lang(he) .brand-alpha,
+:root:lang(he) .side-section,
+:root:lang(he) .side-section button,
+:root:lang(he) .side-thread.shared .side-owner,
+:root:lang(he) .eyebrow,
+:root:lang(he) .label,
+:root:lang(he) .slot-tag,
+:root:lang(he) .mchip-label,
+:root:lang(he) .fb-kind,
+:root:lang(he) .rm-count,
+:root:lang(he) .rm-stat-l,
+:root:lang(he) .rm-spread h4,
+:root:lang(he) .desk-pick-from,
+:root:lang(he) .lib-toc,
+:root:lang(he) .lib-wk-month,
+:root:lang(he) .lib-tip-week,
+:root:lang(he) .lib-corr-kind,
+:root:lang(he) .nt-angle,
+:root:lang(he) .pm-domain,
+:root:lang(he) .wn-meta,
+:root:lang(he) .wn-kind,
+:root:lang(he) .side-link .wn-side,
+:root:lang(he) .tm-crumbs,
+:root:lang(he) .tm-crumbs button,
+:root:lang(he) .qs-who,
+:root:lang(he) .qs-level,
+:root:lang(he) .rd-why .label,
+:root:lang(he) .rd-foot-q,
+:root:lang(he) .th-keep .th-keep-l,
+:root:lang(he) .th-why-l,
+:root:lang(he) .th-prov,
+:root:lang(he) .th-verdict,
+:root:lang(he) .th-tl-kind,
+:root:lang(he) .th-rs-l,
+:root:lang(he) .vp-admin,
+:root:lang(he) .vm-ring-tag,
+:root:lang(he) .vm-kind,
+:root:lang(he) .vm-a-label,
+:root:lang(he) .vd-brand-sub,
+:root:lang(he) .vd-wording-label,
+:root:lang(he) .vd-card-who span,
+:root:lang(he) .vd-card-facts span,
+:root:lang(he) .vd-card-read,
+:root:lang(he) .vd-vl-who b,
+:root:lang(he) .vd-side.mine .vd-side-h::after,
+:root:lang(he) .vd-mono,
+:root:lang(he) .vd-kicker,
+:root:lang(he) .vd-detail-step,
+:root:lang(he) .vd-side-who,
+:root:lang(he) .vd-more summary {
+  letter-spacing: 0.02em;
+}
+
+/* Questions, titles, notes and model text often stay in English inside a Hebrew
+   page. Let each paragraph take its own direction from its first letter, so an
+   English question reads left to right with its question mark at the end. */
+[dir='rtl'] :is(p, h1, h2, h3, h4, li, blockquote, summary, textarea, .clamp) { unicode-bidi: plaintext; }
+[dir='rtl'] input:not([type]), [dir='rtl'] input[type='text'], [dir='rtl'] input[type='search'] { unicode-bidi: plaintext; }

@@ -9,6 +9,7 @@
 import React, { useMemo, useState } from 'react';
 import { closestOf, leanAgainst, hostOf } from '../../engine/views.js';
 import './views.css';
+import { t, tp } from '../../i18n/index.js';
 
 const SIZE = 400, C = SIZE / 2, HUB = 44, RIM = 150, VB = RIM + 30;
 const rad = (deg) => (deg * Math.PI) / 180;
@@ -21,8 +22,14 @@ function sector(r0, r1, a0, a1) {
   return `M${f(x0)},${f(y0)} A${r1},${r1} 0 ${large} 1 ${f(x1)},${f(y1)} L${f(x2)},${f(y2)} A${r0},${r0} 0 ${large} 0 ${f(x3)},${f(y3)} Z`;
 }
 
-const ANSWER_WORD = { a: 'first answer', b: 'second answer', mid: 'in between' };
-const answerText = (crux, a) => (a === 'a' ? crux.a : a === 'b' ? crux.b : 'In between, or it depends');
+const ANSWER_WORD = {
+  get a() { return t('first answer'); },
+  get b() { return t('second answer'); },
+  get mid() { return t('in between'); },
+};
+const answerText = (crux, a) => (a === 'a' ? crux.a : a === 'b' ? crux.b : t('In between, or it depends'));
+// A crux's kind (engine/views.js CRUX_KINDS), as shown.
+const kindName = (k) => ({ cause: t('cause'), effect: t('effect'), evidence: t('evidence'), 'trade-off': t('trade-off'), fact: t('fact') })[k] || k;
 
 export default function ViewsMandala({ map }) {
   const [sel, setSel] = useState(0);
@@ -47,14 +54,14 @@ export default function ViewsMandala({ map }) {
     <div className="vm">
       <div className="vm-stage">
         <svg className="vm-svg" viewBox={`${C - VB} ${C - VB} ${2 * VB} ${2 * VB}`}
-          role="group" aria-label={`${N} views on ${M} cruxes`}>
+          role="group" aria-label={t('{n} views on {m} cruxes', { n: N, m: M })}>
           <circle className="vm-ground" cx={C} cy={C} r={RIM} />
           {views.map((view, i) => {
             const a0 = -90 + i * step, a1 = a0 + step;
             const on = i === sel;
             return (
               <g key={i} className={`vm-slice ${on ? 'on' : ''}`} role="button" tabIndex={0}
-                aria-pressed={on} aria-label={`${view.name}${lean[i].away ? ', your question leans away from this view' : ''}`}
+                aria-pressed={on} aria-label={lean[i].away ? t('{name}, your question leans away from this view', { name: view.name }) : view.name}
                 onClick={() => pick(i)} onKeyDown={key(i)}>
                 {cruxes.map((crux, k) => (
                   <path key={k} className={`vm-cell ans-${view.answers[k]}`} d={sector(HUB + k * ringW, HUB + (k + 1) * ringW, a0, a1)}>
@@ -76,8 +83,8 @@ export default function ViewsMandala({ map }) {
           ))}
           <g className="vm-hub">
             <circle cx={C} cy={C} r={HUB - 4} />
-            <text x={C} y={C - 6}>{N} views</text>
-            <text x={C} y={C + 8}>{M} cruxes</text>
+            <text x={C} y={C - 6}>{t('{n} views', { n: N })}</text>
+            <text x={C} y={C + 8}>{t('{n} cruxes', { n: M })}</text>
           </g>
           {views.map((view, i) => {
             const [bx, by] = pt(RIM + 16, -90 + (i + 0.5) * step);
@@ -89,7 +96,7 @@ export default function ViewsMandala({ map }) {
             );
           })}
         </svg>
-        <div className="vm-picker" role="tablist" aria-label="Views">
+        <div className="vm-picker" role="tablist" aria-label={t('Views')}>
           {views.map((view, i) => (
             <button key={i} role="tab" aria-selected={i === sel} className={`vm-pick ${i === sel ? 'on' : ''} ${lean[i].away ? 'away' : ''}`} onClick={() => pick(i)}>
               <span className="vm-pick-n">{i + 1}</span>{view.name}
@@ -102,17 +109,17 @@ export default function ViewsMandala({ map }) {
         <ol className="vm-cruxes">
           {cruxes.map((c, k) => (
             <li key={k}>
-              <div className="vm-crux-head"><span className="vm-ring-tag">ring {k + 1}</span><span className="vm-kind">{c.kind}</span></div>
+              <div className="vm-crux-head"><span className="vm-ring-tag">{t('ring {n}', { n: k + 1 })}</span><span className="vm-kind">{kindName(c.kind)}</span></div>
               <div className="vm-crux-q">{c.question}</div>
               <div className="vm-crux-ans">
                 <span><i className="vm-dot ans-a" />{c.a}</span>
                 <span><i className="vm-dot ans-b" />{c.b}</span>
               </div>
-              {map.lean?.[k] && <div className="vm-crux-lean">Your question assumes: {map.lean[k] === 'a' ? c.a : c.b}</div>}
+              {map.lean?.[k] && <div className="vm-crux-lean">{t('Your question assumes: {answer}', { answer: map.lean[k] === 'a' ? c.a : c.b })}</div>}
             </li>
           ))}
         </ol>
-        <p className="vm-key"><i className="vm-dot ans-mid" />in between or “it depends” · rings run from the centre out</p>
+        <p className="vm-key"><i className="vm-dot ans-mid" />{t('in between or “it depends” · rings run from the centre out')}</p>
       </div>
 
       {v && (
@@ -132,19 +139,19 @@ export default function ViewsMandala({ map }) {
             ))}
           </ul>
           <div className="vm-facts">
-            {close && <p><span className="label">Closest to</span> {views[close.index].name}, agreeing on {close.same} of {M}.</p>}
-            {vLean.away && <p className="vm-awaynote"><span className="label">Your question</span> leans away from this view: it answers {vLean.against} of the {vLean.assumed} {vLean.assumed === 1 ? 'crux' : 'cruxes'} your wording assumes the other way.</p>}
-            {!vLean.away && hasLean && vLean.against === 0 && <p className="muted vm-small">Your question’s wording sits with this view.</p>}
-            {v.changeMind && <p><span className="label">What would change its mind</span> {v.changeMind}</p>}
+            {close && <p>{t('{label} {name}, agreeing on {same} of {total}.', { label: <span className="label">{t('Closest to')}</span>, name: views[close.index].name, same: close.same, total: M })}</p>}
+            {vLean.away && <p className="vm-awaynote">{tp(vLean.assumed, '{label} leans away from this view: it answers {against} of the {n} crux your wording assumes the other way.', '{label} leans away from this view: it answers {against} of the {n} cruxes your wording assumes the other way.', { label: <span className="label">{t('Your question')}</span>, against: vLean.against })}</p>}
+            {!vLean.away && hasLean && vLean.against === 0 && <p className="muted vm-small">{t('Your question’s wording sits with this view.')}</p>}
+            {v.changeMind && <p><span className="label">{t('What would change its mind')}</span> {v.changeMind}</p>}
           </div>
           {v.piece ? (
             <a className="vm-piece" href={v.piece.url} target="_blank" rel="noopener noreferrer">
-              <span className="label">Read someone who holds it</span>
+              <span className="label">{t('Read someone who holds it')}</span>
               <span className="vm-piece-title">{v.piece.title}</span>
               <span className="vm-piece-src">{[v.piece.by, v.piece.source || hostOf(v.piece.url)].filter(Boolean).join(' · ')}</span>
             </a>
           ) : (
-            <p className="muted vm-small">No piece found by someone who argues this view.</p>
+            <p className="muted vm-small">{t('No piece found by someone who argues this view.')}</p>
           )}
         </section>
       )}

@@ -19,10 +19,13 @@ import {
   BRIDGING_FLOOR, DENSITY_RING_COUNT, densityRing, DOMAINS, PARTS,
   heuristicDomain, heuristicDensity, heuristicPart,
 } from '../../scoring.js';
+import { t } from '../../i18n/index.js';
 
 export { DENSITY_RING_COUNT };
 
 export const RING_BLURB = ['barely scratched', 'a light read', 'some substance', 'demanding', 'as dense as it gets'];
+// RING_BLURB[i] as shown, in the current language.
+export const ringBlurb = (i) => [t('barely scratched'), t('a light read'), t('some substance'), t('demanding'), t('as dense as it gets')][i];
 export const SHORT = {
   science: 'science', technology: 'technology', 'arts & culture': 'arts', 'philosophy & ideas': 'philosophy',
   'society & politics': 'society', 'business & economics': 'economics', 'health & mind': 'mind', history: 'history',

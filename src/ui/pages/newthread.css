@@ -12,7 +12,7 @@
 .nt-from { margin-bottom: 18px; }
 .nt-from-line { font-size: 13.5px; color: var(--ink-faded); margin: 0 0 8px; }
 .nt-from-line a { color: var(--ink-soft); font-family: var(--serif); font-size: 15px; text-decoration: none; border-bottom: 1px solid var(--rule); }
-.nt-from-item { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid var(--rule); border-left: 3px solid var(--slot-color); background: var(--panel); border-radius: 2px; }
+.nt-from-item { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid var(--rule); border-inline-start: 3px solid var(--slot-color); background: var(--panel); border-radius: 2px; }
 .nt-from-item a { font-family: var(--serif); font-size: 16px; text-decoration: none; }
 
 .nt-imgsec { margin-top: 28px; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); padding: 14px 16px 16px; }
@@ -26,9 +26,10 @@
 .nt-note { font-size: 14px; }
 .nt-obs { font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
 .nt-cands { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
-.nt-cand { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 3px; background: #fffdf8; cursor: pointer; }
+.nt-cand { width: 100%; text-align: start; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 3px; background: #fffdf8; cursor: pointer; }
 .nt-cand:hover { border-color: var(--gold); }
 .nt-cand.on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+[dir="rtl"] .nt-cand.on { box-shadow: inset -3px 0 0 var(--accent); }
 .nt-angle { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); }
 .nt-cq { font-family: var(--serif); font-size: 16px; line-height: 1.35; }
 

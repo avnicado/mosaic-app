@@ -15,6 +15,7 @@ import { callLLMJSON, apiFetch } from './llm.js';
 import { clip } from './prompts.js';
 import { verifyUrl } from './feed.js';
 import { MEDIA_TYPES, TAG_FIELDS_SPEC, vocabHint, normalizeMediaType, normalizeField, normalizeTopics } from '../media.js';
+import { t } from '../i18n/index.js';
 
 export const LEVELS = ['gentle', 'steady', 'demanding'];
 export const LEVEL_BLURB = {
@@ -24,12 +25,13 @@ export const LEVEL_BLURB = {
 };
 
 // How you said an item landed. Shapes the learner model and the next find.
+// `en` is what goes into the conversation (and so to the guide); `label` is shown.
 export const REACTIONS = [
-  { key: 'landed', label: 'This landed' },
-  { key: 'too-hard', label: 'Too hard' },
-  { key: 'too-easy', label: 'Too easy' },
-  { key: 'known', label: 'Knew this already' },
-  { key: 'not-for-me', label: 'Not for me' },
+  { key: 'landed', en: 'This landed', get label() { return t('This landed'); } },
+  { key: 'too-hard', en: 'Too hard', get label() { return t('Too hard'); } },
+  { key: 'too-easy', en: 'Too easy', get label() { return t('Too easy'); } },
+  { key: 'known', en: 'Knew this already', get label() { return t('Knew this already'); } },
+  { key: 'not-for-me', en: 'Not for me', get label() { return t('Not for me'); } },
 ];
 export const REACTION_WORDS = {
   landed: 'landed', 'too-hard': 'was too hard', 'too-easy': 'was too easy', known: 'was already known to them', 'not-for-me': 'was not for them',

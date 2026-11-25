@@ -9,6 +9,7 @@ import { useRecord } from '../../data/hooks.js';
 import * as R from '../../data/record.js';
 import { cleanExcerpt, realWhy, holdPlaceholder } from './shelf.js';
 import { lengthText } from '../../length.js';
+import { t } from '../../i18n/index.js';
 
 // The thread this card already seeded, if any.
 function useHeldBy(card) {
@@ -35,12 +36,12 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
     <article className={`pm-card ${compact ? 'compact' : ''} ${card.editorial ? 'editorial' : ''} ${hot ? 'hot' : ''}`}
       onMouseEnter={onHot ? () => onHot(card.url) : undefined} onMouseLeave={onHot ? () => onHot(null) : undefined}>
       <div className="pm-card-top">
-        {num != null && <span className="pm-num" aria-label={`Number ${num} on the Mandala`}>{num}</span>}
+        {num != null && <span className="pm-num" aria-label={t('Number {n} on the Mandala', { n: num })}>{num}</span>}
         <SlotTag slot={card.slot} />
         {card.url && <MediaChip type={card.mediaType} url={card.url} size={13} />}
-        <span className="pm-domain" title={card.part ? `${card.domain} › ${card.part}` : card.domain}>{card.domain}{card.part && !compact ? ` › ${card.part}` : ''}</span>
+        <span className="pm-domain" title={card.part ? `${t(card.domain)} › ${t(card.part)}` : t(card.domain)}>{t(card.domain)}{card.part && !compact ? ` › ${t(card.part)}` : ''}</span>
       </div>
-      {card.elsewhere && <div className="pm-elsewhere">From outside your lean</div>}
+      {card.elsewhere && <div className="pm-elsewhere">{t('From outside your lean')}</div>}
       <h3 className="pm-title">
         {card.url
           ? <a href={card.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(card)}>{card.title}</a>
@@ -48,18 +49,18 @@ export default function ShelfCard({ card, compact = false, dev = false, startHol
       </h3>
       {source && <div className="pm-source">{source}</div>}
       {excerpt && <p className="pm-excerpt">{excerpt}</p>}
-      {why && <p className="pm-why"><span className="label">why here</span> {why}</p>}
+      {why && <p className="pm-why"><span className="label">{t('why here')}</span> {why}</p>}
       {dev && card.scores && (
         <div className="pm-dev">bridging {card.scores.bridging} · density {card.scores.density}{card.density_by ? ` (${card.density_by})` : ''} · engagement {card.scores.engagement} · {card.scored_by}{card.part_by ? ` · part by ${card.part_by}` : ''}{card.tieBrokenByEngagement ? ' · tie-broken' : ''}</div>
       )}
       <div className="pm-foot">
         {card.url && <OpenButton item={card} compact />}
         {heldBy ? (
-          <a className="pm-held" href={'#' + threadPath(heldBy.id)}>You hold this <span className="pm-held-q">— {heldBy.text}</span> →</a>
+          <a className="pm-held" href={'#' + threadPath(heldBy.id)}>{t('You hold this {question} →', { question: <span className="pm-held-q">— {heldBy.text}</span> })}</a>
         ) : compact ? (
-          <a className="btn small ghost" href={`#/promenade?hold=${encodeURIComponent(card.url || card.id)}`}>Hold this</a>
+          <a className="btn small ghost" href={`#/promenade?hold=${encodeURIComponent(card.url || card.id)}`}>{t('Hold this')}</a>
         ) : !holding ? (
-          <button className="btn small" onClick={() => setHolding(true)}>Hold this</button>
+          <button className="btn small" onClick={() => setHolding(true)}>{t('Hold this')}</button>
         ) : (
           <HoldComposer card={{ ...card, excerpt }} onCancel={() => setHolding(false)} />
         )}
@@ -88,15 +89,15 @@ export function HoldComposer({ card, onCancel }) {
   };
   return (
     <form className="pm-hold" onSubmit={submit}>
-      <label className="pm-hold-label" htmlFor={`hold-${card.id}`}>What caught you? Put it as a question, a hunch, or “show me…”</label>
+      <label className="pm-hold-label" htmlFor={`hold-${card.id}`}>{t('What caught you? Put it as a question, a hunch, or “show me…”')}</label>
       <textarea id={`hold-${card.id}`} ref={ref} className="field serif pm-hold-field" rows={3} value={text}
         placeholder={holdPlaceholder(card)} onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(e); if (e.key === 'Escape') onCancel(); }} />
       {err && <div className="error">{err}</div>}
       <div className="pm-hold-actions">
-        <button type="submit" className="btn primary small" disabled={!text.trim() || busy}>{busy ? 'Starting…' : 'Start the thread'}</button>
-        <button type="button" className="btn link" onClick={onCancel}>Cancel</button>
-        {!text.trim() && <span className="muted pm-hold-hint">A thread starts from your words, not the card’s.</span>}
+        <button type="submit" className="btn primary small" disabled={!text.trim() || busy}>{busy ? t('Starting…') : t('Start the thread')}</button>
+        <button type="button" className="btn link" onClick={onCancel}>{t('Cancel')}</button>
+        {!text.trim() && <span className="muted pm-hold-hint">{t('A thread starts from your words, not the card’s.')}</span>}
       </div>
     </form>
   );

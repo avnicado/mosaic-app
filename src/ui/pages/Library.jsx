@@ -11,11 +11,11 @@ import {
   SLOT_ORDER, joinWords, cap, fmtDate,
 } from '../library/derive.js';
 import './library.css';
+import { t, tp, loc } from '../../i18n/index.js';
 
 // Reef is switched off for now (2026-10-05). Set to true to show it again.
 const REEF_ENABLED = false;
 
-const plural =(n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 const openThread = (id) => go(threadPath(id));
 const ThreadLink = ({ t, className = '' }) => (
   <a className={`lib-tlink ${className}`} href={'#' + threadPath(t.id)}>{R.currentArticulation(t)}</a>
@@ -28,9 +28,9 @@ export default function Library() {
   if (!threads.length) {
     return (
       <div className="page wide lib">
-        <div className="eyebrow">Library</div>
-        <h1>Library</h1>
-        <p className="lib-empty">Nothing to mirror yet. <a href="#/new">Start a thread</a>.</p>
+        <div className="eyebrow">{t('Library')}</div>
+        <h1>{t('Library')}</h1>
+        <p className="lib-empty">{t('Nothing to mirror yet. {link}.', { link: <a href="#/new">{t('Start a thread')}</a> })}</p>
       </div>
     );
   }
@@ -42,21 +42,24 @@ export default function Library() {
 
   return (
     <div className="page wide lib">
-      <div className="eyebrow">Library</div>
-      <h1>Your record</h1>
+      <div className="eyebrow">{t('Library')}</div>
+      <h1>{t('Your record')}</h1>
       <p className="lib-sub">
-        {plural(threads.length, 'thread')} since {fmtDate(since, { year: 'numeric' })}:{' '}
-        {[active && `${active} active`, quiet && `${quiet} quiet`, closed.length && `${closed.length} closed`].filter(Boolean).join(', ')}.
-        {' '}A mirror of what you've done, for you only.
+        {t('{threads} since {date}: {counts}.', {
+          threads: tp(threads.length, '{n} thread', '{n} threads'),
+          date: fmtDate(since, { year: 'numeric' }),
+          counts: [active && t('{n} active', { n: active }), quiet && t('{n} quiet', { n: quiet }), closed.length && t('{n} closed', { n: closed.length })].filter(Boolean).join(', '),
+        })}
+        {' '}{t("A mirror of what you've done, for you only.")}
       </p>
-      <nav className="lib-toc" aria-label="On this page">
-        {REEF_ENABLED && <a href="#/library" onClick={(e) => jump(e, 'lib-reef')}>Reef</a>}
-        <a href="#/library" onClick={(e) => jump(e, 'lib-mosaic')}>Mosaic</a>
-        <a href="#/library" onClick={(e) => jump(e, 'lib-threads')}>Threads</a>
-        <a href="#/library" onClick={(e) => jump(e, 'lib-weeks')}>Weeks</a>
-        <a href="#/library" onClick={(e) => jump(e, 'lib-move')}>How you move</a>
-        <a href="#/library" onClick={(e) => jump(e, 'lib-kept')}>Kept</a>
-        {closed.length > 0 && <a href="#/library" onClick={(e) => jump(e, 'lib-closed')}>Closed</a>}
+      <nav className="lib-toc" aria-label={t('On this page')}>
+        {REEF_ENABLED && <a href="#/library" onClick={(e) => jump(e, 'lib-reef')}>{t('Reef')}</a>}
+        <a href="#/library" onClick={(e) => jump(e, 'lib-mosaic')}>{t('Mosaic')}</a>
+        <a href="#/library" onClick={(e) => jump(e, 'lib-threads')}>{t('Threads')}</a>
+        <a href="#/library" onClick={(e) => jump(e, 'lib-weeks')}>{t('Weeks')}</a>
+        <a href="#/library" onClick={(e) => jump(e, 'lib-move')}>{t('How you move')}</a>
+        <a href="#/library" onClick={(e) => jump(e, 'lib-kept')}>{t('Kept#heading')}</a>
+        {closed.length > 0 && <a href="#/library" onClick={(e) => jump(e, 'lib-closed')}>{t('Closed')}</a>}
       </nav>
 
       {REEF_ENABLED && <ReefSection threads={threads} sessions={sessions} items={items} />}
@@ -79,7 +82,7 @@ function jump(e, id) {
 function ReefSection({ threads, sessions, items }) {
   return (
     <section className="section" id="lib-reef">
-      <div className="section-head"><h2>Reef</h2><span className="label">where your questions moved</span></div>
+      <div className="section-head"><h2>{t('Reef')}</h2><span className="label">{t('where your questions moved')}</span></div>
       <CoralReef threads={threads} sessions={sessions} items={items} />
     </section>
   );
@@ -89,7 +92,7 @@ function ReefSection({ threads, sessions, items }) {
 function MosaicSection({ threads, items }) {
   return (
     <section className="section" id="lib-mosaic">
-      <div className="section-head"><h2>Mosaic</h2><span className="label">what you've read and seen</span></div>
+      <div className="section-head"><h2>{t('Mosaic')}</h2><span className="label">{t("what you've read and seen")}</span></div>
       <ReadingMosaic threads={threads} items={items} />
     </section>
   );
@@ -101,20 +104,20 @@ function ThreadsSection({ threads, sessions }) {
     const done = sessions.filter((s) => s.threadId === t.id && s.closedAt);
     const real = done.filter((s) => s.diff?.verdict === 'real').length;
     const cos = done.filter((s) => s.diff?.verdict === 'cosmetic').length;
-    return { t, n: done.length, real, cos, un: done.length - real - cos };
+    return { th: t, n: done.length, real, cos, un: done.length - real - cos };
   });
   return (
     <section className="section" id="lib-threads">
-      <div className="section-head"><h2>Threads</h2><span className="label">did the question move?</span></div>
+      <div className="section-head"><h2>{t('Threads')}</h2><span className="label">{t('did the question move?')}</span></div>
       <ul className="lib-panels">
-        {rows.map(({ t, n, real, cos, un }) => (
-          <li key={t.id}>
-            <span className={`lib-panel-dot ${real ? 'real' : ''}`} title={real ? 'really moved at least once' : 'not yet really moved'} />
+        {rows.map(({ th, n, real, cos, un }) => (
+          <li key={th.id}>
+            <span className={`lib-panel-dot ${real ? 'real' : ''}`} title={real ? t('really moved at least once') : t('not yet really moved')} />
             <span>
-              <ThreadLink t={t} className={t.status === 'closed' ? 'closed' : ''} />
+              <ThreadLink t={th} className={th.status === 'closed' ? 'closed' : ''} />
               <span className="lib-panel-meta">
-                {n ? [real && `${real} real`, cos && `${cos} cosmetic`, un && `${un} not judged`].filter(Boolean).join(' · ') : 'no finished session'}
-                {t.status === 'closed' && ' · closed'}{R.isDormant(t) && ' · quiet'}
+                {n ? [real && t('{n} real', { n: real }), cos && t('{n} cosmetic', { n: cos }), un && t('{n} not judged', { n: un })].filter(Boolean).join(' · ') : t('no finished session')}
+                {th.status === 'closed' && ' · ' + t('closed')}{R.isDormant(th) && ' · ' + t('quiet')}
               </span>
             </span>
           </li>
@@ -129,15 +132,15 @@ function tone(a) { return a === 0 ? 0 : a <= 2 ? 1 : a <= 5 ? 2 : 3; }
 
 function cellWords(c) {
   const parts = [];
-  if (c.sessions) parts.push(plural(c.sessions, 'session') + ' opened');
-  if (c.marked) parts.push(`${plural(c.marked, 'item')} marked${c.moved ? ` (${c.moved} ✦)` : ''}`);
-  if (c.restated) parts.push(plural(c.restated, 'restatement'));
-  if (c.real) parts.push(c.real === 1 ? 'real movement' : `${c.real} real movements`);
-  if (c.cosmetic) parts.push(c.cosmetic === 1 ? 'a cosmetic restatement' : `${c.cosmetic} cosmetic`);
-  if (c.kept) parts.push(`${c.kept} kept`);
-  if (c.created) parts.push('thread started');
-  if (c.closedThread) parts.push('thread closed');
-  return parts.length ? parts.join(' · ') : 'nothing';
+  if (c.sessions) parts.push(tp(c.sessions, '{n} session opened', '{n} sessions opened'));
+  if (c.marked) parts.push(tp(c.marked, '{n} item marked', '{n} items marked') + (c.moved ? ` (${c.moved} ✦)` : ''));
+  if (c.restated) parts.push(tp(c.restated, '{n} restatement', '{n} restatements'));
+  if (c.real) parts.push(c.real === 1 ? t('real movement') : t('{n} real movements', { n: c.real }));
+  if (c.cosmetic) parts.push(c.cosmetic === 1 ? t('a cosmetic restatement') : t('{n} cosmetic', { n: c.cosmetic }));
+  if (c.kept) parts.push(t('{n} kept', { n: c.kept }));
+  if (c.created) parts.push(t('thread started'));
+  if (c.closedThread) parts.push(t('thread closed'));
+  return parts.length ? parts.join(' · ') : t('nothing');
 }
 
 function WeeksSection({ rec }) {
@@ -147,7 +150,7 @@ function WeeksSection({ rec }) {
   const hidden = rows.length - shown.length;
   const months = weeks.map((w, i) => {
     const m = new Date(w).getMonth();
-    return i === 0 || m !== new Date(weeks[i - 1]).getMonth() ? new Date(w).toLocaleDateString(undefined, { month: 'short' }) : '';
+    return i === 0 || m !== new Date(weeks[i - 1]).getMonth() ? new Date(w).toLocaleDateString(loc(), { month: 'short' }) : '';
   });
   const onEnter = (e, r, c) => {
     const box = e.currentTarget.closest('.lib-weeks').getBoundingClientRect();
@@ -156,15 +159,15 @@ function WeeksSection({ rec }) {
       x: Math.min(Math.max(cb.left - box.left + cb.width / 2, 110), box.width - 110),
       y: cb.top - box.top,
       title: R.currentArticulation(r.thread),
-      week: `Week of ${fmtDate(c.start)}`,
+      week: t('Week of {date}', { date: fmtDate(c.start) }),
       body: cellWords(c),
     });
   };
   return (
     <section className="section" id="lib-weeks">
-      <div className="section-head"><h2>Weeks</h2><span className="label">last 16 weeks</span></div>
+      <div className="section-head"><h2>{t('Weeks')}</h2><span className="label">{t('last 16 weeks')}</span></div>
       {!shown.length ? (
-        <p className="muted">No activity in the last 16 weeks.</p>
+        <p className="muted">{t('No activity in the last 16 weeks.')}</p>
       ) : (
         <div className="lib-weeks" onMouseLeave={() => setTip(null)}>
           <div className="lib-wk-row lib-wk-head" aria-hidden="true">
@@ -181,7 +184,7 @@ function WeeksSection({ rec }) {
                 <span key={i}
                   className={`lib-wk-cell t${tone(c.activity)}${c.real ? ' real' : ''}${c.closedThread ? ' shut' : ''}`}
                   onMouseEnter={(e) => onEnter(e, r, c)}
-                  aria-label={`Week of ${fmtDate(c.start)}: ${cellWords(c)}`} />
+                  aria-label={t('Week of {date}: {activity}', { date: fmtDate(c.start), activity: cellWords(c) })} />
               ))}
             </div>
           ))}
@@ -195,11 +198,11 @@ function WeeksSection({ rec }) {
           <div className="lib-wk-legend">
             <span><i className="lib-wk-cell t1" /> 1–2</span>
             <span><i className="lib-wk-cell t2" /> 3–5</span>
-            <span><i className="lib-wk-cell t3" /> 6+ sessions, marks and restatements</span>
-            {shown.some((r) => r.cells.some((c) => c.real)) && <span><i className="lib-wk-cell t1 real" /> a session that really moved the question</span>}
-            {shown.some((r) => r.cells.some((c) => c.closedThread)) && <span><i className="lib-wk-cell t1 shut" /> the week a thread was closed</span>}
+            <span><i className="lib-wk-cell t3" /> {t('6+ sessions, marks and restatements')}</span>
+            {shown.some((r) => r.cells.some((c) => c.real)) && <span><i className="lib-wk-cell t1 real" /> {t('a session that really moved the question')}</span>}
+            {shown.some((r) => r.cells.some((c) => c.closedThread)) && <span><i className="lib-wk-cell t1 shut" /> {t('the week a thread was closed')}</span>}
           </div>
-          {hidden > 0 && <p className="lib-note">{plural(hidden, 'thread')} with nothing in these weeks {hidden === 1 ? 'is' : 'are'} left out.</p>}
+          {hidden > 0 && <p className="lib-note">{tp(hidden, '{n} thread with nothing in these weeks is left out.', '{n} threads with nothing in these weeks are left out.')}</p>}
         </div>
       )}
     </section>
@@ -222,17 +225,21 @@ function MoveSection({ threads, sessions, items }) {
 
   return (
     <section className="section" id="lib-move">
-      <div className="section-head"><h2>How you move</h2><span className="label">across every thread</span></div>
+      <div className="section-head"><h2>{t('How you move')}</h2><span className="label">{t('across every thread')}</span></div>
       <div className="lib-move">
         <div>
-          <h3 className="lib-h">What moved you, by slot</h3>
+          <h3 className="lib-h">{t('What moved you, by slot')}</h3>
           <p className="lib-lead">
             {top.length
-              ? <>{cap(joinWords(top))} items have moved you most{top.length > 1 ? ', equally' : ''}.</>
-              : 'You haven’t marked anything ✦ moved me yet.'}
-            {shut.length > 0 && <> {cap(joinWords(shut))} {shut.length > 1 ? 'are' : 'is'} where you’ve most often marked – closed it down.</>}
+              ? (top.length > 1
+                ? t('{slots} items have moved you most, equally.', { slots: cap(joinWords(top.map((x) => t(x)))) })
+                : t('{slots} items have moved you most.', { slots: cap(joinWords(top.map((x) => t(x)))) }))
+              : t('You haven’t marked anything ✦ moved me yet.')}
+            {shut.length > 0 && <>{' '}{shut.length > 1
+              ? t('{slots} are where you’ve most often marked – closed it down.', { slots: cap(joinWords(shut.map((x) => t(x)))) })
+              : t('{slots} is where you’ve most often marked – closed it down.', { slots: cap(joinWords(shut.map((x) => t(x)))) })}</>}
           </p>
-          <div className="lib-slots" role="table" aria-label="Marks per slot">
+          <div className="lib-slots" role="table" aria-label={t('Marks per slot')}>
             {SLOT_ORDER.map((s) => {
               const o = slots[s];
               const w = (n) => `${(n / maxMarked) * 100}%`;
@@ -244,61 +251,70 @@ function MoveSection({ threads, sessions, items }) {
                     {o.neutral > 0 && <i className="n" style={{ width: w(o.neutral) }} />}
                     {o.closed > 0 && <i className="c" style={{ width: w(o.closed) }} />}
                   </span>
-                  <span role="cell" className="lib-slot-nums">✦ {o.moved} · ○ {o.neutral} · – {o.closed} <span className="muted">of {o.shown}</span></span>
+                  <span role="cell" className="lib-slot-nums">✦ {o.moved} · ○ {o.neutral} · – {o.closed} <span className="muted">{t('of {n}', { n: o.shown })}</span></span>
                 </div>
               );
             })}
           </div>
-          <p className="lib-note">✦ moved me · ○ neutral · – closed it down, out of every item placed in that slot.</p>
+          <p className="lib-note">{t('✦ moved me · ○ neutral · – closed it down, out of every item placed in that slot.')}</p>
         </div>
 
         <div>
-          <h3 className="lib-h">Restatements</h3>
+          <h3 className="lib-h">{t('Restatements')}</h3>
           {v.finished ? (
             <>
               <p className="lib-lead">
-                Of {plural(v.finished, 'finished session')}, {v.real} really moved the question, {v.cosmetic} {v.cosmetic === 1 ? 'was' : 'were'} rewording
-                {v.unjudged ? `, and ${v.unjudged} ended without a restatement` : ''}.
-                {v.open ? ` ${plural(v.open, 'session')} ${v.open === 1 ? 'is' : 'are'} still open.` : ''}
+                {(() => {
+                  const vars = { finished: tp(v.finished, '{n} finished session', '{n} finished sessions'), real: v.real, cosmetic: v.cosmetic, unjudged: v.unjudged };
+                  if (v.unjudged) {
+                    return v.cosmetic === 1
+                      ? t('Of {finished}, {real} really moved the question, {cosmetic} was rewording, and {unjudged} ended without a restatement.', vars)
+                      : t('Of {finished}, {real} really moved the question, {cosmetic} were rewording, and {unjudged} ended without a restatement.', vars);
+                  }
+                  return v.cosmetic === 1
+                    ? t('Of {finished}, {real} really moved the question, {cosmetic} was rewording.', vars)
+                    : t('Of {finished}, {real} really moved the question, {cosmetic} were rewording.', vars);
+                })()}
+                {v.open ? ' ' + tp(v.open, '{n} session is still open.', '{n} sessions are still open.') : ''}
               </p>
               {v.moves.length > 0 && (
                 <>
-                  <div className="label lib-mini">Kinds of movement named</div>
+                  <div className="label lib-mini">{t('Kinds of movement named')}</div>
                   <ul className="lib-plain">
                     {v.moves.slice(0, 6).map(([label, n]) => <li key={label}>{label}{n > 1 && <span className="muted"> ×{n}</span>}</li>)}
                   </ul>
                 </>
               )}
             </>
-          ) : <p className="muted">No session has finished yet.</p>}
+          ) : <p className="muted">{t('No session has finished yet.')}</p>}
         </div>
 
         <div>
-          <h3 className="lib-h">What the readings keep finding</h3>
-          <Recurring title="Taken for granted in more than one thread" groups={pres}
-            none="No presupposition has come up in more than one thread yet." />
-          <Recurring title="Said to be missing in more than one thread" groups={abs}
-            none="No absence has come up in more than one thread yet." />
+          <h3 className="lib-h">{t('What the readings keep finding')}</h3>
+          <Recurring title={t('Taken for granted in more than one thread')} groups={pres}
+            none={t('No presupposition has come up in more than one thread yet.')} />
+          <Recurring title={t('Said to be missing in more than one thread')} groups={abs}
+            none={t('No absence has come up in more than one thread yet.')} />
         </div>
 
         <div>
-          <h3 className="lib-h">Your corrections</h3>
+          <h3 className="lib-h">{t('Your corrections')}</h3>
           {corr.rejected + corr.addedPre + corr.addedAbsent + corr.notes === 0 ? (
-            <p className="muted">You haven’t corrected a reading yet.</p>
+            <p className="muted">{t('You haven’t corrected a reading yet.')}</p>
           ) : (
             <>
               <p className="lib-lead">
                 {[
-                  corr.rejected && `You’ve rejected ${plural(corr.rejected, 'thing')} a reading claimed`,
-                  corr.addedPre && `added ${plural(corr.addedPre, 'presupposition')} it missed`,
-                  corr.addedAbsent && `named ${corr.addedAbsent} ${corr.addedAbsent === 1 ? 'thing' : 'things'} it left out`,
-                  corr.notes && `left a note on ${plural(corr.notes, 'reading')}`,
+                  corr.rejected && tp(corr.rejected, 'You’ve rejected {n} thing a reading claimed', 'You’ve rejected {n} things a reading claimed'),
+                  corr.addedPre && tp(corr.addedPre, 'added {n} presupposition it missed', 'added {n} presuppositions it missed'),
+                  corr.addedAbsent && tp(corr.addedAbsent, 'named {n} thing it left out', 'named {n} things it left out'),
+                  corr.notes && tp(corr.notes, 'left a note on {n} reading', 'left a note on {n} readings'),
                 ].filter(Boolean).join(', ').replace(/^./, (c) => c.toUpperCase())}.
               </p>
               <ul className="lib-corr">
                 {corr.recent.map((c, i) => (
                   <li key={i}>
-                    <span className={`lib-corr-kind k-${c.kind}`}>{{ rejected: 'rejected', 'added-pre': 'added', 'added-absent': 'missing', note: 'note' }[c.kind]}</span>
+                    <span className={`lib-corr-kind k-${c.kind}`}>{{ rejected: t('rejected#correction'), 'added-pre': t('added#correction'), 'added-absent': t('missing#correction'), note: t('note') }[c.kind]}</span>
                     <span>
                       <span className="lib-corr-text">{c.text}</span>
                       <ThreadLink t={c.thread} className="lib-corr-thread" />
@@ -323,7 +339,7 @@ function Recurring({ title, groups, none }) {
           {groups.slice(0, 6).map((g) => (
             <li key={g.text}>
               <span className="serif">{g.text}</span>{' '}
-              <span className="muted">· {g.threads.length} threads{g.rejectedElsewhere ? ' · you’ve rejected this before' : ''}</span>
+              <span className="muted">· {t('{n} threads', { n: g.threads.length })}{g.rejectedElsewhere ? ' · ' + t('you’ve rejected this before') : ''}</span>
             </li>
           ))}
         </ul>
@@ -344,16 +360,16 @@ function KeptSection({ threads, items }) {
   return (
     <section className="section" id="lib-kept">
       <div className="section-head">
-        <h2>Kept</h2>
+        <h2>{t('Kept#heading')}</h2>
         {kept.length > 0 && (
-          <div className="lib-filter" role="group" aria-label="Filter kept items">
-            <button className={filter === 'all' ? 'on' : ''} aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>All · {kept.length}</button>
-            <button className={filter === 'notes' ? 'on' : ''} aria-pressed={filter === 'notes'} onClick={() => setFilter('notes')}>With notes · {withNotes.length}</button>
+          <div className="lib-filter" role="group" aria-label={t('Filter kept items')}>
+            <button className={filter === 'all' ? 'on' : ''} aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>{t('All · {n}', { n: kept.length })}</button>
+            <button className={filter === 'notes' ? 'on' : ''} aria-pressed={filter === 'notes'} onClick={() => setFilter('notes')}>{t('With notes · {n}', { n: withNotes.length })}</button>
           </div>
         )}
       </div>
-      {!kept.length ? <p className="muted">Nothing kept yet. Keep an item from a feed and it shows up here.</p>
-        : !groups.length ? <p className="muted">No kept item has a note yet.</p>
+      {!kept.length ? <p className="muted">{t('Nothing kept yet. Keep an item from a feed and it shows up here.')}</p>
+        : !groups.length ? <p className="muted">{t('No kept item has a note yet.')}</p>
         : groups.map(({ t, items: its }) => (
           <div className="lib-kept-group" key={t.id}>
             <ThreadLink t={t} className="lib-kept-thread" />
@@ -385,21 +401,21 @@ function ClosedSection({ closed, sessions }) {
   const list = [...closed].sort((a, b) => (b.closedAt || 0) - (a.closedAt || 0));
   return (
     <section className="section" id="lib-closed">
-      <div className="section-head"><h2>Closed threads</h2><span className="label">{closed.length}</span></div>
+      <div className="section-head"><h2>{t('Closed threads')}</h2><span className="label">{closed.length}</span></div>
       <div className="lib-closed">
-        {list.map((t) => {
-          const n = sessions.filter((s) => s.threadId === t.id && s.closedAt).length;
-          const first = t.articulations?.[0]?.text;
-          const now = R.currentArticulation(t);
+        {list.map((th) => {
+          const n = sessions.filter((s) => s.threadId === th.id && s.closedAt).length;
+          const first = th.articulations?.[0]?.text;
+          const now = R.currentArticulation(th);
           return (
-            <article className="card lib-closed-card" key={t.id}>
-              <div className="label">Closed {fmtDate(t.closedAt, { year: 'numeric' })} · {plural(n, 'session')} · opened {fmtDate(t.createdAt, { year: 'numeric' })}</div>
-              <a className="lib-closed-q" href={'#' + threadPath(t.id)}>{now}</a>
-              {first && first !== now && <p className="lib-closed-began"><span className="label">Began as</span> {first}</p>}
-              {t.synthesis
-                ? <blockquote className="lib-synth">{t.synthesis}</blockquote>
-                : <p className="muted lib-small">Closed without a synthesis.</p>}
-              <a className="btn small ghost" href={'#' + threadPath(t.id)}>Open thread</a>
+            <article className="card lib-closed-card" key={th.id}>
+              <div className="label">{t('Closed {date} · {sessions} · opened {opened}', { date: fmtDate(th.closedAt, { year: 'numeric' }), sessions: tp(n, '{n} session', '{n} sessions'), opened: fmtDate(th.createdAt, { year: 'numeric' }) })}</div>
+              <a className="lib-closed-q" href={'#' + threadPath(th.id)}>{now}</a>
+              {first && first !== now && <p className="lib-closed-began"><span className="label">{t('Began as')}</span> {first}</p>}
+              {th.synthesis
+                ? <blockquote className="lib-synth">{th.synthesis}</blockquote>
+                : <p className="muted lib-small">{t('Closed without a synthesis.')}</p>}
+              <a className="btn small ghost" href={'#' + threadPath(th.id)}>{t('Open thread')}</a>
             </article>
           );
         })}

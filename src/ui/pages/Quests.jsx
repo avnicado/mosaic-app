@@ -9,8 +9,8 @@ import { startQuest } from '../../data/quests.js';
 import { go, questPath } from '../router.js';
 import { timeAgo } from '../kit.jsx';
 import { Icon } from '../icons.jsx';
+import { t, tp } from '../../i18n/index.js';
 
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s);
 
 export default function Quests() {
@@ -36,27 +36,25 @@ export default function Quests() {
 
   return (
     <div className="page qs-list-page">
-      <div className="eyebrow">Quests</div>
-      <h1>What do you want to learn?</h1>
+      <div className="eyebrow">{t('Quests')}</div>
+      <h1>{t('What do you want to learn?')}</h1>
       <p className="qs-lede">
-        A quest is a subject you want to learn your way into. A guide talks it through with you, keeps a map of the
-        territory, and points you to real works by real people, at your level. It doesn't teach you; it shows you where to go,
-        and listens to how it went.
+        {t('A quest is a subject you want to learn your way into. A guide talks it through with you, keeps a map of the territory, and points you to real works by real people, at your level. It doesn\'t teach you; it shows you where to go, and listens to how it went.')}
       </p>
       <div className="qs-start">
-        <textarea className="field serif qs-start-field" rows={2} value={text} placeholder="e.g. Teach me about rationality — I’ve read a bit of Kahneman"
+        <textarea className="field serif qs-start-field" rows={2} value={text} placeholder={t('e.g. Teach me about rationality — I’ve read a bit of Kahneman')}
           onChange={(e) => { setText(e.target.value); setErr(''); }}
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) start(); }} />
         <div className="qs-start-row">
-          <button className="btn primary" disabled={!text.trim()} onClick={start}><Icon name="quest" size={15} /> Start the quest</button>
-          <span className="muted qs-small">Say it however it comes. A broad subject is fine: the guide will ask.</span>
+          <button className="btn primary" disabled={!text.trim()} onClick={start}><Icon name="quest" size={15} /> {t('Start the quest')}</button>
+          <span className="muted qs-small">{t('Say it however it comes. A broad subject is fine: the guide will ask.')}</span>
         </div>
         {err && <p className="qs-err">{err}</p>}
       </div>
 
       {active.length > 0 && (
         <section className="section qs-section">
-          <div className="section-head"><h2>Your quests</h2></div>
+          <div className="section-head"><h2>{t('Your quests')}</h2></div>
           <ul className="desk-list">
             {active.map(({ q, regions, pointed, landed, last }) => (
               <li key={q.id}>
@@ -64,11 +62,11 @@ export default function Quests() {
                   <span className="desk-row-main">
                     <span className="desk-q">{q.title}</span>
                     <span className="desk-meta">
-                      {[`touched ${timeAgo(q.touchedAt)}`, regions && plural(regions, 'region'), pointed && `${plural(pointed, 'thing')} pointed to`, landed && `${landed} landed`].filter(Boolean).join(' · ')}
+                      {[t('touched {when}', { when: timeAgo(q.touchedAt) }), regions && tp(regions, '{n} region', '{n} regions'), pointed && tp(pointed, '{n} thing pointed to', '{n} things pointed to'), landed && t('{n} landed', { n: landed })].filter(Boolean).join(' · ')}
                     </span>
-                    {last && <span className="desk-meta desk-last qs-last">Guide: {clip(last, 140)}</span>}
+                    {last && <span className="desk-meta desk-last qs-last">{t('Guide: {text}', { text: clip(last, 140) })}</span>}
                   </span>
-                  <span className="desk-go">continue →</span>
+                  <span className="desk-go">{t('continue →')}</span>
                 </a>
               </li>
             ))}
@@ -77,7 +75,7 @@ export default function Quests() {
       )}
       {closed.length > 0 && (
         <section className="section qs-section">
-          <div className="section-head"><h2>Set down</h2></div>
+          <div className="section-head"><h2>{t('Set down')}</h2></div>
           <ul className="desk-list">
             {closed.map(({ q }) => (
               <li key={q.id}><a className="desk-row quiet" href={'#' + questPath(q.id)}><span className="desk-row-main"><span className="desk-q">{q.title}</span></span></a></li>

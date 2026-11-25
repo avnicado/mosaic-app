@@ -7,11 +7,11 @@ import { colonies, rng } from './derive.js';
 import { growColony, polypPaths } from './geometry.js';
 import { threadPath } from '../router.js';
 import './coral.css';
+import { t, tp, loc } from '../../i18n/index.js';
 
 const SLOT_W = 168, ROW_H = 208, BASE_FROM_BOTTOM = 50;
 const INK = '#4a4038', PANEL = '#faf6ee';
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-const fmt = (ts) => new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+const fmt = (ts) => new Date(ts).toLocaleDateString(loc(), { month: 'short', day: 'numeric', year: 'numeric' });
 
 function useNarrow() {
   const q = '(max-width: 760px)';
@@ -42,10 +42,10 @@ function wrap(text, width = 24, lines = 2) {
 
 const words = (c) => {
   const bits = [];
-  bits.push(c.real ? `${plural(c.real, 'session')} really moved this question` : 'No session has really moved this question yet');
-  if (c.cosmetic) bits.push(`${plural(c.cosmetic, 'session')} only reworded it`);
-  if (c.spawned) bits.push(`it gave rise to ${plural(c.spawned, 'thread')}`);
-  if (c.reflections) bits.push(`you wrote ${plural(c.reflections, 'note')} on it`);
+  bits.push(c.real ? tp(c.real, '{n} session really moved this question', '{n} sessions really moved this question') : t('No session has really moved this question yet'));
+  if (c.cosmetic) bits.push(tp(c.cosmetic, '{n} session only reworded it', '{n} sessions only reworded it'));
+  if (c.spawned) bits.push(tp(c.spawned, 'it gave rise to {n} thread', 'it gave rise to {n} threads'));
+  if (c.reflections) bits.push(tp(c.reflections, 'you wrote {n} note on it', 'you wrote {n} notes on it'));
   return bits.map((b) => b[0].toUpperCase() + b.slice(1)).join('. ') + '.';
 };
 
@@ -65,7 +65,7 @@ function Colony({ c, i, geo, outline, selected, onSelect, cx, baseY }) {
   const gray = c.dormant;
   const pal = palette(c.hue, gray);
   const label = wrap(c.question);
-  const aria = `${c.question}. ${words(c)}${c.dormant ? ' Quiet for 30 days or more.' : ''}`;
+  const aria = `${c.question}. ${words(c)}${c.dormant ? ' ' + t('Quiet for 30 days or more.') : ''}`;
   const key = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } };
   const pp = useMemo(() => polypPaths(geo.polyps), [geo]);
   const bodyId = `cr-b${i}`, tubeId = `cr-t${i}`;
@@ -213,15 +213,15 @@ export default function CoralReef({ threads, sessions, items }) {
       <div className="cr-bar">
         <label className="cr-toggle">
           <input type="checkbox" checked={outline} onChange={(e) => setOutline(e.target.checked)} />
-          <span>Preview its public form — the outline rule</span>
+          <span>{t('Preview its public form — the outline rule')}</span>
         </label>
-        {outline && <span className="cr-example">Nothing is published. Structure only, with all fill removed.</span>}
+        {outline && <span className="cr-example">{t('Nothing is published. Structure only, with all fill removed.')}</span>}
       </div>
       {!anyReal && (
-        <p className="cr-empty">Nothing has grown yet. A colony grows only when a session really moves the question. Opening threads, reading and marking add nothing.</p>
+        <p className="cr-empty">{t('Nothing has grown yet. A colony grows only when a session really moves the question. Opening threads, reading and marking add nothing.')}</p>
       )}
       <div className="cr-wrap">
-        <svg className="cr-svg" viewBox={`0 0 ${W} ${Ht}`} role="group" aria-label="Your threads as a reef of coral colonies" onClick={(e) => { if (e.target === e.currentTarget) setSelId(null); }}>
+        <svg className="cr-svg" viewBox={`0 0 ${W} ${Ht}`} role="group" aria-label={t('Your threads as a reef of coral colonies')} onClick={(e) => { if (e.target === e.currentTarget) setSelId(null); }}>
           <ReefDefs />
           {[0.18, 0.47, 0.78].map((u, k) => (
             <path key={`s${k}`} className="cr-shaft" d={`M${W * u} 0 L ${W * u + 46 + k * 12} 0 L ${W * u - 30 + k * 20} ${Ht} L ${W * u - 90 + k * 14} ${Ht} Z`} fill="url(#cr-shaft)" />
@@ -243,16 +243,15 @@ export default function CoralReef({ threads, sessions, items }) {
           <a className="cr-q" href={'#' + threadPath(sel.id)}>{sel.question}</a>
           <p className="cr-words">{words(sel)}</p>
           <p className="cr-words muted">
-            {[sel.closed && 'Closed', sel.dormant && `Quiet since ${fmt(sel.touchedAt)}. That is data, not failure.`].filter(Boolean).join(' · ') || 'Active.'}
+            {[sel.closed && t('Closed#thread'), sel.dormant && t('Quiet since {date}. That is data, not failure.', { date: fmt(sel.touchedAt) })].filter(Boolean).join(' · ') || t('Active.')}
           </p>
         </div>
-      ) : <p className="cr-hint">Click a colony to read what grew it.</p>}
+      ) : <p className="cr-hint">{t('Click a colony to read what grew it.')}</p>}
 
       <p className="cr-key">
-        <b>One colony per thread.</b> A <i className="k-polyp" /> polyp is one session that really moved the question. Branches reach as far as the share of a
-        thread’s sessions that really moved it, so rewording adds nothing. Small <i className="k-bud" /> buds at the base are threads it spawned.
-        <i className="k-pearl" /> Gold pearls are notes you wrote. Gray and bleached means quiet for 30 days or more: data, not failure.
-        Activity alone grows nothing. This is a mirror, not a trophy: only you see it.
+        {t('{lead} A {polyp} polyp is one session that really moved the question. Branches reach as far as the share of a thread’s sessions that really moved it, so rewording adds nothing. Small {bud} buds at the base are threads it spawned.{pearl} Gold pearls are notes you wrote. Gray and bleached means quiet for 30 days or more: data, not failure. Activity alone grows nothing. This is a mirror, not a trophy: only you see it.', {
+          lead: <b>{t('One colony per thread.')}</b>, polyp: <i className="k-polyp" />, bud: <i className="k-bud" />, pearl: <i className="k-pearl" />,
+        })}
       </p>
     </div>
   );

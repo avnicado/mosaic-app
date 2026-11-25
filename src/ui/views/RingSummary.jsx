@@ -3,6 +3,7 @@
 // reading of your question currently is"). Tapping one opens that ring.
 import React from 'react';
 import { currentViewsMap, setViewsMapOpen } from '../../data/views.js';
+import { t } from '../../i18n/index.js';
 
 export const OPEN_RING = 'mosaic:views-ring';
 
@@ -21,13 +22,13 @@ export default function RingSummary({ thread }) {
   return (
     <section className="th-rings" aria-labelledby="th-rings-h">
       <div className="th-rail-head">
-        <h2 className="th-rail-title" id="th-rings-h">The questions it splits on</h2>
-        <span className="th-rail-meta">{map.cruxes.length} rings</span>
+        <h2 className="th-rail-title" id="th-rings-h">{t('The questions it splits on')}</h2>
+        <span className="th-rail-meta">{t('{n} rings', { n: map.cruxes.length })}</span>
       </div>
       <ol className="th-rings-list">
         {map.cruxes.map((c, k) => (
           <li key={k}>
-            <button type="button" className="th-ring-q" onClick={() => open(k)} title="Open this ring">
+            <button type="button" className="th-ring-q" onClick={() => open(k)} title={t('Open this ring')}>
               <span className="th-ring-n">{k + 1}</span>
               <span className="th-ring-text">
                 <span className="th-ring-question">{c.question}</span>
@@ -37,7 +38,7 @@ export default function RingSummary({ thread }) {
           </li>
         ))}
       </ol>
-      <p className="th-rings-hint">Ring 1 is the innermost. Tap one for articles on each side.</p>
+      <p className="th-rings-hint">{t('Ring 1 is the innermost. Tap one for articles on each side.')}</p>
     </section>
   );
 }

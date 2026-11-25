@@ -6,19 +6,20 @@ import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Icon } from '../icons.jsx';
 import { isOwner } from '../../session.js';
 import './feedback.css';
+import { t, loc } from '../../i18n/index.js';
 
 export const KINDS = [
-  { key: 'bug', label: 'Something broke' },
-  { key: 'confusing', label: 'Confusing' },
-  { key: 'idea', label: 'An idea' },
-  { key: 'other', label: 'Other' },
+  { key: 'bug', get label() { return t('Something broke'); } },
+  { key: 'confusing', get label() { return t('Confusing'); } },
+  { key: 'idea', get label() { return t('An idea'); } },
+  { key: 'other', get label() { return t('Other'); } },
 ];
 const MAX = 4000;
 
 async function post(body) {
   const res = await fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(j?.error?.message || `Could not send (${res.status}).`);
+  if (!res.ok) throw new Error(j?.error?.message || t('Could not send ({status}).', { status: res.status }));
   return j;
 }
 
@@ -79,42 +80,42 @@ export function FeedbackButton({ page }) {
 
   return (
     <>
-      <button type="button" className="side-link fb-open" onClick={open}><Icon name="feedback" size={17} />Send feedback</button>
+      <button type="button" className="side-link fb-open" onClick={open}><Icon name="feedback" size={17} />{t('Send feedback')}</button>
       <dialog ref={dlg} className="fb" aria-labelledby="fb-title"
         onClick={(e) => { if (e.target === dlg.current) close(); }}>
         {state === 'sent' ? (
           <div className="fb-body">
-            <h2 id="fb-title">Sent. Thank you.</h2>
-            <p className="fb-help">The admin will read it. Your note went to no one else.</p>
+            <h2 id="fb-title">{t('Sent. Thank you.')}</h2>
+            <p className="fb-help">{t('The admin will read it. Your note went to no one else.')}</p>
             <div className="fb-actions">
-              <button type="button" className="btn primary" onClick={close}>Close</button>
-              <button type="button" className="btn ghost" onClick={() => setState('idle')}>Write another</button>
+              <button type="button" className="btn primary" onClick={close}>{t('Close')}</button>
+              <button type="button" className="btn ghost" onClick={() => setState('idle')}>{t('Write another')}</button>
             </div>
           </div>
         ) : (
           <form className="fb-body" onSubmit={send}>
             <div className="fb-head">
-              <h2 id="fb-title">Tell the admin</h2>
-              <button type="button" className="fb-x" onClick={close} aria-label="Close"><Icon name="x" size={14} /></button>
+              <h2 id="fb-title">{t('Tell the admin')}</h2>
+              <button type="button" className="fb-x" onClick={close} aria-label={t('Close')}><Icon name="x" size={14} /></button>
             </div>
-            <p className="fb-help">Mosaic is in alpha. Say what broke, what confused you, or what you wish it did. Your note goes straight to the admin and to no one else.</p>
-            <div className="fb-kinds" role="radiogroup" aria-label="What kind of note is this?">
+            <p className="fb-help">{t('Mosaic is in alpha. Say what broke, what confused you, or what you wish it did. Your note goes straight to the admin and to no one else.')}</p>
+            <div className="fb-kinds" role="radiogroup" aria-label={t('What kind of note is this?')}>
               {KINDS.map((k) => (
                 <button key={k.key} type="button" role="radio" aria-checked={kind === k.key}
                   className={kind === k.key ? 'on' : ''} onClick={() => setKind(k.key)}>{k.label}</button>
               ))}
             </div>
-            <label className="label" htmlFor="fb-text">Your note</label>
+            <label className="label" htmlFor="fb-text">{t('Your note')}</label>
             <textarea id="fb-text" className="field" rows={6} maxLength={MAX} value={message} autoFocus
-              onChange={(e) => setMessage(e.target.value)} placeholder="What happened, and what did you expect?" />
+              onChange={(e) => setMessage(e.target.value)} placeholder={t('What happened, and what did you expect?')} />
             <label className="fb-check">
               <input type="checkbox" checked={context} onChange={(e) => setContext(e.target.checked)} />
-              <span>Include which page I am on and my device type. Never my threads or anything I wrote.</span>
+              <span>{t('Include which page I am on and my device type. Never my threads or anything I wrote.')}</span>
             </label>
             {error && <p className="error">{error}</p>}
             <div className="fb-actions">
-              <button type="submit" className="btn primary" disabled={!message.trim() || state === 'sending'}>{state === 'sending' ? 'Sending…' : 'Send'}</button>
-              <button type="button" className="btn ghost" onClick={close}>Cancel</button>
+              <button type="submit" className="btn primary" disabled={!message.trim() || state === 'sending'}>{state === 'sending' ? t('Sending…') : t('Send')}</button>
+              <button type="button" className="btn ghost" onClick={close}>{t('Cancel')}</button>
               <span className="fb-count muted">{message.length}/{MAX}</span>
             </div>
           </form>
@@ -125,7 +126,7 @@ export function FeedbackButton({ page }) {
 }
 
 // ---- the owner's inbox (Settings) ------------------------------------------------------------
-const when = (ts) => new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const when = (ts) => new Date(ts).toLocaleString(loc(), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 export function FeedbackInbox() {
   const [items, setItems] = useState(null);
@@ -134,7 +135,7 @@ export function FeedbackInbox() {
     try {
       const res = await fetch('/api/feedback', { cache: 'no-store' });
       const j = await res.json();
-      if (!res.ok) throw new Error(j?.error?.message || `Failed (${res.status})`);
+      if (!res.ok) throw new Error(j?.error?.message || t('Failed ({status})', { status: res.status }));
       setItems(j.items); setUnread(j.unread); setError(null);
     } catch (e) { setError(e.message); }
   };
@@ -145,23 +146,23 @@ export function FeedbackInbox() {
   const n = (items || []).filter((f) => !f.read).length;
   return (
     <section className="section">
-      <div className="section-head"><h2>Feedback</h2><span className="label">{items ? `${n} unread · ${items.length} in all` : ''}</span></div>
-      <p className="set-help">Notes people send with “Send feedback”. Only you can read them.</p>
+      <div className="section-head"><h2>{t('Feedback')}</h2><span className="label">{items ? t('{unread} unread · {total} in all', { unread: n, total: items.length }) : ''}</span></div>
+      <p className="set-help">{t('Notes people send with “Send feedback”. Only you can read them.')}</p>
       {error && <p className="error">{error}</p>}
-      {items && !items.length && <p className="muted">Nothing yet.</p>}
+      {items && !items.length && <p className="muted">{t('Nothing yet.')}</p>}
       <ul className="fb-list">
         {(items || []).map((f) => (
           <li key={f.id} className={f.read ? 'read' : ''}>
             <div className="fb-meta">
-              <span className="fb-kind">{KINDS.find((k) => k.key === f.kind)?.label || 'Other'}</span>
+              <span className="fb-kind">{KINDS.find((k) => k.key === f.kind)?.label || t('Other')}</span>
               <span className="serif">{f.userName}</span>
-              <span className="muted">{when(f.createdAt)}{f.page ? ` · on ${f.page}` : ''}</span>
+              <span className="muted">{f.page ? t('{when} · on {page}', { when: when(f.createdAt), page: f.page }) : when(f.createdAt)}</span>
             </div>
             <p className="fb-msg">{f.message}</p>
             {f.device && <p className="fb-device muted">{f.device}</p>}
             <div className="fb-row-actions">
-              <button className="btn link" onClick={() => act(f.read ? 'unread' : 'read', f.id)}>{f.read ? 'Mark unread' : 'Mark read'}</button>
-              <button className="btn link" onClick={() => { if (confirm('Delete this note?')) act('delete', f.id); }}>Delete</button>
+              <button className="btn link" onClick={() => act(f.read ? 'unread' : 'read', f.id)}>{f.read ? t('Mark unread') : t('Mark read')}</button>
+              <button className="btn link" onClick={() => { if (confirm(t('Delete this note?'))) act('delete', f.id); }}>{t('Delete')}</button>
             </div>
           </li>
         ))}

@@ -1,5 +1,6 @@
 // Pure reads over the record for the Library. No React, no writes.
 import * as R from '../../data/record.js';
+import { t, loc } from '../../i18n/index.js';
 
 const DAY = 864e5;
 export const SLOT_ORDER = ['sharpen', 'complicate', 'bridge', 'ground'];
@@ -126,6 +127,6 @@ export function verdicts(sessions) {
   };
 }
 
-export const joinWords = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+export const joinWords = (xs) => (xs.length < 2 ? xs.join('') : t('{list} and {last}', { list: xs.slice(0, -1).join(', '), last: xs[xs.length - 1] }));
 export const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-export const fmtDate = (ts, opts = {}) => (ts ? new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', ...opts }) : '');
+export const fmtDate = (ts, opts = {}) => (ts ? new Date(ts).toLocaleDateString(loc(), { month: 'short', day: 'numeric', ...opts }) : '');

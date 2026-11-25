@@ -27,14 +27,14 @@
 .lib-wk-row:not(.lib-wk-head):hover .lib-wk-label { color: var(--accent); }
 .lib-wk-head { cursor: default; }
 .lib-wk-month { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faded); white-space: nowrap; overflow: visible; height: 16px; }
-.lib-wk-label { font-family: var(--serif); font-size: 14px; line-height: 1.25; color: var(--ink); text-decoration: none; padding-right: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lib-wk-label { font-family: var(--serif); font-size: 14px; line-height: 1.25; color: var(--ink); text-decoration: none; padding-inline-end: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .lib-wk-label.closed { font-style: italic; color: var(--ink-soft); }
 .lib-wk-cell { position: relative; display: block; height: 30px; border-radius: 2px; background: transparent; border: 1px solid var(--rule-soft); }
 .lib-wk-cell.t1 { background: #cdd2b9; border-color: #c2c8ab; }
 .lib-wk-cell.t2 { background: #9aa385; border-color: #9aa385; }
 .lib-wk-cell.t3 { background: #6b7559; border-color: #6b7559; }
 .lib-wk-cell.real::after { content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1.5px var(--panel); }
-.lib-wk-cell.shut::before { content: ""; position: absolute; right: -1px; top: -1px; bottom: -1px; width: 3px; background: var(--gold); border-radius: 0 2px 2px 0; }
+.lib-wk-cell.shut::before { content: ""; position: absolute; inset-inline-end: -1px; top: -1px; bottom: -1px; width: 3px; background: var(--gold); border-start-end-radius: 2px; border-end-end-radius: 2px; }
 .lib-wk-row:not(.lib-wk-head) .lib-wk-cell:hover { outline: 1.5px solid var(--ink); outline-offset: 0; }
 .lib-tip { position: absolute; transform: translate(-50%, calc(-100% - 8px)); z-index: 5; width: 220px; background: var(--ink); color: #f5f0e6; padding: 8px 10px; border-radius: 3px; font-size: 12.5px; line-height: 1.45; pointer-events: none; }
 .lib-tip-week { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
@@ -70,7 +70,7 @@
 /* kept */
 .lib-filter { display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
 .lib-filter button { border: none; background: var(--panel); padding: 4px 10px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; }
-.lib-filter button + button { border-left: 1px solid var(--rule); }
+.lib-filter button + button { border-inline-start: 1px solid var(--rule); }
 .lib-filter button.on { background: var(--ink); color: var(--bg); }
 .lib-kept-group { margin-bottom: 18px; }
 .lib-kept-thread { display: block; font-size: 16.5px; margin-bottom: 4px; }
@@ -80,7 +80,7 @@
 .lib-kept-title { color: var(--ink); font-weight: 500; text-underline-offset: 3px; }
 .lib-kept-title:hover { color: var(--accent); }
 .lib-kept-src { font-size: 13px; color: var(--ink-faded); }
-.lib-kept-note { margin: 4px 0 0; padding-left: 10px; border-left: 2px solid var(--rule); font-size: 14px; color: var(--ink-soft); }
+.lib-kept-note { margin: 4px 0 0; padding-inline-start: 10px; border-inline-start: 2px solid var(--rule); font-size: 14px; color: var(--ink-soft); }
 
 /* closed */
 .lib-closed { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
@@ -88,8 +88,8 @@
 .lib-closed-q { font-family: var(--serif); font-size: 19px; line-height: 1.3; color: var(--ink); text-decoration: none; }
 .lib-closed-q:hover { color: var(--accent); }
 .lib-closed-began { margin: 0; font-size: 13.5px; color: var(--ink-faded); }
-.lib-closed-began .label { margin-right: 4px; }
-.lib-synth { margin: 0; padding-left: 12px; border-left: 2px solid var(--gold); font-family: var(--serif); font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+.lib-closed-began .label { margin-inline-end: 4px; }
+.lib-synth { margin: 0; padding-inline-start: 12px; border-inline-start: 2px solid var(--gold); font-family: var(--serif); font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
 
 @media (max-width: 760px) {
   .lib .ms-legend { grid-template-columns: 1fr; }

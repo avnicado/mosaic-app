@@ -14,6 +14,7 @@ import {
 import * as R from '../../data/record.js';
 import { apiFetch } from '../../engine/llm.js';
 import { withLength } from '../../length.js';
+import { t } from '../../i18n/index.js';
 
 // ---- open questions (editorial) ------------------------------------------------
 // Ported from the old app's EDITORIAL_LIVE. They link nowhere; holding one
@@ -44,14 +45,14 @@ export const OPEN_QUESTIONS = [
 
 // Plain section titles (scoring.js still carries older wording).
 export function sectionTitle(sec, hasThreads) {
-  if (sec.key === 'near') return hasThreads ? 'Near your threads' : 'From all over';
-  if (sec.key === 'far') return 'Far field';
-  return 'Open questions';
+  if (sec.key === 'near') return hasThreads ? t('Near your threads') : t('From all over');
+  if (sec.key === 'far') return t('Far field');
+  return t('Open questions');
 }
 export function sectionNote(sec, hasThreads) {
-  if (sec.key === 'near') return hasThreads ? 'Close to what your threads are about.' : 'Once you hold a thread, this part of the shelf leans toward it.';
-  if (sec.key === 'far') return 'Away from what you hold, each from a different field.';
-  return 'Questions to try on. They link nowhere; hold one to make it yours.';
+  if (sec.key === 'near') return hasThreads ? t('Close to what your threads are about.') : t('Once you hold a thread, this part of the shelf leans toward it.');
+  if (sec.key === 'far') return t('Away from what you hold, each from a different field.');
+  return t('Questions to try on. They link nowhere; hold one to make it yours.');
 }
 
 // ---- threads → taxonomy domains ---------------------------------------------------
@@ -141,14 +142,14 @@ export function realWhy(card) {
 
 // "e.g. …" placeholder for the Hold composer, from the card itself.
 export function holdPlaceholder(card) {
-  if (card.editorial) return 'Say it your own way, or narrow it to the part that caught you';
-  let t = (card.title || '').replace(/\s+/g, ' ').trim();
-  if (t.length > 42) t = t.slice(0, 40).replace(/\s+\S*$/, '') + '…';
+  if (card.editorial) return t('Say it your own way, or narrow it to the part that caught you');
+  let title = (card.title || '').replace(/\s+/g, ' ').trim();
+  if (title.length > 42) title = title.slice(0, 40).replace(/\s+\S*$/, '') + '…';
   switch (card.slot) {
-    case 'complicate': return `e.g. What does “${t}” leave out?`;
-    case 'bridge': return `e.g. Show me where else “${t}” turns up`;
-    case 'ground': return `e.g. What actually happened in “${t}”?`;
-    default: return `e.g. What’s really at stake in “${t}”?`;
+    case 'complicate': return t('e.g. What does “{title}” leave out?', { title });
+    case 'bridge': return t('e.g. Show me where else “{title}” turns up', { title });
+    case 'ground': return t('e.g. What actually happened in “{title}”?', { title });
+    default: return t('e.g. What’s really at stake in “{title}”?', { title });
   }
 }
 
@@ -180,9 +181,9 @@ async function fetchCorpus() {
   for (const url of ['/api/corpus', '/corpus.json']) {
     try {
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`${url} answered ${res.status}`);
+      if (!res.ok) throw new Error(t('{url} answered {status}', { url, status: res.status }));
       const json = await res.json();
-      if (!Array.isArray(json.items) || !json.items.length) throw new Error(`${url} was empty`);
+      if (!Array.isArray(json.items) || !json.items.length) throw new Error(t('{url} was empty', { url }));
       return { meta: json.meta || {}, items: json.items.map(prepare), from: url, day: today() };
     } catch (e) { errors.push(e.message); }
   }
@@ -303,15 +304,15 @@ async function lookFurther(lean, key) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       const type = data?.error?.type || '';
-      const message = res.status === 401 ? 'You’re signed out, so Mosaic couldn’t look further.'
-        : res.status === 429 ? (data?.error?.message || 'Too many searches just now.')
-          : 'Mosaic couldn’t look further just now.';
+      const message = res.status === 401 ? t('You’re signed out, so Mosaic couldn’t look further.')
+        : res.status === 429 ? (data?.error?.message || t('Too many searches just now.'))
+          : t('Mosaic couldn’t look further just now.');
       throw Object.assign(new Error(message), { type });
     }
     if (corpus) mergeFound(data.items || []);
     entry = { status: 'done', found: (data.items || []).length, searched: !!data.searched };
   } catch (e) {
-    entry = { status: 'error', message: e.message || 'Mosaic couldn’t look further just now.', type: e.type || '' };
+    entry = { status: 'error', message: e.message || t('Mosaic couldn’t look further just now.'), type: e.type || '' };
   }
   looked.set(key, entry);
   set({ furtherTick: state.furtherTick + 1 });

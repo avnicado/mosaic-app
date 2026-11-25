@@ -20,6 +20,7 @@
 //              visits, firstAt, lastAt }
 
 import * as R from './record.js';
+import { t } from '../i18n/index.js';
 
 // Merge [from, to] spans into a sorted, non-overlapping list.
 export function mergeSpans(spans) {
@@ -115,32 +116,39 @@ export function completion(p) {
   return { level, done: level >= 0.999 };
 }
 
-const VERB = { read: 'read', watch: 'watched', listen: 'listened to' };
+// Whole phrases per kind, so each reads naturally in every language.
+const VERB = { read: () => t('read'), watch: () => t('watched'), listen: () => t('listened to') };
+const DONE_IT = { read: () => t('read it'), watch: () => t('watched it'), listen: () => t('listened to it') };
+const PCT = {
+  read: (pct) => t('read {pct}%', { pct }),
+  watch: (pct) => t('watched {pct}%', { pct }),
+  listen: (pct) => t('listened to {pct}%', { pct }),
+};
 export function minutesText(ms) {
   const m = Math.round(ms / 60000);
-  if (ms < 45000) return 'under 1 min';
-  if (m < 60) return `${Math.max(1, m)} min`;
-  return `${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + ' min' : ''}`.trim();
+  if (ms < 45000) return t('under 1 min');
+  if (m < 60) return t('{n} min', { n: Math.max(1, m) });
+  return m % 60 ? t('{h} h {m} min', { h: Math.floor(m / 60), m: m % 60 }) : t('{h} h', { h: Math.floor(m / 60) });
 }
 
 // "read it · 9 min of ~12 min", "read 80% · 6 min of ~12 min", "watched 42% · 12 min", "about 9 min with the player".
 export function progressText(p) {
   if (!p || (!p.ms && !covered(p.spans) && !p.depth)) return '';
   const done = doneOf(p);
-  if (p.estimated) return `about ${minutesText(p.ms)} with the player`;
+  if (p.estimated) return t('about {time} with the player', { time: minutesText(p.ms) });
   const c = completion(p);
   // An article you got further down than your time there allows was skimmed.
   const expect = p.expectSec || (p.minutes ? p.minutes * 60 : null);
   const blocks = p.kind === 'read' && p.words;
   const skimmed = blocks ? !c?.done && p.passW > p.readW
     : p.kind === 'read' && !c?.done && expect && p.ms / 1000 / (expect * DONE_TIME) < Math.min(1, (p.depth || 0) / DONE_DEPTH);
-  const pct = c?.done ? `${VERB[p.kind]} it`
-    : skimmed && blocks ? `skimmed ${Math.round(((p.readW + p.passW) / p.words) * 100)}%`
-    : skimmed ? (p.depth >= DONE_DEPTH ? 'skimmed to the end' : `skimmed ${Math.round(p.depth * 100)}%`)
-      : done == null ? '' : `${VERB[p.kind]} ${Math.round(done * 100)}%`;
-  const time = p.kind === 'read' && p.minutes ? `${minutesText(p.ms)} of ~${p.minutes} min` : minutesText(p.ms);
-  const preview = p.provider === 'spotify' && p.dur && p.dur <= SPOTIFY_PREVIEW ? 'preview only' : null;
-  return [pct || VERB[p.kind], time, preview].filter(Boolean).join(' · ');
+  const pct = c?.done ? DONE_IT[p.kind]?.()
+    : skimmed && blocks ? t('skimmed {pct}%', { pct: Math.round(((p.readW + p.passW) / p.words) * 100) })
+    : skimmed ? (p.depth >= DONE_DEPTH ? t('skimmed to the end') : t('skimmed {pct}%', { pct: Math.round(p.depth * 100) }))
+      : done == null ? '' : PCT[p.kind]?.(Math.round(done * 100));
+  const time = p.kind === 'read' && p.minutes ? t('{time} of ~{total} min', { time: minutesText(p.ms), total: p.minutes }) : minutesText(p.ms);
+  const preview = p.provider === 'spotify' && p.dur && p.dur <= SPOTIFY_PREVIEW ? t('preview only') : null;
+  return [pct || VERB[p.kind]?.(), time, preview].filter(Boolean).join(' · ');
 }
 
 // Merge a tracker's delta into the stored progress. delta: { kind, ms (added),

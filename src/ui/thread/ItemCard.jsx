@@ -8,18 +8,19 @@ import { go, threadPath } from '../router.js';
 import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
 import { progressText } from '../../data/progress.js';
 import { mediaInfo } from '../../media.js';
+import { t, loc } from '../../i18n/index.js';
 
 const SIGNALS = [
-  { key: 'moved', label: 'moved me' },
-  { key: 'neutral', label: 'neutral' },
-  { key: 'closed', label: 'closed it down' },
+  { key: 'moved', get label() { return t('moved me'); } },
+  { key: 'neutral', get label() { return t('neutral'); } },
+  { key: 'closed', get label() { return t('closed it down'); } },
 ];
 
 export function Provenance({ item }) {
   const bits = [];
-  if (item.provenance === 'knowledge') bits.push(<span key="p" title="Chosen from what the model knows, not from a live search">from Wikipedia</span>);
-  if (item.linkCheck === 'ok') bits.push(<span key="l" className="th-ok" title="The link was checked and loads">link ✓</span>);
-  else bits.push(<span key="l" className="th-unconf" title="The link couldn't be checked; it may not load">link unconfirmed</span>);
+  if (item.provenance === 'knowledge') bits.push(<span key="p" title={t('Chosen from what the model knows, not from a live search')}>{t('from Wikipedia')}</span>);
+  if (item.linkCheck === 'ok') bits.push(<span key="l" className="th-ok" title={t('The link was checked and loads')}>{t('link ✓')}</span>);
+  else bits.push(<span key="l" className="th-unconf" title={t("The link couldn't be checked; it may not load")}>{t('link unconfirmed')}</span>);
   return <span className="th-prov">{bits.reduce((acc, b, i) => (i ? [...acc, <span key={'s' + i} className="th-dot">·</span>, b] : [b]), [])}</span>;
 }
 
@@ -40,7 +41,7 @@ export function RatingRow({ item, compact = false }) {
             {[1, 2, 3, 4].map((v) => (
               <button key={v} type="button" role="radio" aria-checked={(r[ax.key] || 0) === v}
                 className={`th-rdot ${(r[ax.key] || 0) >= v ? 'on' : ''}`}
-                title={`${ax.label}: ${v} of 4`}
+                title={t('{axis}: {v} of 4', { axis: ax.label, v })}
                 onClick={() => A.setRating(item.id, ax.key, (r[ax.key] || 0) === v ? 0 : v)} />
             ))}
           </span>
@@ -57,7 +58,7 @@ export function NoteList({ item }) {
       {item.notes.map((n) => (
         <li key={n.at}>
           <span className="th-note-text">{n.text}</span>
-          <button className="th-x" title="Remove this note" onClick={() => A.removeNote(item.id, n.at)}><Icon name="x" size={12} /></button>
+          <button className="th-x" title={t('Remove this note')} onClick={() => A.removeNote(item.id, n.at)}><Icon name="x" size={12} /></button>
         </li>
       ))}
     </ul>
@@ -88,14 +89,14 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
       <header className="th-card-head">
         <SlotTag slot={item.slot} blurb />
         <button className={`th-keep ${item.kept ? 'on' : ''}`} onClick={() => A.toggleKeep(item.id)}
-          title={item.kept ? 'Kept — click to unkeep' : 'Keep this item'} aria-pressed={!!item.kept}>
-          <Icon name={item.kept ? 'kept' : 'keep'} size={15} /><span className="th-keep-l">{item.kept ? 'Kept' : 'Keep'}</span>
+          title={item.kept ? t('Kept — click to unkeep') : t('Keep this item')} aria-pressed={!!item.kept}>
+          <Icon name={item.kept ? 'kept' : 'keep'} size={15} /><span className="th-keep-l">{item.kept ? t('Kept') : t('Keep')}</span>
         </button>
       </header>
 
       <div className="th-card-kind">
         <MediaChip type={item.mediaType} url={item.url} label />
-        {item.openedAt ? <span className="th-opened">opened {new Date(item.openedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}{progressText(item.progress) ? ` · ${progressText(item.progress)}` : ''}</span> : null}
+        {item.openedAt ? <span className="th-opened">{t('opened {date}', { date: new Date(item.openedAt).toLocaleDateString(loc(), { month: 'short', day: 'numeric' }) })}{progressText(item.progress) ? ` · ${progressText(item.progress)}` : ''}</span> : null}
       </div>
       <h3 className="th-card-title">
         <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={readerClick(item, () => A.markOpened(item.id))}>{item.title}</a>
@@ -113,10 +114,10 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
       <div className="th-card-open">
         <OpenButton item={item} onOpen={() => A.markOpened(item.id)} />
       </div>
-      <div className="th-why"><span className="th-why-l">Why here</span>{item.why}</div>
+      <div className="th-why"><span className="th-why-l">{t('Why here')}</span>{item.why}</div>
       <div className="th-card-prov"><Provenance item={item} /></div>
 
-      <div className="th-signals" role="group" aria-label="How did this land?">
+      <div className="th-signals" role="group" aria-label={t('How did this land?')}>
         {SIGNALS.map((s) => (
           <button key={s.key} className={`th-sig th-sig-${s.key} ${item.signal === s.key ? 'on' : ''}`}
             aria-pressed={item.signal === s.key} onClick={() => A.setSignal(item.id, s.key)}>
@@ -127,49 +128,49 @@ export default function ItemCard({ item, replacing, ratingsOn, threadClosed }) {
 
       <NoteList item={item} />
       {rated && panel !== 'rate' && ratingsOn && (
-        <button className="th-rated" onClick={() => toggle('rate')} title="Edit rating">
+        <button className="th-rated" onClick={() => toggle('rate')} title={t('Edit rating')}>
           {RATING_AXES.filter((a) => item.rating[a.key] > 0).map((a) => `${a.label.split(' ')[0].toLowerCase()} ${item.rating[a.key]}`).join(' · ')}
         </button>
       )}
 
       <div className="th-actions">
-        <button className={`th-act ${panel === 'note' ? 'on' : ''}`} onClick={() => toggle('note')}><Icon name="note" size={14} /> Note</button>
-        {ratingsOn && <button className={`th-act ${panel === 'rate' ? 'on' : ''}`} onClick={() => toggle('rate')}><Icon name="rate" size={14} /> Rate</button>}
-        {!threadClosed && <button className="th-act" disabled={replacing} onClick={() => A.replaceItem(item.id)} title="Swap in a different item for this slot"><Icon name="swap" size={14} /> Different item</button>}
+        <button className={`th-act ${panel === 'note' ? 'on' : ''}`} onClick={() => toggle('note')}><Icon name="note" size={14} /> {t('Note')}</button>
+        {ratingsOn && <button className={`th-act ${panel === 'rate' ? 'on' : ''}`} onClick={() => toggle('rate')}><Icon name="rate" size={14} /> {t('Rate')}</button>}
+        {!threadClosed && <button className="th-act" disabled={replacing} onClick={() => A.replaceItem(item.id)} title={t('Swap in a different item for this slot')}><Icon name="swap" size={14} /> {t('Different item')}</button>}
         <span className="th-act-spacer" />
-        <button className={`th-act th-pursue ${panel === 'pursue' ? 'on' : ''}`} onClick={() => toggle('pursue')} title="Start a new thread from this item"><Icon name="pursue" size={14} /> Pursue</button>
+        <button className={`th-act th-pursue ${panel === 'pursue' ? 'on' : ''}`} onClick={() => toggle('pursue')} title={t('Start a new thread from this item')}><Icon name="pursue" size={14} /> {t('Pursue')}</button>
       </div>
 
       {panel === 'note' && (
         <div className="th-panel">
-          <textarea ref={noteRef} className="field th-note-field" rows={3} value={note} placeholder="What does this make you think? (Saving a note also keeps the item.)"
+          <textarea ref={noteRef} className="field th-note-field" rows={3} value={note} placeholder={t('What does this make you think? (Saving a note also keeps the item.)')}
             onChange={(e) => setNote(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveNote(); if (e.key === 'Escape') setPanel(null); }} />
           <div className="th-panel-row">
-            <button className="btn small" disabled={!note.trim()} onClick={saveNote}>Save note</button>
-            <button className="btn link" onClick={() => setPanel(null)}>Cancel</button>
+            <button className="btn small" disabled={!note.trim()} onClick={saveNote}>{t('Save note')}</button>
+            <button className="btn link" onClick={() => setPanel(null)}>{t('Cancel')}</button>
             <span className="th-hint">⌘↵</span>
           </div>
         </div>
       )}
       {panel === 'rate' && ratingsOn && (
-        <div className="th-panel"><RatingRow item={item} /><div className="th-panel-row"><button className="btn link" onClick={() => setPanel(null)}>Done</button></div></div>
+        <div className="th-panel"><RatingRow item={item} /><div className="th-panel-row"><button className="btn link" onClick={() => setPanel(null)}>{t('Done')}</button></div></div>
       )}
       {panel === 'pursue' && (
         <div className="th-panel">
-          <label className="th-panel-label" htmlFor={'p' + item.id}>What's the question this opens?</label>
+          <label className="th-panel-label" htmlFor={'p' + item.id}>{t("What's the question this opens?")}</label>
           <textarea id={'p' + item.id} ref={pursueRef} className="field serif th-pursue-field" rows={2} value={pursue}
             onChange={(e) => setPursue(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) doPursue(); if (e.key === 'Escape') setPanel(null); }} />
           <div className="th-panel-row">
-            <button className="btn small primary" disabled={!pursue.trim() || spawning} onClick={doPursue}>{spawning ? <Spinner /> : null} Start the thread</button>
-            <button className="btn link" onClick={() => setPanel(null)}>Cancel</button>
-            <span className="th-hint">It keeps a link back to this thread.</span>
+            <button className="btn small primary" disabled={!pursue.trim() || spawning} onClick={doPursue}>{spawning ? <Spinner /> : null} {t('Start the thread')}</button>
+            <button className="btn link" onClick={() => setPanel(null)}>{t('Cancel')}</button>
+            <span className="th-hint">{t('It keeps a link back to this thread.')}</span>
           </div>
         </div>
       )}
 
-      {replacing && <div className="th-card-veil"><Spinner /> finding a different {item.slot} item…</div>}
+      {replacing && <div className="th-card-veil"><Spinner /> {t('finding a different {slot} item…', { slot: t(item.slot) })}</div>}
     </article>
   );
 }
@@ -178,7 +179,7 @@ export function SkeletonCard({ slot }) {
   return (
     <article className={`th-card th-skel slot-${slot}`} aria-busy="true">
       <header className="th-card-head"><SlotTag slot={slot} blurb /></header>
-      <div className="th-skel-msg"><Spinner /> finding a {slot} item…</div>
+      <div className="th-skel-msg"><Spinner /> {t('finding a {slot} item…', { slot: t(slot) })}</div>
       <div className="th-skel-line w80" /><div className="th-skel-line w60" /><div className="th-skel-line w90" /><div className="th-skel-line w40" />
     </article>
   );
@@ -188,9 +189,9 @@ export function FailedCard({ slot, error, onRetry, busy }) {
   return (
     <article className={`th-card th-failed slot-${slot}`}>
       <header className="th-card-head"><SlotTag slot={slot} blurb /></header>
-      <p className="th-failed-msg">Couldn't find a {slot} item this time.</p>
+      <p className="th-failed-msg">{t("Couldn't find a {slot} item this time.", { slot: t(slot) })}</p>
       {error && <p className="th-failed-err">{String(error).slice(0, 160)}</p>}
-      <div><button className="btn small" disabled={busy} onClick={onRetry}>Try again</button></div>
+      <div><button className="btn small" disabled={busy} onClick={onRetry}>{t('Try again')}</button></div>
     </article>
   );
 }
@@ -199,7 +200,7 @@ export function EmptySlotCard({ slot }) {
   return (
     <article className={`th-card th-emptyslot slot-${slot}`}>
       <header className="th-card-head"><SlotTag slot={slot} blurb /></header>
-      <p className="muted th-empty-msg">Not filled yet.</p>
+      <p className="muted th-empty-msg">{t('Not filled yet.')}</p>
     </article>
   );
 }

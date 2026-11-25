@@ -21,7 +21,7 @@
 .set-axis-name { font-size: 14px; }
 .set-seg { justify-self: start; display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--panel); flex-wrap: nowrap; }
 .set-seg button { border: none; background: none; padding: 4px 10px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; min-height: 28px; white-space: nowrap; }
-.set-seg button + button { border-left: 1px solid var(--rule); }
+.set-seg button + button { border-inline-start: 1px solid var(--rule); }
 .set-seg button.on { background: var(--ink); color: var(--bg); }
 .set-dur { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rule-soft); }
 .set-dur-end { font-size: 13px; }

@@ -5,6 +5,7 @@
 import React from 'react';
 import { mediaInfo } from '../media.js';
 import { openReader } from './reader/store.js';
+import { t } from '../i18n/index.js';
 
 const c = (cx, cy, r) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0z`;
 
@@ -132,13 +133,13 @@ export function OpenButton({ item, onOpen, compact = false }) {
   return (
     <span className={`open-pair fam-${m.family} ${compact ? 'compact' : ''}`}>
       <a className={`open-btn fam-${m.family} ${compact ? 'compact' : ''}`} href={item.url} target="_blank" rel="noopener noreferrer"
-        onClick={readerClick(item, onOpen)} title={`${m.verb} in Mosaic: ${item.title || item.url}`}>
+        onClick={readerClick(item, onOpen)} title={t('{verb} in Mosaic: {title}', { verb: m.verb, title: item.title || item.url })}>
         <Icon name={m.type} size={compact ? 14 : 16} />
         <span className="open-verb">{m.verb}</span>
-        {!compact && <span className="open-host">in Mosaic</span>}
+        {!compact && <span className="open-host">{t('in Mosaic')}</span>}
       </a>
       <a className="open-site" href={item.url} target="_blank" rel="noopener noreferrer" onClick={onOpen}
-        title={`Open on ${host || 'the site'}`} aria-label={`Open on ${host || 'the site'}`}>
+        title={host ? t('Open on {host}', { host }) : t('Open on the site')} aria-label={host ? t('Open on {host}', { host }) : t('Open on the site')}>
         <Icon name="open" size={compact ? 12 : 14} />{!compact && host && <span>{host}</span>}
       </a>
     </span>

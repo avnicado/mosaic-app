@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { RELEASES, CURRENT_VERSION, compareVersions } from '../../releases.js';
 import { useSeenVersion, markSeen } from '../../data/whatsnew.js';
 import './whatsnew.css';
+import { t, loc } from '../../i18n/index.js';
 
-const KIND = { new: 'New', better: 'Better', fixed: 'Fixed' };
+const KIND = { get new() { return t('New'); }, get better() { return t('Better'); }, get fixed() { return t('Fixed'); } };
 const ORDER = ['new', 'better', 'fixed'];
 
-const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString(loc(), { month: 'long', day: 'numeric', year: 'numeric' });
 
 export default function WhatsNew() {
   const seen = useSeenVersion();
@@ -18,16 +19,16 @@ export default function WhatsNew() {
 
   return (
     <div className="page wn">
-      <div className="eyebrow">What’s new</div>
-      <h1>What’s new in Mosaic</h1>
-      <p className="wn-lede">You’re on version <span className="wn-ver">{CURRENT_VERSION}</span>. Each version below says what changed, newest first.</p>
+      <div className="eyebrow">{t('What’s new')}</div>
+      <h1>{t('What’s new in Mosaic')}</h1>
+      <p className="wn-lede">{t('You’re on version {version}. Each version below says what changed, newest first.', { version: <span className="wn-ver">{CURRENT_VERSION}</span> })}</p>
 
       {RELEASES.map((r) => (
         <section key={r.version} className={`wn-release ${isNew(r) ? 'unseen' : ''}`} aria-labelledby={`wn-${r.version}`}>
           <div className="wn-meta">
             <span className="wn-ver">{r.version}</span>
             <span className="wn-date">{fmtDate(r.date)}</span>
-            {isNew(r) && <span className="wn-tag">New to you</span>}
+            {isNew(r) && <span className="wn-tag">{t('New to you')}</span>}
           </div>
           <h2 id={`wn-${r.version}`}>{r.title}</h2>
           {r.summary && <p className="wn-summary">{r.summary}</p>}

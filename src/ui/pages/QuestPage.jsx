@@ -12,14 +12,20 @@ import { progressText } from '../../data/progress.js';
 import { go, threadPath } from '../router.js';
 import { Spinner, timeAgo } from '../kit.jsx';
 import { Icon, MediaChip, OpenButton, readerClick } from '../icons.jsx';
+import { t } from '../../i18n/index.js';
 
 // Ways to steer, one tap each. They are sent as your words, so the guide reads them like anything else you say.
+// `text` is what is sent (English, as before); `label` is what the button shows.
 const STEERS = [
-  'What should I look at next?',
-  'Easier, please.',
-  'I want to go deeper.',
-  'Show me a different angle.',
+  { text: 'What should I look at next?', get label() { return t('What should I look at next?'); } },
+  { text: 'Easier, please.', get label() { return t('Easier, please.'); } },
+  { text: 'I want to go deeper.', get label() { return t('I want to go deeper.'); } },
+  { text: 'Show me a different angle.', get label() { return t('Show me a different angle.'); } },
 ];
+
+// The guide's levels (engine/quest.js LEVELS) and what each means, as shown.
+const levelName = (l) => ({ gentle: t('gentle'), steady: t('steady'), demanding: t('demanding') })[l] || l;
+const levelBlurb = (l) => ({ gentle: t('an easy way in'), steady: t('takes some focus'), demanding: t('dense, for when you are ready') })[l] || LEVEL_BLURB[l];
 
 export default function QuestPage({ id }) {
   const q = useRecord(() => R.getQuest(id), [id]);
@@ -38,13 +44,13 @@ export default function QuestPage({ id }) {
         <main className="qs-main">
           <ol className="qs-convo" aria-live="polite">
             {q.messages.map((m) => <Message key={m.id} q={q} m={m} items={items} busy={busy} />)}
-            {busy.thinking && <li className="qs-msg guide"><div className="qs-who">Guide</div><p className="qs-thinking"><Spinner /> thinking…</p></li>}
+            {busy.thinking && <li className="qs-msg guide"><div className="qs-who">{t('Guide')}</div><p className="qs-thinking"><Spinner /> {t('thinking…')}</p></li>}
           </ol>
           {busy.error && (
             <div className="qs-error">
               {busy.error}
-              <button className="btn link" onClick={() => { clearError(id); Q.retry(id); }}>Try again</button>
-              <button className="btn link" onClick={() => clearError(id)}>Dismiss</button>
+              <button className="btn link" onClick={() => { clearError(id); Q.retry(id); }}>{t('Try again')}</button>
+              <button className="btn link" onClick={() => clearError(id)}>{t('Dismiss')}</button>
             </div>
           )}
           <Composer q={q} busy={busy} />
@@ -52,7 +58,7 @@ export default function QuestPage({ id }) {
         </main>
         <aside className={`qs-rail ${railOpen ? 'open' : ''}`}>
           <button className="qs-rail-toggle" onClick={() => setRailOpen((v) => !v)} aria-expanded={railOpen}>
-            <Icon name="quest" size={14} /> The map · what the guide knows about you <span className="qs-caret">{railOpen ? '▴' : '▾'}</span>
+            <Icon name="quest" size={14} /> {t('The map · what the guide knows about you')} <span className="qs-caret">{railOpen ? '▴' : '▾'}</span>
           </button>
           <div className="qs-rail-body">
             <QuestMap q={q} busy={busy} />
@@ -69,52 +75,52 @@ function QuestHead({ q, items }) {
   const [title, setTitle] = useState(q.title);
   const all = Object.values(items);
   const status = [
-    `Started ${timeAgo(q.createdAt)}`,
-    all.length ? `${all.length} pointed to` : null,
-    all.filter((i) => i.openedAt).length ? `${all.filter((i) => i.openedAt).length} opened` : null,
-    all.filter((i) => i.reaction === 'landed').length ? `${all.filter((i) => i.reaction === 'landed').length} landed` : null,
+    t('Started {when}', { when: timeAgo(q.createdAt) }),
+    all.length ? t('{n} pointed to', { n: all.length }) : null,
+    all.filter((i) => i.openedAt).length ? t('{n} opened', { n: all.filter((i) => i.openedAt).length }) : null,
+    all.filter((i) => i.reaction === 'landed').length ? t('{n} landed', { n: all.filter((i) => i.reaction === 'landed').length }) : null,
   ].filter(Boolean);
   return (
     <header className="qs-head">
-      <div className="eyebrow">Quest{q.status !== 'active' ? ' · set down' : ''}</div>
+      <div className="eyebrow">{q.status !== 'active' ? t('Quest · set down') : t('Quest')}</div>
       {editing ? (
         <div className="qs-title-edit">
           <input className="field serif" autoFocus value={title} onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { Q.renameQuest(q.id, title); setEditing(false); } if (e.key === 'Escape') setEditing(false); }} />
-          <button className="btn small primary" onClick={() => { Q.renameQuest(q.id, title); setEditing(false); }}>Save</button>
+          <button className="btn small primary" onClick={() => { Q.renameQuest(q.id, title); setEditing(false); }}>{t('Save')}</button>
         </div>
       ) : <h1 className="qs-title" onDoubleClick={() => setEditing(true)}>{q.title}</h1>}
       <div className="qs-status">
         <span>{status.join(' · ')}</span>
-        {!editing && <button className="btn link" onClick={() => { setTitle(q.title); setEditing(true); }}>Rename</button>}
+        {!editing && <button className="btn link" onClick={() => { setTitle(q.title); setEditing(true); }}>{t('Rename')}</button>}
         {q.status === 'active'
-          ? <button className="btn link" onClick={() => Q.closeQuest(q.id)}>Set it down</button>
-          : <button className="btn link" onClick={() => Q.reopenQuest(q.id)}>Pick it up again</button>}
-        <button className="btn link qs-del" onClick={() => { if (window.confirm('Delete this quest, its conversation and what it pointed to? Threads you held from it stay.')) { R.deleteQuest(q.id); go('/quests'); } }}>Delete</button>
+          ? <button className="btn link" onClick={() => Q.closeQuest(q.id)}>{t('Set it down')}</button>
+          : <button className="btn link" onClick={() => Q.reopenQuest(q.id)}>{t('Pick it up again')}</button>}
+        <button className="btn link qs-del" onClick={() => { if (window.confirm(t('Delete this quest, its conversation and what it pointed to? Threads you held from it stay.'))) { R.deleteQuest(q.id); go('/quests'); } }}>{t('Delete')}</button>
       </div>
     </header>
   );
 }
 
 function Message({ q, m, items, busy }) {
-  if (m.role === 'event') return <li className="qs-event">{m.text}{m.threadId && <> <a href={'#' + threadPath(m.threadId)}>open the thread →</a></>}</li>;
-  if (m.role === 'you') return <li className="qs-msg you"><div className="qs-who">You</div><p className="qs-text">{m.text}</p></li>;
+  if (m.role === 'event') return <li className="qs-event">{m.text}{m.threadId && <> <a href={'#' + threadPath(m.threadId)}>{t('open the thread →')}</a></>}</li>;
+  if (m.role === 'you') return <li className="qs-msg you"><div className="qs-who">{t('You')}</div><p className="qs-text">{m.text}</p></li>;
   const its = (m.itemIds || []).map((x) => items[x]).filter(Boolean);
   const isLastFind = q.messages.filter((x) => x.find).pop()?.id === m.id;
   return (
     <li className="qs-msg guide">
-      <div className="qs-who">Guide</div>
+      <div className="qs-who">{t('Guide')}</div>
       {m.text.split(/\n{2,}/).map((para, k) => <p className="qs-text" key={k}>{para}</p>)}
       {m.find && (
         <div className="qs-find">
           <div className="qs-find-head">
-            <span className="label">Looking for</span> {m.find.what}
-            <span className={`qs-level lv-${m.find.level}`}>{m.find.level}</span>
+            <span className="label">{t('Looking for')}</span> {m.find.what}
+            <span className={`qs-level lv-${m.find.level}`}>{levelName(m.find.level)}</span>
           </div>
           {its.length > 0 && <ul className="qs-works">{its.map((it) => <Work key={it.id} it={it} />)}</ul>}
-          {!its.length && isLastFind && busy.finding && <p className="qs-searching"><Spinner /> searching the web for real works…</p>}
+          {!its.length && isLastFind && busy.finding && <p className="qs-searching"><Spinner /> {t('searching the web for real works…')}</p>}
           {!its.length && !busy.finding && (m.findEmpty || m.findFailed) && (
-            <p className="qs-searching">{m.findFailed ? 'The search failed.' : 'Nothing good turned up.'} <button className="btn link" onClick={() => Q.findAgain(q.id, m.id)}>Search again</button></p>
+            <p className="qs-searching">{m.findFailed ? t('The search failed.') : t('Nothing good turned up.')} <button className="btn link" onClick={() => Q.findAgain(q.id, m.id)}>{t('Search again')}</button></p>
           )}
         </div>
       )}
@@ -134,13 +140,13 @@ function Work({ it }) {
       </div>
       <div className="qs-work-src">
         {[it.source].filter(Boolean).join(' · ')}
-        {it.level && <span className={`qs-level lv-${it.level}`} title={LEVEL_BLURB[it.level]}>{it.level}</span>}
+        {it.level && <span className={`qs-level lv-${it.level}`} title={levelBlurb(it.level)}>{levelName(it.level)}</span>}
         {had && <span className="qs-had">{had}</span>}
       </div>
       {it.why && <p className="qs-work-why">{it.why}</p>}
       <div className="qs-work-acts">
         <OpenButton item={it} compact />
-        <div className="qs-reacts" role="group" aria-label="How did it land?">
+        <div className="qs-reacts" role="group" aria-label={t('How did it land?')}>
           {REACTIONS.map((r) => (
             <button key={r.key} className={`qs-react r-${r.key} ${it.reaction === r.key ? 'on' : ''}`} aria-pressed={it.reaction === r.key}
               onClick={() => Q.react(it.id, r.key)}>{r.label}</button>
@@ -157,13 +163,13 @@ function Surfaced({ q, text }) {
   const held = useRecord(() => R.allThreads().find((t) => t.questId === q.id && t.articulations?.[0]?.text === (edit ?? text)), [q.id, text, edit]);
   return (
     <div className="qs-surfaced">
-      <div className="label">A question of your own</div>
+      <div className="label">{t('A question of your own')}</div>
       {edit == null ? <p className="qs-surfaced-q serif">“{text}”</p>
         : <textarea className="field serif" rows={2} value={edit} onChange={(e) => setEdit(e.target.value)} />}
-      {held ? <a className="btn link" href={'#' + threadPath(held.id)}>Held as a thread → open it</a> : (
+      {held ? <a className="btn link" href={'#' + threadPath(held.id)}>{t('Held as a thread → open it')}</a> : (
         <div className="qs-row">
-          <button className="btn small" onClick={async () => go(threadPath(await Q.holdAsThread(q.id, edit ?? text)))}><Icon name="hold" size={14} /> Hold it as a thread</button>
-          {edit == null && <button className="btn link" onClick={() => setEdit(text)}>Put it my way first</button>}
+          <button className="btn small" onClick={async () => go(threadPath(await Q.holdAsThread(q.id, edit ?? text)))}><Icon name="hold" size={14} /> {t('Hold it as a thread')}</button>
+          {edit == null && <button className="btn link" onClick={() => setEdit(text)}>{t('Put it my way first')}</button>}
         </div>
       )}
     </div>
@@ -173,28 +179,28 @@ function Surfaced({ q, text }) {
 function Composer({ q, busy }) {
   const [text, setText] = useState('');
   const send = (t) => { if (!t.trim() || busy.thinking) return; Q.say(q.id, t); setText(''); };
-  if (q.status !== 'active') return <p className="muted qs-small">This quest is set down. Pick it up again to keep talking.</p>;
+  if (q.status !== 'active') return <p className="muted qs-small">{t('This quest is set down. Pick it up again to keep talking.')}</p>;
   return (
     <div className="qs-composer">
       <div className="qs-steers">
-        {STEERS.map((s) => <button key={s} className="qs-steer" disabled={busy.thinking} onClick={() => send(s)}>{s}</button>)}
+        {STEERS.map((s) => <button key={s.text} className="qs-steer" disabled={busy.thinking} onClick={() => send(s.text)}>{s.label}</button>)}
       </div>
-      <textarea className="field qs-input" rows={2} value={text} placeholder="Tell the guide where you are, what landed, what you want next…"
+      <textarea className="field qs-input" rows={2} value={text} placeholder={t('Tell the guide where you are, what landed, what you want next…')}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(text); } }} />
       <div className="qs-row">
-        <button className="btn primary small" disabled={!text.trim() || busy.thinking} onClick={() => send(text)}>Send</button>
-        <span className="muted qs-small">Enter sends · Shift+Enter for a new line</span>
+        <button className="btn primary small" disabled={!text.trim() || busy.thinking} onClick={() => send(text)}>{t('Send')}</button>
+        <span className="muted qs-small">{t('Enter sends · Shift+Enter for a new line')}</span>
       </div>
     </div>
   );
 }
 
 const STATUS = [
-  { key: 'open', label: 'not yet' },
-  { key: 'exploring', label: 'exploring' },
-  { key: 'done', label: 'done for now' },
-  { key: 'set aside', label: 'set aside' },
+  { key: 'open', get label() { return t('not yet'); } },
+  { key: 'exploring', get label() { return t('exploring'); } },
+  { key: 'done', get label() { return t('done for now'); } },
+  { key: 'set aside', get label() { return t('set aside'); } },
 ];
 
 function QuestMap({ q, busy }) {
@@ -202,32 +208,32 @@ function QuestMap({ q, busy }) {
   const [holding, setHolding] = useState(null); // { id, text }
   return (
     <section className="qs-box">
-      <div className="qs-box-head"><h2>The map</h2><span className="label">{q.map.length || ''}</span></div>
-      {!q.map.length && <p className="muted qs-small">The guide sketches the territory as you talk. Each region can be explored here, or held as its own thread.</p>}
+      <div className="qs-box-head"><h2>{t('The map')}</h2><span className="label">{q.map.length || ''}</span></div>
+      {!q.map.length && <p className="muted qs-small">{t('The guide sketches the territory as you talk. Each region can be explored here, or held as its own thread.')}</p>}
       <ul className="qs-map">
         {q.map.map((b) => (
           <li key={b.id} className={`qs-region st-${b.status.replace(' ', '-')}`}>
             <div className="qs-region-top">
               <span className="qs-dot" aria-hidden="true" />
-              <button className="qs-region-title" disabled={busy.thinking || q.status !== 'active'} title="Ask the guide to go into this"
+              <button className="qs-region-title" disabled={busy.thinking || q.status !== 'active'} title={t('Ask the guide to go into this')}
                 onClick={() => Q.exploreBranch(q.id, b.id)}>{b.title}</button>
             </div>
             {b.why && <p className="qs-region-why">{b.why}</p>}
             <div className="qs-region-acts">
-              <select className="qs-status-sel" value={b.status} onChange={(e) => Q.setBranchStatus(q.id, b.id, e.target.value)} aria-label="Status">
+              <select className="qs-status-sel" value={b.status} onChange={(e) => Q.setBranchStatus(q.id, b.id, e.target.value)} aria-label={t('Status')}>
                 {STATUS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
               {b.threadId && R.getThread(b.threadId)
-                ? <a className="btn link" href={'#' + threadPath(b.threadId)}>its thread →</a>
-                : <button className="btn link" onClick={() => setHolding({ id: b.id, text: b.title })}>Hold as a thread</button>}
+                ? <a className="btn link" href={'#' + threadPath(b.threadId)}>{t('its thread →')}</a>
+                : <button className="btn link" onClick={() => setHolding({ id: b.id, text: b.title })}>{t('Hold as a thread')}</button>}
             </div>
             {holding?.id === b.id && (
               <div className="qs-hold">
                 <textarea className="field serif" rows={2} autoFocus value={holding.text} onChange={(e) => setHolding({ ...holding, text: e.target.value })} />
-                <p className="muted qs-small">Put it as the question you'd hold. The thread gives you four items and asks where you got to.</p>
+                <p className="muted qs-small">{t("Put it as the question you'd hold. The thread gives you four items and asks where you got to.")}</p>
                 <div className="qs-row">
-                  <button className="btn small primary" disabled={!holding.text.trim()} onClick={async () => { const tid = await Q.holdAsThread(q.id, holding.text, b.id); setHolding(null); go(threadPath(tid)); }}>Hold it</button>
-                  <button className="btn link" onClick={() => setHolding(null)}>Cancel</button>
+                  <button className="btn small primary" disabled={!holding.text.trim()} onClick={async () => { const tid = await Q.holdAsThread(q.id, holding.text, b.id); setHolding(null); go(threadPath(tid)); }}>{t('Hold it')}</button>
+                  <button className="btn link" onClick={() => setHolding(null)}>{t('Cancel')}</button>
                 </div>
               </div>
             )}
@@ -235,7 +241,7 @@ function QuestMap({ q, busy }) {
         ))}
       </ul>
       <div className="qs-add">
-        <input className="field" value={adding} placeholder="+ add a region" onChange={(e) => setAdding(e.target.value)}
+        <input className="field" value={adding} placeholder={t('+ add a region')} onChange={(e) => setAdding(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { Q.addBranch(q.id, adding); setAdding(''); } }} />
       </div>
     </section>
@@ -243,10 +249,10 @@ function QuestMap({ q, busy }) {
 }
 
 const LISTS = [
-  { key: 'known', label: 'Already knows' },
-  { key: 'interests', label: 'Drawn to' },
-  { key: 'avoid', label: 'Not interested in' },
-  { key: 'prefers', label: 'Prefers' },
+  { key: 'known', get label() { return t('Already knows'); } },
+  { key: 'interests', get label() { return t('Drawn to'); } },
+  { key: 'avoid', get label() { return t('Not interested in'); } },
+  { key: 'prefers', get label() { return t('Prefers'); } },
 ];
 
 // The guide's model of you, in the open: every line is yours to correct.
@@ -254,10 +260,10 @@ function Learner({ q }) {
   const l = { ...Q.EMPTY_LEARNER, ...q.learner };
   return (
     <section className="qs-box">
-      <div className="qs-box-head"><h2>What the guide knows about you</h2></div>
-      <p className="muted qs-small">Only for this quest, only for you. Change anything that's wrong; the guide goes by this.</p>
-      <EditLine label="Level" value={l.level} placeholder="e.g. new to it, read a couple of books" onSave={(v) => Q.setLearnerField(q.id, 'level', v)} />
-      <EditLine label="Background" value={l.background} placeholder="anything relevant you bring" onSave={(v) => Q.setLearnerField(q.id, 'background', v)} />
+      <div className="qs-box-head"><h2>{t('What the guide knows about you')}</h2></div>
+      <p className="muted qs-small">{t("Only for this quest, only for you. Change anything that's wrong; the guide goes by this.")}</p>
+      <EditLine label={t('Level')} value={l.level} placeholder={t('e.g. new to it, read a couple of books')} onSave={(v) => Q.setLearnerField(q.id, 'level', v)} />
+      <EditLine label={t('Background')} value={l.background} placeholder={t('anything relevant you bring')} onSave={(v) => Q.setLearnerField(q.id, 'background', v)} />
       {LISTS.map(({ key, label }) => <ChipList key={key} label={label} list={l[key] || []} onRemove={(x) => Q.removeLearner(q.id, key, x)} onAdd={(x) => Q.addLearner(q.id, key, x)} />)}
     </section>
   );
@@ -282,9 +288,9 @@ function ChipList({ label, list, onRemove, onAdd }) {
     <div className="qs-line">
       <span className="label">{label}</span>
       <div className="qs-chips">
-        {list.map((x) => <span key={x} className="qs-chip">{x}<button aria-label={`Remove ${x}`} onClick={() => onRemove(x)}>×</button></span>)}
+        {list.map((x) => <span key={x} className="qs-chip">{x}<button aria-label={t('Remove {x}', { x })} onClick={() => onRemove(x)}>×</button></span>)}
         {adding == null
-          ? <button className="qs-chip add" onClick={() => setAdding('')}>+ add</button>
+          ? <button className="qs-chip add" onClick={() => setAdding('')}>{t('+ add')}</button>
           : <input className="field qs-chip-in" autoFocus value={adding} onChange={(e) => setAdding(e.target.value)} onBlur={() => { onAdd(adding); setAdding(null); }}
             onKeyDown={(e) => { if (e.key === 'Enter') { onAdd(adding); setAdding(null); } if (e.key === 'Escape') setAdding(null); }} />}
       </div>

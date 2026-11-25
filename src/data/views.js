@@ -13,6 +13,7 @@ import { getBusy, setBusy } from './actions.js';
 import { apiFetch } from '../engine/llm.js';
 import { exampleFor, EXAMPLES } from '../viewsdemo/examples.js';
 import { fetchRingSides } from '../viewsdemo/ringSides.js';
+import * as i18n from '../i18n/index.js'; // as i18n.t: `t` is a thread here
 
 export const VIEWS_SINCE = Date.parse('2026-11-22T00:00:00Z');
 
@@ -42,7 +43,7 @@ export async function requestViews(threadId, { force = false } = {}) {
       body: JSON.stringify({ question: text, presuppositions: t.reading?.presuppositions || [], force }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error?.message || `Views error (${res.status})`);
+    if (!res.ok) throw new Error(data?.error?.message || i18n.t('Views error ({status})', { status: res.status }));
     const { question, cached, ...map } = data;
     R.patchThread(threadId, { views: { ...map, text, force, open: map.status === 'divisive' } });
   } catch (e) {
@@ -90,8 +91,8 @@ export async function requestViewsMap(threadId) {
       data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.pending) break;
     }
-    if (!res.ok) throw new Error(data?.error?.message || `Views error (${res.status})`);
-    if (data?.pending) throw new Error('The mapping model is busy just now. Try again in a minute.');
+    if (!res.ok) throw new Error(data?.error?.message || i18n.t('Views error ({status})', { status: res.status }));
+    if (data?.pending) throw new Error(i18n.t('The mapping model is busy just now. Try again in a minute.'));
     const { cached, ...map } = data;
     R.patchThread(threadId, { viewsMap: { text, status: map.status, map, open: map.status === 'mapped', at: Date.now() } });
   } catch (e) {

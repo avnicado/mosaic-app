@@ -11,7 +11,7 @@
 .vp-title { font-size: 22px; }
 .vp-why { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; margin: 12px 0 4px; max-width: 70ch; }
 .vp-settled { font-size: 13px; color: var(--ink-soft); margin: 14px 0 0; }
-.vp-settled .label, .vm-facts .label, .vm-piece .label { margin-right: 6px; }
+.vp-settled .label, .vm-facts .label, .vm-piece .label { margin-inline-end: 6px; }
 .vp-foot { margin-top: 10px; }
 
 .vm { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 12px 28px; align-items: start; margin-top: 10px; }
@@ -32,6 +32,7 @@
 .vm-ring-n { font-family: var(--mono); font-size: 9.5px; font-weight: 600; fill: #fffaf0; stroke: rgba(26, 22, 18, .35); stroke-width: 2.5px; paint-order: stroke; dominant-baseline: central; pointer-events: none; }
 .vm-hub circle { fill: var(--panel); stroke: var(--rule); stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .vm-hub text { font-family: var(--mono); font-size: 10px; fill: var(--ink-soft); text-anchor: middle; dominant-baseline: central; }
+[dir="rtl"] .vm-hub text { direction: rtl; } /* "3 עמדות" reads right to left; the mandala stays put */
 .vm-label { cursor: pointer; }
 .vm-label circle { fill: var(--panel); stroke: var(--rule); stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .vm-label.on circle { fill: var(--ink); stroke: var(--ink); }
@@ -39,7 +40,7 @@
 .vm-label.on .vm-badge { fill: #fffaf0; }
 
 .vm-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.vm-pick { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px 4px 5px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel); cursor: pointer; font-size: 13px; color: var(--ink-soft); text-align: left; }
+.vm-pick { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 0; padding-inline: 5px 10px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel); cursor: pointer; font-size: 13px; color: var(--ink-soft); text-align: start; }
 .vm-pick.on { border-color: var(--ink); color: var(--ink); }
 .vm-pick.away { border-style: dashed; }
 .vm-pick-n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--rule-soft); font-family: var(--mono); font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
@@ -68,7 +69,7 @@
 .vm-answers .vm-dot { transform: translateY(1px); }
 .vm-a-label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faded); }
 .vm-facts p { font-size: 13.5px; margin: 6px 0; line-height: 1.45; }
-.vm-awaynote { border-left: 2px dashed var(--ink-faded); padding-left: 8px; }
+.vm-awaynote { border-inline-start: 2px dashed var(--ink-faded); padding-inline-start: 8px; }
 .vm-small { font-size: 12.5px; margin: 8px 0 0; }
 .vm-piece { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); text-decoration: none; }
 .vm-piece:hover { border-color: var(--accent); }

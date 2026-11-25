@@ -22,6 +22,7 @@ import { REACTIONS } from '../../engine/quest.js';
 import { react } from '../../data/quests.js';
 import '../quest/quest.css';
 import './reader.css';
+import { t, isRtl } from '../../i18n/index.js';
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   if (node.tagName === 'A' && node.getAttribute('href')) {
@@ -40,19 +41,30 @@ const clean = (html) => DOMPurify.sanitize(html, {
 });
 
 const SIGNALS = [
-  { key: 'moved', label: 'moved me' },
-  { key: 'neutral', label: 'neutral' },
-  { key: 'closed', label: 'closed it down' },
+  { key: 'moved', get label() { return t('moved me'); } },
+  { key: 'neutral', get label() { return t('neutral'); } },
+  { key: 'closed', get label() { return t('closed it down'); } },
 ];
 
 const WHY_NOT = {
-  gone: 'The page is gone from the site (it answered “not found”).',
-  blocked: 'The site wouldn’t hand the page to Mosaic (many sites block servers).',
-  empty: 'There’s no article on this page to pull out: it may be an app, a paywall or mostly pictures.',
-  pdf: 'This is a PDF.',
-  bad_url: 'This link can’t be read inside Mosaic.',
-  error: 'Mosaic couldn’t load the page.',
+  get gone() { return t('The page is gone from the site (it answered “not found”).'); },
+  get blocked() { return t('The site wouldn’t hand the page to Mosaic (many sites block servers).'); },
+  get empty() { return t('There’s no article on this page to pull out: it may be an app, a paywall or mostly pictures.'); },
+  get pdf() { return t('This is a PDF.'); },
+  get bad_url() { return t('This link can’t be read inside Mosaic.'); },
+  get error() { return t('Mosaic couldn’t load the page.'); },
 };
+
+// "12 min read", with how dense it is (server/reader.js) when known. Whole
+// phrases, so a density word never collides with the same word used elsewhere.
+const MIN_READ = {
+  light: (n) => t('{n} min read · light', { n }),
+  moderate: (n) => t('{n} min read · moderate', { n }),
+  dense: (n) => t('{n} min read · dense', { n }),
+  'very dense': (n) => t('{n} min read · very dense', { n }),
+};
+const minRead = (n, density) => (!density ? t('{n} min read', { n })
+  : MIN_READ[density] ? MIN_READ[density](n) : `${t('{n} min read', { n })} · ${density}`);
 
 export default function Reader() {
   const target = useSyncExternalStore(subscribeReader, getReader);
@@ -132,11 +144,14 @@ function ReaderPanel({ target }) {
   }, [item.url]);
 
   const host = hostOf(item.url);
+  // In a right-to-left interface the piece keeps its own direction (an English
+  // article stays left to right). In English nothing changes.
+  const own = isRtl() ? 'auto' : undefined;
   const meta = [
     article?.byline && article.byline !== item.source ? article.byline : null,
     item.source || article?.siteName,
     host,
-    article?.minutes ? `${article.minutes} min read${article.density ? ` · ${article.density}` : ''}` : null,
+    article?.minutes ? minRead(article.minutes, article.density) : null,
   ].filter(Boolean);
 
   return (
@@ -146,17 +161,17 @@ function ReaderPanel({ target }) {
           <MediaChip type={item.mediaType} url={item.url} label />
           {item.slot && <SlotTag slot={item.slot} />}
           <span className="rd-spacer" />
-          <a className="rd-site" href={item.url} target="_blank" rel="noopener noreferrer" title="Open the original in a new tab">
-            Open on {host || 'the site'} <Icon name="open" size={13} />
+          <a className="rd-site" href={item.url} target="_blank" rel="noopener noreferrer" title={t('Open the original in a new tab')}>
+            {host ? t('Open on {site}', { site: host }) : t('Open on the site')} <Icon name="open" size={13} />
           </a>
-          <button className="rd-close" onClick={closeReader} title="Close (Esc)" aria-label="Close"><Icon name="x" size={18} /></button>
+          <button className="rd-close" onClick={closeReader} title={t('Close (Esc)')} aria-label={t('Close')}><Icon name="x" size={18} /></button>
         </header>
 
         <div className="rd-scroll" ref={scrollRef}>
           <div className={`rd-body ${embed ? 'rd-media' : ''}`}>
-            <h1 className="rd-title">{article?.title && !embed ? article.title : item.title}</h1>
+            <h1 className="rd-title" dir={own}>{article?.title && !embed ? article.title : item.title}</h1>
             <div className="rd-meta">{meta.join(' · ')}</div>
-            {item.why && <p className="rd-why"><span className="label">Why here</span> {item.why}</p>}
+            {item.why && <p className="rd-why"><span className="label">{t('Why here')}</span> {item.why}</p>}
 
             {spotify && <div className="rd-embed audio" ref={spotifyRef} style={{ height: embed.height }} />}
             {embed && !spotify && (
@@ -166,25 +181,25 @@ function ReaderPanel({ target }) {
                   referrerPolicy="strict-origin-when-cross-origin" />
               </div>
             )}
-            {embed && item.preview && <p className="rd-preview">{item.preview}</p>}
+            {embed && item.preview && <p className="rd-preview" dir={own}>{item.preview}</p>}
 
-            {!embed && article?.loading && <div className="rd-loading"><Spinner /> Getting the {m.type === 'paper' ? 'paper' : 'article'} from {host}…</div>}
+            {!embed && article?.loading && <div className="rd-loading"><Spinner /> {m.type === 'paper' ? t('Getting the paper from {host}…', { host }) : t('Getting the article from {host}…', { host })}</div>}
             {!embed && article?.failed && (
               <div className="rd-failed">
                 <p>{WHY_NOT[article.failed] || WHY_NOT.error}</p>
-                {item.preview && <p className="rd-preview">{item.preview}</p>}
+                {item.preview && <p className="rd-preview" dir={own}>{item.preview}</p>}
                 <a className="btn primary" href={item.url} target="_blank" rel="noopener noreferrer">
-                  {m.verb} on {host} <Icon name="open" size={14} />
+                  {t('{verb} on {host}', { verb: m.verb, host })} <Icon name="open" size={14} />
                 </a>
               </div>
             )}
             {!embed && article?.html && (
-              <article className="rd-article" ref={articleRef} dangerouslySetInnerHTML={{ __html: article.html }} />
+              <article className="rd-article" dir={own} ref={articleRef} dangerouslySetInnerHTML={{ __html: article.html }} />
             )}
             {!embed && article?.html && (
               <p className="rd-end">
-                Pulled from <a href={article.url || item.url} target="_blank" rel="noopener noreferrer">{hostOf(article.url || item.url)}</a> for reading here.
-                Pictures, charts or parts of the page may be missing; the original is the real thing.
+                {t('Pulled from {site} for reading here.', { site: <a href={article.url || item.url} target="_blank" rel="noopener noreferrer">{hostOf(article.url || item.url)}</a> })}
+                {' '}{t('Pictures, charts or parts of the page may be missing; the original is the real thing.')}
               </p>
             )}
           </div>
@@ -201,9 +216,9 @@ function ReaderFoot({ item }) {
   const had = progressText(item.progress);
   if (item.questId) return (
     <footer className="rd-foot">
-      {had && <span className="rd-had" title="Recorded while it was open in Mosaic">{had}</span>}
-      <span className="rd-foot-q">How did it land?</span>
-      <div className="qs-reacts rd-signals" role="group" aria-label="How did this land?">
+      {had && <span className="rd-had" title={t('Recorded while it was open in Mosaic')}>{had}</span>}
+      <span className="rd-foot-q">{t('How did it land?')}</span>
+      <div className="qs-reacts rd-signals" role="group" aria-label={t('How did this land?')}>
         {REACTIONS.map((r) => (
           <button key={r.key} className={`qs-react r-${r.key} ${item.reaction === r.key ? 'on' : ''}`}
             aria-pressed={item.reaction === r.key} onClick={() => react(item.id, r.key)}>{r.label}</button>
@@ -213,9 +228,9 @@ function ReaderFoot({ item }) {
   );
   return (
     <footer className="rd-foot">
-      {had && <span className="rd-had" title="Recorded while it was open in Mosaic">{had}</span>}
-      <span className="rd-foot-q">How did it land?</span>
-      <div className="th-signals rd-signals" role="group" aria-label="How did this land?">
+      {had && <span className="rd-had" title={t('Recorded while it was open in Mosaic')}>{had}</span>}
+      <span className="rd-foot-q">{t('How did it land?')}</span>
+      <div className="th-signals rd-signals" role="group" aria-label={t('How did this land?')}>
         {SIGNALS.map((s) => (
           <button key={s.key} className={`th-sig th-sig-${s.key} ${item.signal === s.key ? 'on' : ''}`}
             aria-pressed={item.signal === s.key} onClick={() => A.setSignal(item.id, s.key)}>
@@ -224,7 +239,7 @@ function ReaderFoot({ item }) {
         ))}
       </div>
       <button className={`th-keep ${item.kept ? 'on' : ''}`} onClick={() => A.toggleKeep(item.id)} aria-pressed={!!item.kept}>
-        <Icon name={item.kept ? 'kept' : 'keep'} size={15} /><span className="th-keep-l">{item.kept ? 'Kept' : 'Keep'}</span>
+        <Icon name={item.kept ? 'kept' : 'keep'} size={15} /><span className="th-keep-l">{item.kept ? t('Kept') : t('Keep')}</span>
       </button>
     </footer>
   );

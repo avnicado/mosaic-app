@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { boot, onSyncStatus, wipeLocal } from './sync.js';
 import { setSessionInfo } from './session.js';
+import { t, applyDocument, reloadLang } from './i18n/index.js';
+import './i18n/rtl.css';
+
+applyDocument(); // sign-in screens follow the last language used on this device
 
 const App = React.lazy(() => import('./ui/App.jsx'));
 
@@ -19,7 +23,7 @@ const link = { color: '#8f2418' };
 async function post(url, body) {
   const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(j?.error?.message || `Failed (${res.status})`);
+  if (!res.ok) throw new Error(j?.error?.message || t('Failed ({status})', { status: res.status }));
   return j;
 }
 
@@ -36,16 +40,16 @@ function Login({ onDone, mode, signup, onSignup }) {
   return (
     <div style={shell}>
       <form onSubmit={submit} style={{ width: '100%', maxWidth: 340 }}>
-        <h1 style={title}>Mosaic</h1>
+        <h1 style={title}>{t('Mosaic')}</h1>
         {mode === 'locked' ? (
-          <p style={err}>This deployment has no <code>APP_PASSWORD</code> set. Add it in the project's environment variables and redeploy.</p>
+          <p style={err}>{t("This deployment has no {var} set. Add it in the project's environment variables and redeploy.", { var: <code>APP_PASSWORD</code> })}</p>
         ) : (
           <>
-            <input style={field} autoFocus autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (leave empty if you're the owner)" />
-            <input style={field} type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Password" />
-            <button type="submit" disabled={busy || (!pw && mode !== 'open')} style={primary}>{busy ? 'Signing in…' : 'Sign in'}</button>
+            <input style={field} autoFocus autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Name (leave empty if you're the owner)")} />
+            <input style={field} type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder={t('Password')} />
+            <button type="submit" disabled={busy || (!pw && mode !== 'open')} style={primary}>{busy ? t('Signing in…') : t('Sign in')}</button>
             {error && <p style={err}>{error}</p>}
-            {signup && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>New here? <a href="#" onClick={(e) => { e.preventDefault(); onSignup(); }} style={link}>Create an account</a></p>}
+            {signup && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>{t('New here? {link}', { link: <a href="#" onClick={(e) => { e.preventDefault(); onSignup(); }} style={link}>{t('Create an account')}</a> })}</p>}
           </>
         )}
       </form>
@@ -62,7 +66,7 @@ function Join({ code, valid, onDone, onBack }) {
   const [busy, setBusy] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
-    if (pw !== pw2) { setError("The passwords don't match."); return; }
+    if (pw !== pw2) { setError(t("The passwords don't match.")); return; }
     setBusy(true); setError(null);
     try {
       await post('/api/join', code ? { code, name, password: pw } : { name, password: pw });
@@ -73,20 +77,20 @@ function Join({ code, valid, onDone, onBack }) {
   return (
     <div style={shell}>
       <form onSubmit={submit} style={{ width: '100%', maxWidth: 360 }}>
-        <h1 style={title}>{code ? 'Join Mosaic' : 'Create an account'}</h1>
+        <h1 style={title}>{code ? t('Join Mosaic') : t('Create an account')}</h1>
         {!valid ? (
-          <p style={err}>This invite link is no longer valid. Ask for a new one.</p>
+          <p style={err}>{t('This invite link is no longer valid. Ask for a new one.')}</p>
         ) : (
           <>
-            <p style={sub}>{code ? "You've been invited. " : ''}Your threads will be private to you; you can choose to share a thread with the others later.</p>
-            <input style={field} autoFocus autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-            <input style={field} type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="Choose a password (8+ characters)" />
-            <input style={field} type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="Password again" />
-            <button type="submit" disabled={busy || !name.trim() || pw.length < 8} style={primary}>{busy ? 'Joining…' : 'Join'}</button>
+            <p style={sub}>{code ? t("You've been invited. Your threads will be private to you; you can choose to share a thread with the others later.") : t('Your threads will be private to you; you can choose to share a thread with the others later.')}</p>
+            <input style={field} autoFocus autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Your name')} />
+            <input style={field} type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder={t('Choose a password (8+ characters)')} />
+            <input style={field} type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder={t('Password again')} />
+            <button type="submit" disabled={busy || !name.trim() || pw.length < 8} style={primary}>{busy ? t('Joining…') : t('Join')}</button>
             {error && <p style={err}>{error}</p>}
           </>
         )}
-        {onBack && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>Have an account? <a href="#" onClick={(e) => { e.preventDefault(); onBack(); }} style={link}>Sign in</a></p>}
+        {onBack && <p style={{ ...sub, marginTop: 18, textAlign: 'center' }}>{t('Have an account? {link}', { link: <a href="#" onClick={(e) => { e.preventDefault(); onBack(); }} style={link}>{t('Sign in')}</a> })}</p>}
       </form>
     </div>
   );
@@ -94,8 +98,8 @@ function Join({ code, valid, onDone, onBack }) {
 
 const BADGE = {
   pending: null,
-  offline: 'Not saved to the server yet — retrying',
-  'signed-out': 'Signed out — reload to sign in; changes are kept on this device',
+  get offline() { return t('Not saved to the server yet — retrying'); },
+  get 'signed-out'() { return t('Signed out — reload to sign in; changes are kept on this device'); },
   saved: null,
 };
 
@@ -105,7 +109,7 @@ function SyncBadge() {
   const text = s && BADGE[s];
   if (!text) return null;
   return (
-    <div className="sync-badge" style={{ position: 'fixed', bottom: 'calc(12px + env(safe-area-inset-bottom))', left: 12, zIndex: 9999, background: '#fbf3e2', border: '1px solid #b8923a', color: '#4a4038', fontSize: 12.5, padding: '6px 10px', borderRadius: 2 }}>
+    <div className="sync-badge" style={{ position: 'fixed', bottom: 'calc(12px + env(safe-area-inset-bottom))', insetInlineStart: 12, zIndex: 9999, background: '#fbf3e2', border: '1px solid #b8923a', color: '#4a4038', fontSize: 12.5, padding: '6px 10px', borderRadius: 2 }}>
       {text}
     </div>
   );
@@ -126,6 +130,7 @@ function Root() {
     if (invite && session.user?.role !== 'member') { setState({ phase: 'join', valid: session.inviteValid !== false }); return; }
     if (!session.authed) { setState({ phase: 'login', mode: session.mode, signup: !!session.signup && session.mode === 'password' }); return; }
     const r = await boot(session.user?.id || 'owner');
+    reloadLang(); // the person's own choice, now that their record is here
     if (!r.ok) { setState({ phase: 'login', mode: session.mode, signup: !!session.signup && session.mode === 'password' }); return; }
     setState({ phase: 'app' });
   };

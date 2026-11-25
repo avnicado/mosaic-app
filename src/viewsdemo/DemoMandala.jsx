@@ -31,6 +31,7 @@
 // d(angle) * du: equal-area rings are equal steps of u, and a straight joint in
 // that plane leaves both stones their area.
 import React from 'react';
+import { t } from '../i18n/index.js';
 
 const RIM = 132, HUB = 30, C = 0;
 const rad = (deg) => (deg * Math.PI) / 180;
@@ -275,7 +276,7 @@ export function anchorPoint(map, viewId, k) {
   return i < 0 ? g.numAt[k] : g.cells[k][i].mid;
 }
 
-export const answerText = (c, pos) => (pos === 'left' ? c.left : pos === 'right' ? c.right : 'It depends, or in between');
+export const answerText = (c, pos) => (pos === 'left' ? c.left : pos === 'right' ? c.right : t('It depends, or in between'));
 
 export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell, colorOf, mark, pieces = null }) {
   const { views, cruxes } = map;
@@ -288,7 +289,7 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
 
   return (
     <svg className={`vd-mm-svg ${ring != null ? 'ring-on' : ''}`} viewBox="-200 -166 400 332" role="group"
-      aria-label={`${N} views, each a slice, across ${M} questions, each a ring`}>
+      aria-label={t('{n} views, each a slice, across {m} questions, each a ring', { n: N, m: M })}>
       <defs>
         {views.map((v, i) => (
           <pattern key={v.id} id={`vd-hatch-${i}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -310,14 +311,14 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
               return g.cells[k][i].parts.map((d, j) => {
                 const piece = mine[j];
                 const empty = pos !== 'mid' && !piece;
-                const what = piece ? `${piece.title}${piece.outlet ? ` (${piece.outlet})` : ''}` : pos === 'mid' ? answerText(c, pos) : 'no piece found yet';
+                const what = piece ? `${piece.title}${piece.outlet ? ` (${piece.outlet})` : ''}` : pos === 'mid' ? answerText(c, pos) : t('no piece found yet');
                 return (
                   <path key={`${k}-${j}`} className={`vd-mm-cell ${empty ? 'empty' : ''} ${ring != null && ring !== k ? 'rdim' : ''} ${ring === k && on ? 'here' : ''}`}
                     d={d} fill={fill} fillOpacity={empty ? op * 0.32 : op}
                     role="button" tabIndex={0}
-                    aria-label={`${v.name} on question ${k + 1}, ${c.question}: ${answerText(c, pos)}. ${piece ? `Piece: ${what}.` : ''} Open what to read on this question.`}
+                    aria-label={t('{view} on question {n}, {question}: {answer}. {piece} Open what to read on this question.', { view: v.name, n: k + 1, question: c.question, answer: answerText(c, pos), piece: piece ? t('Piece: {what}.', { what }) : '' })}
                     onClick={() => onCell(v.id, k)} onKeyDown={keys(() => onCell(v.id, k))}>
-                    <title>{`${v.short || v.name} on question ${k + 1}, ${answerText(c, pos)}: ${what}`}</title>
+                    <title>{t('{view} on question {n}, {answer}: {what}', { view: v.short || v.name, n: k + 1, answer: answerText(c, pos), what })}</title>
                   </path>
                 );
               });
@@ -330,13 +331,13 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
         <path className="vd-mm-ringon" d={g.ringPath[ring]} />
       )}
       <circle className="vd-mm-hub" cx={C} cy={C} r={HUB - 2} />
-      <text className="vd-mm-hubt" x={C} y={C - 1}>Tap to</text>
-      <text className="vd-mm-hubt" x={C} y={C + 10}>explore</text>
+      <text className="vd-mm-hubt" x={C} y={C - 1}>{t('Tap to')}</text>
+      <text className="vd-mm-hubt" x={C} y={C + 10}>{t('explore')}</text>
       {cruxes.map((c, k) => {
         const [x, y] = g.numAt[k];
         return (
           <g key={k} className={`vd-mm-num ${ring === k ? 'on' : ''}`} role="button" tabIndex={0}
-            aria-pressed={ring === k} aria-label={`Question ${k + 1}: ${c.question}`}
+            aria-pressed={ring === k} aria-label={t('Question {n}: {question}', { n: k + 1, question: c.question })}
             onClick={() => pickRing(k)} onKeyDown={keys(() => pickRing(k))}>
             <circle cx={x} cy={y} r="9" />
             <text x={x} y={y + 3.6}>{k + 1}</text>
@@ -361,7 +362,7 @@ export default function DemoMandala({ map, focus, onFocus, ring, onRing, onCell,
         return (
           <text key={v.id} className={`vd-mm-label ${on ? 'on' : ''} ${dim ? 'dim' : ''}`} x={x} y={y0} textAnchor={anchor}
             style={{ fill: colorOf(map, v.id) }} onClick={() => pick(v.id)} role="button" tabIndex={0}
-            aria-label={`${v.name}: its whole case`} onKeyDown={keys(() => pick(v.id))}>
+            aria-label={t('{name}: its whole case', { name: v.name })} onKeyDown={keys(() => pick(v.id))}>
             {ls.map((l, j) => <tspan key={j} x={x} dy={j ? lh : 0}>{l}</tspan>)}
           </text>
         );

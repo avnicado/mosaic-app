@@ -8,6 +8,7 @@ import { engaged } from './actions.js';
 import { guideTurn, findWorks, REACTIONS } from '../engine/quest.js';
 import { vocabulary } from '../engine/tags.js';
 import { progressText } from './progress.js';
+import { t } from '../i18n/index.js';
 
 const errText = (e) => (e?.message || String(e)).slice(0, 240);
 const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -48,7 +49,7 @@ const excludeFor = (q) => [...new Set([
 // ---- quests ------------------------------------------------------------------------
 export function startQuest(text) {
   text = (text || '').trim();
-  if (!text) throw new Error('Say what you want to learn about.');
+  if (!text) throw new Error(t('Say what you want to learn about.'));
   const now = Date.now();
   const q = R.putQuest({
     id: R.genId(), title: firstWords(text), titled: false, learner: { ...EMPTY_LEARNER }, map: [],
@@ -81,7 +82,7 @@ async function runTurn(questId, text) {
     const ctx = questContext({ ...q, messages: q.messages.slice(0, -1) });
     turn = await guideTurn(ctx, text);
   } catch (e) {
-    setBusy(questId, { thinking: false, error: `The guide couldn't answer: ${errText(e)}` });
+    setBusy(questId, { thinking: false, error: t("The guide couldn't answer: {error}", { error: errText(e) }) });
     return;
   }
   const guideMsg = msg('guide', turn.reply, { question: turn.question || null, find: turn.find ? { what: turn.find.what, level: turn.find.level } : null, itemIds: [] });
@@ -120,7 +121,7 @@ async function find(questId, messageId, need, branchId) {
       messages: cur.messages.map((m) => (m.id === messageId ? { ...m, itemIds: ids, findEmpty: !ids.length } : m)),
     }));
   } catch (e) {
-    setBusy(questId, { error: `The search didn't work: ${errText(e)}` });
+    setBusy(questId, { error: t("The search didn't work: {error}", { error: errText(e) }) });
     R.patchQuest(questId, (cur) => ({ messages: cur.messages.map((m) => (m.id === messageId ? { ...m, findFailed: true } : m)) }));
   } finally {
     setBusy(questId, { finding: false });
@@ -155,7 +156,7 @@ export function react(itemId, reaction) {
   const next = it.reaction === reaction ? null : reaction;
   R.patchItem(itemId, { reaction: next, reactedAt: Date.now() });
   if (!next) return;
-  const label = REACTIONS.find((r) => r.key === next)?.label.toLowerCase() || next;
+  const label = REACTIONS.find((r) => r.key === next)?.en.toLowerCase() || next; // stored English: the guide reads it
   R.patchQuest(it.questId, (q) => ({ messages: [...q.messages, msg('event', `“${it.title}”: ${label}.`, { itemId })], touchedAt: Date.now() }));
 }
 

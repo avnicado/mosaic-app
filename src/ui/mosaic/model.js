@@ -4,6 +4,7 @@
 import { mediaInfo, normalizeField, FIELDS } from '../../media.js';
 import { engaged } from '../../data/actions.js';
 import { completion, SPOTIFY_PREVIEW } from '../../data/progress.js';
+import { t } from '../../i18n/index.js';
 
 const DAY = 864e5;
 export const UNSORTED = 'unsorted';
@@ -12,10 +13,10 @@ export const UNSORTED = 'unsorted';
 // of the piece: an item that moved you is laid dark; one you only opened is
 // pale; one that closed the question down is cut but left uncoloured.
 export const KINDS = {
-  moved:  { t: 0.95, label: 'moved you (✦)' },
-  kept:   { t: 0.6,  label: 'kept or noted' },
-  read:   { t: 0.28, label: 'opened, rated or marked neutral' },
-  closed: { t: null, label: 'closed the question down' },
+  moved:  { t: 0.95, get label() { return t('moved you (✦)'); } },
+  kept:   { t: 0.6,  get label() { return t('kept or noted'); } },
+  read:   { t: 0.28, get label() { return t('opened, rated or marked neutral'); } },
+  closed: { t: null, get label() { return t('closed the question down'); } },
 };
 
 // How long the item is, in seconds, when the reader learned it: an article's

@@ -4,6 +4,7 @@
 
 import { callLLMJSON, MODEL, VISION_MODEL } from './llm.js';
 import { CHARACTERIZE_SYSTEM, ARTIFACT_CANDIDATES_PROMPT, characterizePrompt, diffPrompt, clip, SLOTS } from './prompts.js';
+import { t } from '../i18n/index.js';
 
 const arr = (v) => (Array.isArray(v) ? v.map((x) => String(x).trim()).filter(Boolean) : []);
 const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -68,7 +69,7 @@ export async function analyzeImage(image, note = '') {
     maxTokens: 1200,
   });
   const candidates = (r.candidates || []).filter((c) => c && c.question).slice(0, 3);
-  if (!candidates.length) throw new Error('No candidate questions came back — try again.');
+  if (!candidates.length) throw new Error(t('No candidate questions came back — try again.'));
   return { observation: String(r.observation || ''), candidates };
 }
 

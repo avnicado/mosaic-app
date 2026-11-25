@@ -14,26 +14,27 @@ import { placeHeld, admittedOf } from '../promenade/mandala.js';
 import { leanParts } from '../../scoring.js';
 import * as R from '../../data/record.js';
 import { useRecord } from '../../data/hooks.js';
+import { t, loc } from '../../i18n/index.js';
 
 const fmtDay = (iso) => {
   const d = new Date(iso);
-  return Number.isNaN(+d) ? null : d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  return Number.isNaN(+d) ? null : d.toLocaleDateString(loc(), { weekday: 'long', day: 'numeric', month: 'long' });
 };
 const fmtTime = (iso) => {
   const d = new Date(iso);
-  return Number.isNaN(+d) ? '' : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return Number.isNaN(+d) ? '' : d.toLocaleTimeString(loc(), { hour: 'numeric', minute: '2-digit' });
 };
 
 // Ways to widen a lean that lights too little.
 function widenFor(lean) {
   const zoom = lean.fields[0] || null;
   const out = [];
-  if (zoom && leanParts(lean, zoom).length) out.push([`All of ${zoom}`, () => setLean((l) => ({ ...l, parts: {} }))]);
-  if (lean.ring != null) out.push(['Any depth', () => setLean((l) => ({ ...l, ring: null }))]);
-  if (lean.mood) out.push(['Any mood', () => setLean((l) => ({ ...l, mood: null }))]);
-  if ((lean.hunch || '').trim()) out.push(['Drop the hunch', () => setLean((l) => ({ ...l, hunch: '' }))]);
-  if (zoom) out.push(['All fields', () => setLean((l) => ({ ...l, fields: [], parts: {} }))]);
-  if (!out.length) out.push(['Leave it open', clearLean]);
+  if (zoom && leanParts(lean, zoom).length) out.push([t('All of {field}', { field: t(zoom) }), () => setLean((l) => ({ ...l, parts: {} }))]);
+  if (lean.ring != null) out.push([t('Any depth'), () => setLean((l) => ({ ...l, ring: null }))]);
+  if (lean.mood) out.push([t('Any mood'), () => setLean((l) => ({ ...l, mood: null }))]);
+  if ((lean.hunch || '').trim()) out.push([t('Drop the hunch'), () => setLean((l) => ({ ...l, hunch: '' }))]);
+  if (zoom) out.push([t('All fields'), () => setLean((l) => ({ ...l, fields: [], parts: {} }))]);
+  if (!out.length) out.push([t('Leave it open'), clearLean]);
   return out;
 }
 
@@ -77,45 +78,45 @@ export default function Promenade() {
   return (
     <div className="page wide pm-page">
       <header className="pm-head">
-        <div className="eyebrow">Promenade</div>
-        <h1>Today, laid out as a mosaic</h1>
+        <div className="eyebrow">{t('Promenade')}</div>
+        <h1>{t('Today, laid out as a mosaic')}</h1>
         <p className="soft pm-intro">
-          Every tile is a piece Mosaic collected this morning. The bigger the tile, the longer it takes; the darker,
-          the denser. Open any tile for its card, step into a field to read titles, and lean as little or as much as
-          you like. If something catches, hold it and it becomes a thread.
+          {t('Every tile is a piece Mosaic collected this morning. The bigger the tile, the longer it takes; the darker, the denser. Open any tile for its card, step into a field to read titles, and lean as little or as much as you like. If something catches, hold it and it becomes a thread.')}
         </p>
       </header>
 
       {(status === 'idle' || status === 'loading') && (
         <>
-          <p className="muted pm-loading">Collecting today’s pieces. The first visit of the day can take a few seconds.</p>
+          <p className="muted pm-loading">{t('Collecting today’s pieces. The first visit of the day can take a few seconds.')}</p>
           <ShelfSkeleton sections={1} />
         </>
       )}
 
       {status === 'error' && (
         <div className="pm-section">
-          <div className="error">Couldn’t collect today’s pieces. {error}</div>
-          <p><button className="btn" onClick={retryShelf}>Try again</button></p>
+          <div className="error">{t('Couldn’t collect today’s pieces. {error}', { error })}</div>
+          <p><button className="btn" onClick={retryShelf}>{t('Try again')}</button></p>
         </div>
       )}
 
       {status === 'ready' && (
         <>
-          {stale && <div className="notice pm-stale">Today’s collection isn’t reachable, so this is an older saved one.</div>}
+          {stale && <div className="notice pm-stale">{t('Today’s collection isn’t reachable, so this is an older saved one.')}</div>}
           <Mandala items={items} lean={lean} setLean={setLean} held={held}
             holdKey={onMandala ? holdKey : null} dev={dev} further={further} widen={widenFor(lean)} />
 
           {deskCard && (
             <section className="pm-section pm-desk">
-              <div className="section-head"><h2>From your Desk</h2><span className="muted pm-note">{deskCard.url ? 'Outside the part of the Mandala you’re in.' : 'An open question, so it has no tile.'}</span></div>
+              <div className="section-head"><h2>{t('From your Desk')}</h2><span className="muted pm-note">{deskCard.url ? t('Outside the part of the Mandala you’re in.') : t('An open question, so it has no tile.')}</span></div>
               <div className="pm-grid"><div className="pm-cell"><ShelfCard card={deskCard} dev={dev} startHolding /></div></div>
             </section>
           )}
 
           <footer className="pm-collected muted">
-            {collected ? <>Collected {collected}{meta.generatedAt ? ` at ${fmtTime(meta.generatedAt)}` : ''}</> : 'Collected today'}
-            {sources ? ` from ${sources} sources` : ''}. Tomorrow brings a new mosaic.
+            {collected
+              ? (sources ? t('Collected {day} at {time} from {n} sources.', { day: collected, time: fmtTime(meta.generatedAt), n: sources }) : t('Collected {day} at {time}.', { day: collected, time: fmtTime(meta.generatedAt) }))
+              : (sources ? t('Collected today from {n} sources.', { n: sources }) : t('Collected today.'))}
+            {' '}{t('Tomorrow brings a new mosaic.')}
           </footer>
         </>
       )}

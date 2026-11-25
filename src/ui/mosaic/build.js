@@ -28,6 +28,10 @@ import {
 import { KINDS, UNSORTED, topicSlug, stoneRadius } from './model.js';
 import { iconMarkup } from '../icons.jsx';
 import { CM_GROUND_DEFS } from '../../groundAssets.js';
+import { t } from '../../i18n/index.js';
+
+// A field's name as shown; data-f keeps the English name the page matches on.
+const fieldName = (f) => (f === UNSORTED ? t('unsorted') : t(f));
 
 export const VB_W = 1000;
 export const VB_H = 470;
@@ -241,8 +245,10 @@ export function buildReadingMosaic({ fields, links }) {
       const { p, jitter, hueJit, sparkle } = s.piece;
       const K = KINDS[p.kind];
       const topics = p.topics.map(topicSlug).join(' ');
-      const how = !p.fill ? '' : p.fill.done ? ' · finished' : p.fill.level > 0 ? ` · ${Math.round(p.fill.level * 100)}% of the way` : ' · just opened';
-      const long = p.length ? ` · ~${p.length >= 5400 ? (p.length / 3600).toFixed(1) + ' h' : Math.max(1, Math.round(p.length / 60)) + ' min'} long` : '';
+      const how = !p.fill ? '' : ' · ' + (p.fill.done ? t('finished') : p.fill.level > 0 ? t('{n}% of the way', { n: Math.round(p.fill.level * 100) }) : t('just opened'));
+      const long = !p.length ? '' : ' · ' + (p.length >= 5400
+        ? t('~{n} h long', { n: (p.length / 3600).toFixed(1) })
+        : t('~{n} min long', { n: Math.max(1, Math.round(p.length / 60)) }));
       const tip = `${p.title}${p.source ? ' — ' + p.source : ''}\n${K.label}${how}${long}${p.topics.length ? ' · ' + p.topics.join(', ') : ''}`;
       const open = `<g class="rm-piece k-${p.kind}" data-item="${esc(p.id)}" data-t="${esc(topics)}" data-f="${fid}"><title>${esc(tip)}</title>`;
       let fill, dark = false;
@@ -290,7 +296,7 @@ export function buildReadingMosaic({ fields, links }) {
     let bottom = P.cy;
     cells.forEach(({ cell }) => cell.forEach((pt) => { if (pt[1] > bottom) bottom = pt[1]; }));
     P.bottom = bottom;
-    labels.push({ x: P.cx, y: bottom + 14, text: `${P.f.name} · ${P.f.pieces.length}`, field: fid, unsorted });
+    labels.push({ x: P.cx, y: bottom + 14, text: `${fieldName(P.f.name)} · ${P.f.pieces.length}`, field: fid, unsorted });
   });
 
   // ---- 4. seams between fields that share topics --------------------------------------
@@ -302,7 +308,7 @@ export function buildReadingMosaic({ fields, links }) {
     const w = 1.2 + 2.2 * (l.strength / maxStrength);
     const topics = l.shared.map((x) => x.topic);
     const slugs = topics.map(topicSlug).join(' ');
-    seams.push(`<g class="rm-seam" data-t="${esc(slugs)}"><title>${esc(`${A.f.name} and ${B.f.name} share: ${topics.join(', ')}`)}</title>` +
+    seams.push(`<g class="rm-seam" data-t="${esc(slugs)}"><title>${esc(t('{a} and {b} share: {topics}', { a: fieldName(A.f.name), b: fieldName(B.f.name), topics: topics.join(', ') }))}</title>` +
       `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--gold)" stroke-width="${w.toFixed(1)}" stroke-linecap="round" stroke-dasharray="1 ${(w + 3).toFixed(1)}" opacity="0.85"/>` +
       `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="transparent" stroke-width="12"/></g>`);
   });

@@ -2,8 +2,11 @@
 .rd-backdrop { position: fixed; inset: 0; z-index: 900; background: rgba(26, 22, 18, 0.38); display: flex; justify-content: flex-end; animation: rd-fade 0.15s ease-out; }
 @keyframes rd-fade { from { opacity: 0; } }
 @keyframes rd-in { from { transform: translateX(28px); opacity: 0.4; } }
+@keyframes rd-in-rtl { from { transform: translateX(-28px); opacity: 0.4; } }
 .rd { width: min(920px, 100%); height: 100%; background: var(--bg); display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(26, 22, 18, 0.18); outline: none; animation: rd-in 0.18s ease-out; }
-.rd-bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 22px; border-bottom: 1px solid var(--rule); background: var(--bg-deep); flex: 0 0 auto; }
+/* Right to left the sheet comes in from the left edge (justify-content: flex-end flips by itself). */
+[dir="rtl"] .rd { box-shadow: 12px 0 40px rgba(26, 22, 18, 0.18); animation-name: rd-in-rtl; }
+.rd-bar { display: flex; align-items: center; gap: 12px; padding-block: 10px; padding-inline: 22px 16px; border-bottom: 1px solid var(--rule); background: var(--bg-deep); flex: 0 0 auto; }
 .rd-spacer { flex: 1; }
 .rd-site { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); text-decoration: none; padding: 5px 10px; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); max-width: 45vw; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .rd-site:hover { border-color: var(--ink-faded); color: var(--ink); }
@@ -14,7 +17,7 @@
 .rd-body.rd-media { max-width: 860px; }
 .rd-title { font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
 .rd-meta { font-size: 13px; color: var(--ink-faded); }
-.rd-why { margin: 18px 0 0; padding: 10px 14px; border-left: 2px solid var(--gold); background: var(--panel); font-size: 14px; font-style: italic; color: var(--ink-soft); line-height: 1.5; }
+.rd-why { margin: 18px 0 0; padding: 10px 14px; border-inline-start: 2px solid var(--gold); background: var(--panel); font-size: 14px; font-style: italic; color: var(--ink-soft); line-height: 1.5; }
 .rd-why .label { font-style: normal; display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); margin-bottom: 2px; }
 .rd-embed { margin: 24px 0 0; background: #111; border-radius: 4px; overflow: hidden; }
 .rd-embed.video { aspect-ratio: 16 / 9; }
@@ -35,14 +38,14 @@
 .rd-article img { max-width: 100%; height: auto; display: block; margin: 1.2em auto; border-radius: 2px; }
 .rd-article figure { margin: 1.4em 0; }
 .rd-article figcaption { font-family: var(--sans); font-size: 13px; color: var(--ink-faded); line-height: 1.45; margin-top: -0.6em; }
-.rd-article blockquote { margin: 1.2em 0; padding: 0 0 0 18px; border-left: 2px solid var(--rule); color: var(--ink-soft); font-style: italic; }
-.rd-article ul, .rd-article ol { padding-left: 1.3em; margin: 0 0 1.05em; }
+.rd-article blockquote { margin: 1.2em 0; padding: 0; padding-inline-start: 18px; border-inline-start: 2px solid var(--rule); color: var(--ink-soft); font-style: italic; }
+.rd-article ul, .rd-article ol { padding-inline-start: 1.3em; margin: 0 0 1.05em; }
 .rd-article li { margin-bottom: 0.35em; }
 .rd-article pre { font-family: var(--mono); font-size: 13.5px; line-height: 1.5; background: var(--panel); border: 1px solid var(--rule-soft); padding: 12px 14px; overflow-x: auto; border-radius: 3px; }
 .rd-article code { font-family: var(--mono); font-size: 0.82em; background: var(--panel); padding: 1px 4px; border-radius: 2px; }
 .rd-article pre code { background: none; padding: 0; font-size: inherit; }
 .rd-article table { border-collapse: collapse; font-family: var(--sans); font-size: 14px; display: block; overflow-x: auto; margin: 1.2em 0; }
-.rd-article td, .rd-article th { border: 1px solid var(--rule); padding: 5px 9px; text-align: left; vertical-align: top; }
+.rd-article td, .rd-article th { border: 1px solid var(--rule); padding: 5px 9px; text-align: start; vertical-align: top; }
 .rd-article hr { border: none; border-top: 1px solid var(--rule); margin: 2em 0; }
 .rd-end { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--rule-soft); font-size: 12.5px; color: var(--ink-faded); font-style: italic; }
 
@@ -51,8 +54,8 @@
 .rd-signals { flex: 0 1 420px; }
 
 @media (max-width: 700px) {
-  .rd { width: 100%; box-shadow: none; }
-  .rd-bar { padding: 8px 10px 8px 14px; gap: 8px; }
+  .rd, [dir="rtl"] .rd { width: 100%; box-shadow: none; }
+  .rd-bar { padding-block: 8px; padding-inline: 14px 10px; gap: 8px; }
   .rd-bar .slot-tag { display: none; }
   .rd-site { font-size: 12px; max-width: 52vw; }
   .rd-body { padding: 22px 16px 40px; }
@@ -62,5 +65,5 @@
   .rd-foot-q { display: none; }
   .rd-signals { flex: 1 1 100%; order: 2; }
 }
-.rd-had { order: 3; margin-left: auto; font-size: 12.5px; color: var(--ink-faded); font-style: italic; white-space: nowrap; }
-@media (max-width: 700px) { .rd-had { order: 1; margin-left: 0; } }
+.rd-had { order: 3; margin-inline-start: auto; font-size: 12.5px; color: var(--ink-faded); font-style: italic; white-space: nowrap; }
+@media (max-width: 700px) { .rd-had { order: 1; margin-inline-start: 0; } }
