@@ -77,7 +77,6 @@ export default defineConfig(({ mode }) => {
   }
   return {
     plugins: [react(), apiPlugin(), releaseCheckPlugin()],
-    build: { rollupOptions: { input: { main: resolve(__dirname, 'index.html'), check: resolve(__dirname, 'whatsnew-check.html') } } }, // TEMP: check page
     server: { port: Number(process.env.PORT) || 5200 },
   };
 });
