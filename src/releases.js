@@ -11,6 +11,18 @@
 
 export const RELEASES = [
   {
+    version: '0.8.0',
+    date: '2026-11-25',
+    title: 'Stones in the views mandala',
+    summary: 'The views mandala is now laid in mosaic stones, like the Promenade, and the size of each stone means something.',
+    changes: [
+      { kind: 'better', text: 'Each view is a run of irregular stones that fit together, in the view’s own colour.' },
+      { kind: 'better', text: 'A bigger stone means that question matters more to that view’s case.' },
+      { kind: 'better', text: 'Every ring holds the same area, so an inner ring no longer looks less important. The question the views most share sits at the centre, and the sharpest split sits at the rim.' },
+      { kind: 'better', text: 'Tap any stone to open its ring.' },
+    ],
+  },
+  {
     version: '0.7.0',
     date: '2026-11-24',
     title: 'What’s new, and version numbers',
