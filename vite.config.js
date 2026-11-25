@@ -77,9 +77,6 @@ export default defineConfig(({ mode }) => {
   }
   return {
     plugins: [react(), apiPlugin(), releaseCheckPlugin()],
-    // Two pages: the app (index.html) and the public views page (views.html,
-    // served at /views by cleanUrls; not linked from the app).
-    build: { rollupOptions: { input: { main: resolve(__dirname, 'index.html'), views: resolve(__dirname, 'views.html') } } },
     server: { port: Number(process.env.PORT) || 5200 },
   };
 });
