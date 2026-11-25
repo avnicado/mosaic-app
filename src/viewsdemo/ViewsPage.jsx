@@ -284,7 +284,7 @@ function ChartCaption() {
       <p className="vd-cap-key">
         <span><b>Colour</b> = a view</span>
         <span><b>Ring</b> = a question, numbered from the centre</span>
-        <span><b>Stone</b> = a piece arguing that answer; faint = none found yet</span>
+        <span><b>Filled stone</b> = a piece arguing that answer; faint = none found yet</span>
         <span><b>More room</b> = the question matters more to that view</span>
         <span><i className="vd-sw solid" aria-hidden="true" /> first answer</span>
         <span><i className="vd-sw pale" aria-hidden="true" /> second answer</span>

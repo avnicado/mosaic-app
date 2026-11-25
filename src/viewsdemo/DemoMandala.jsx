@@ -20,9 +20,10 @@
 // - Each stone is a piece: a real page arguing that view's answer on that
 //   ring (Gil: "Stone per piece is the goal"). A ring's pieces argue one of
 //   its two answers, so they are dealt out among the views that give that
-//   answer, the view whose case turns most on the question first. A view
-//   with no piece yet is one faint stone; "it depends" is one striped stone.
-//   A ring's run breaks into more stones as its pieces are found.
+//   answer, the view whose case turns most on the question first. A stone
+//   with no piece yet is faint, so a ring fills in as its pieces are found,
+//   and a run with more pieces than stones breaks into more. "It depends"
+//   stays striped: no page argues it.
 // - The joints between stones lean a little and step from ring to ring, so it
 //   reads as cut stone rather than a pie chart.
 //
@@ -93,8 +94,8 @@ export function dealPieces(map, pieces) {
 // little at every corner, so the stones are irregular but still fit exactly.
 // A view's area on a ring still follows its stake, apart from that waver.
 //
-// counts[k][i], when given, is how many stones view i's run on ring k is laid
-// in (one per piece); without it, long runs get a few stones by length.
+// counts[k][i], when given, is how many pieces view i has on ring k: its run
+// is laid in at least that many stones, and otherwise a few by its length.
 export function stones(map, counts = null) {
   const ckey = counts ? counts.map((row) => row.join('.')).join('/') : '';
   if (!cache.has(map)) cache.set(map, new Map());
@@ -130,7 +131,10 @@ export function stones(map, counts = null) {
     const js = [];
     views.forEach((_, i) => {
       const a0 = bounds[k][i] + turn[k], w = bounds[k][i + 1] - bounds[k][i];
-      const n = counts ? Math.max(1, counts[k][i] || 1) : Math.max(1, Math.min(5, Math.round((w * rMid) / (thick * 1.7))));
+      // Laid by length, a few stones to a long run, as a mosaic is; more where
+      // the view has more pieces than that.
+      const byLength = Math.max(1, Math.min(5, Math.round((w * rMid) / (thick * 1.7))));
+      const n = counts ? Math.max(byLength, counts[k][i] || 1) : byLength;
       for (let j = 0; j < n; j++) {
         const frac = j === 0 ? 0 : (j + (rand() - 0.5) * 0.45) / n;
         js.push({ a: a0 + frac * w, view: i, start: j === 0, width: w / n });
