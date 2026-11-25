@@ -277,7 +277,7 @@ const ringSearch = async (q, opts) => {
 };
 const r1 = await ringSides(RING_IN, { ip: 'r', unlimited: true, llm: ringCalls, search: ringSearch, check: async () => true });
 assert.equal(ringLLM, 2, 'one call writes the searches, one picks the pages');
-assert.equal(ringSearches.length, 2, 'one search per answer');
+assert.equal(ringSearches.length, 4, 'one search per answer, then a second for each answer with fewer than three pieces');
 assert.ok(ringSearches.every((x) => x.excluded > 0), 'fact-check sites are excluded at the search');
 assert.deepEqual(r1.reading.map((x) => x.side), ['left', 'right'], 'one piece per side; the wrong-side page is dropped');
 assert.equal(r1.reading[0].url, 'https://retailers.example.org/parking-and-sales');
@@ -308,9 +308,10 @@ const e2 = await ringSides(EMPTY_IN, { ip: 'r', unlimited: true, llm: emptyLLM, 
 assert.equal(e2.cached, true, 'an empty ring is held briefly, so a retry is free');
 assert.equal(emptyCalls, 2, 'and costs no further model calls');
 
-// An answer left empty gets a second search, in the other wording the query
-// call wrote, and one more picking call. Half the rings in the live run showed
-// one answer with articles and the other with none.
+// An answer with fewer than three pieces gets a second search, in the other
+// wording the query call wrote, and one more picking call. Each piece is a
+// stone on the mandala, so a thin answer is worth the second go, not only an
+// empty one.
 const SECOND_IN = { ...RING_IN, crux: { ...RING_IN.crux, question: 'Does the second pass find the other side?' } };
 let qCalls = 0, pickCalls = 0, searched = [], secondSys = '', secondPrompt = '';
 const secondLLM = async (body) => {
@@ -331,23 +332,24 @@ const secondLLM = async (body) => {
   secondSys = sys;
   secondPrompt = body.messages[1].content;
   return { status: 200, json: { choices: [{ message: { content: JSON.stringify({ picks: [
-    { result: 1, side: 'A', outlet: 'Ignored', says: 'A page for the side that is already full.', title_side: 'A' },
-    { result: 1, side: 'B', outlet: 'Two', says: 'The other side, found only by the second wording.', title_side: 'B' },
+    { result: 1, side: 'A', outlet: 'Three', says: 'A second page for side A, from the other wording.', title_side: 'A' },
+    { result: 2, side: 'B', outlet: 'Two', says: 'The other side, found only by the second wording.', title_side: 'B' },
   ] }) } }] } };
 };
 const secondSearch = async (q) => {
   searched.push(q);
-  if (/other [AB] words/.test(q)) return [RS('https://b-side.example.org/only-on-the-second-wording', 'Car-free streets lift takings, the second case')];
+  if (/other A words/.test(q)) return [RS('https://a-side.example.org/second-wording', 'Parking charges drive shoppers out of town')];
+  if (/other B words/.test(q)) return [RS('https://b-side.example.org/only-on-the-second-wording', 'Car-free streets lift takings, the second case')];
   return [RS('https://a-side.example.org/first', 'Parking fees cut shop sales')];
 };
 const sec = await ringSides(SECOND_IN, { ip: 'r', unlimited: true, llm: secondLLM, search: secondSearch, check: async () => true });
 assert.equal(qCalls, 1, 'the fallback wording comes from the one query call, not a second one');
 assert.equal(pickCalls, 2, 'one picking call per round');
-assert.deepEqual(searched, ['first A words', 'first B words', 'other B words'], 'only the empty answer is searched again');
-assert.deepEqual(sec.reading.map((x) => x.side), ['left', 'right'], 'both answers now have a piece');
-assert.equal(sec.reading[1].url, 'https://b-side.example.org/only-on-the-second-wording');
-assert.equal(sec.reading.filter((x) => x.side === 'left').length, 1, 'the full side gains nothing from the second round');
-assert.match(secondSys, /Only these answers are still open: B\b/, 'the second call is told only B is open');
+assert.deepEqual(searched, ['first A words', 'first B words', 'other A words', 'other B words'], 'both thin answers are searched again');
+assert.deepEqual(sec.reading.map((x) => x.side), ['left', 'left', 'right'], 'the thin side gains a piece and the empty side gets one');
+assert.equal(sec.reading[2].url, 'https://b-side.example.org/only-on-the-second-wording');
+assert.match(secondSys, /Only these answers still need pieces: A and B\b/, 'the second call is told which answers need more');
+assert.match(secondSys, /up to 4 results that argue answer A/, 'a ring keeps up to four pieces an answer');
 assert.match(secondPrompt, /Car-free streets lift takings, the second case \(b-side\.example\.org/, 'it sees the page the fallback wording found');
 
 // A dead link never reaches the reader.
